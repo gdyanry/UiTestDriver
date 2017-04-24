@@ -1,13 +1,13 @@
 package com.yanry.testdriver.client.appium;
 
-import com.yanry.testdriver.ui.mobile.model.base.StateToCheck;
-import com.yanry.testdriver.ui.mobile.model.base.process.StartProcess;
-import com.yanry.testdriver.ui.mobile.model.base.window.Window;
-import com.yanry.testdriver.ui.mobile.model.distribute.HttpClientReception;
-import com.yanry.testdriver.ui.mobile.model.extend.action.Click;
-import com.yanry.testdriver.ui.mobile.model.extend.action.EnterText;
-import com.yanry.testdriver.ui.mobile.model.extend.expectation.GeneralExpectation;
-import com.yanry.testdriver.ui.mobile.model.extend.expectation.Toast;
+import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
+import com.yanry.testdriver.ui.mobile.base.process.StartProcess;
+import com.yanry.testdriver.ui.mobile.extend.window.Window;
+import com.yanry.testdriver.ui.mobile.distribute.HttpClientReception;
+import com.yanry.testdriver.ui.mobile.extend.action.Click;
+import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
+import com.yanry.testdriver.ui.mobile.extend.expectation.GeneralExpectation;
+import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
 import lib.common.model.json.JSONArray;

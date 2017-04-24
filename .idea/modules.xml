@@ -5,8 +5,8 @@
       <module fileurl="file://$PROJECT_DIR$/AppiumClient/AppiumClient.iml" filepath="$PROJECT_DIR$/AppiumClient/AppiumClient.iml" />
       <module fileurl="file://$PROJECT_DIR$/../CommonLib/CommonLib.iml" filepath="$PROJECT_DIR$/../CommonLib/CommonLib.iml" />
       <module fileurl="file://$PROJECT_DIR$/Core/Core.iml" filepath="$PROJECT_DIR$/Core/Core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Sample/Sample.iml" filepath="$PROJECT_DIR$/Sample/Sample.iml" />
       <module fileurl="file://$PROJECT_DIR$/SpringServer/SpringServer.iml" filepath="$PROJECT_DIR$/SpringServer/SpringServer.iml" />
-      
     </modules>
   </component>
 </project>

@@ -1,4 +1,4 @@
-group 'testdriver.yanry.com'
+group 'com.yanry.testdriver'
 version '1.0-SNAPSHOT'
 
 buildscript {

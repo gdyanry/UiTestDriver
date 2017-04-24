@@ -1,9 +1,9 @@
 package com.yanry.testdriver.server.spring;
 
-import com.yanry.testdriver.ui.mobile.model.base.Graph;
-import com.yanry.testdriver.ui.mobile.model.distribute.Const;
-import com.yanry.testdriver.ui.mobile.model.distribute.ServerReception;
-import com.yanry.testdriver.ui.mobile.model.test.TestApp;
+import com.yanry.testdriver.ui.mobile.base.Graph;
+import com.yanry.testdriver.ui.mobile.extend.window.WindowManager;
+import com.yanry.testdriver.ui.mobile.distribute.Const;
+import com.yanry.testdriver.ui.mobile.distribute.ServerReception;
 import lib.common.model.Singletons;
 import lib.common.model.cache.TimerCache;
 import lib.common.model.json.JSONArray;
@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
  *
  *  Subclasses should be annotated with {@link RestController}(required) and {@link RequestMapping}(optional)
  */
-public class CommunicatorController {
+public abstract class CommunicatorController {
     private TimerCache<ServerReception> receptionMap;
     private Executor executor;
 
@@ -33,12 +33,15 @@ public class CommunicatorController {
         executor = Executors.newCachedThreadPool();
     }
 
+    protected abstract void populateGraph(Graph graph, WindowManager manager);
+
     @GetMapping(Const.HTTP_PATH_PREPARE)
     public String prepare(HttpServletResponse response) {
         String token = UUID.randomUUID().toString();
         ServerReception reception = new ServerReception();
-        Graph graph = new Graph();
-        TestApp.defineGraph(graph);
+        Graph graph = new Graph(false);
+        WindowManager manager = new WindowManager(graph);
+        populateGraph(graph, manager);
         receptionMap.put(token, reception);
         response.setHeader(Const.HTTP_HEADER_TOKEN, token);
         return reception.prepare(graph).toString();
