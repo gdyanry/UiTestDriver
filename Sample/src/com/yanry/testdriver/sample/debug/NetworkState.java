@@ -1,22 +1,43 @@
 package com.yanry.testdriver.sample.debug;
 
-import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.*;
-import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.extend.property.GeneralProperty;
+import com.yanry.testdriver.ui.mobile.base.property.CacheSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
+import com.yanry.testdriver.ui.mobile.extend.action.SwitchState;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Created by rongyu.yan on 2/27/2017.
  */
-public class NetworkState extends GeneralProperty<Network> {
+public class NetworkState extends UnsearchableSwitchableProperty<NetworkState.Network> {
+    private Graph graph;
 
     public NetworkState(Graph graph) {
-        super(graph, false, Network.values());
-        Util.createPath(graph, null, new SwitchNetwork(Network.Normal),
-                getExpectation(Timing.IMMEDIATELY, Network.Normal));
-        Util.createPath(graph, null, new SwitchNetwork(Network.Abnormal),
-                getExpectation(Timing.IMMEDIATELY, Network.Abnormal));
-        Util.createPath(graph, null, new SwitchNetwork(Network.Disconnected),
-                getExpectation(Timing.IMMEDIATELY, Network.Disconnected));
+        this.graph = graph;
+    }
+
+    @Override
+    protected Network checkValue() {
+        return graph.checkState(new StateToCheck<>(this, Network.values()));
+    }
+
+    @Override
+    protected boolean doSwitch(Network to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {
+        return getGraph().performAction(new SwitchState<>(this, to));
+    }
+
+    @Override
+    protected Graph getGraph() {
+        return graph;
+    }
+
+    /**
+     * Created by rongyu.yan on 3/2/2017.
+     */
+    public enum Network {
+        Normal, Abnormal, Disconnected
     }
 }

@@ -7,14 +7,14 @@ import com.yanry.testdriver.ui.mobile.base.Presentable;
  */
 @Presentable
 public class Timing {
-    public static final Timing IMMEDIATELY = new Timing(false, 0);
+    public static final Timing IMMEDIATELY = null;
 
     private boolean isWithin;
-    private int second;
+    private int millis;
 
-    public Timing(boolean isWithin, int second) {
+    public Timing(boolean isWithin, int millis) {
         this.isWithin = isWithin;
-        this.second = second;
+        this.millis = millis;
     }
 
     @Presentable
@@ -23,7 +23,7 @@ public class Timing {
     }
 
     @Presentable
-    public int getSecond() {
-        return second;
+    public int getMillis() {
+        return millis;
     }
 }

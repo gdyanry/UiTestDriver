@@ -1,20 +1,28 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 
 /**
  * Created by rongyu.yan on 4/24/2017.
  */
-public abstract class TransientExpectation extends StatelessExpectation {
+public class TransientExpectation extends NotPropertyExpectation {
     private int duration;
+    private Graph graph;
 
-    public TransientExpectation(Timing timing, int duration) {
+    public TransientExpectation(Timing timing, int duration, Graph graph) {
         super(timing);
         this.duration = duration;
+        this.graph = graph;
     }
 
     @Presentable
     public int getDuration() {
         return duration;
+    }
+
+    @Override
+    protected Graph getGraph() {
+        return graph;
     }
 }

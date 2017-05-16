@@ -2,8 +2,7 @@ package com.yanry.testdriver.sample.debug.distribuite;
 
 import com.yanry.testdriver.sample.debug.TestApp;
 import com.yanry.testdriver.server.spring.CommunicatorController;
-import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.extend.window.WindowManager;
+import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +17,7 @@ public class DemoController extends CommunicatorController {
     }
 
     @Override
-    protected void populateGraph(Graph graph, WindowManager manager) {
-        TestApp.defineGraph(graph, manager);
+    protected void populateGraph(TestManager manager) {
+        TestApp.defineGraph(manager);
     }
 }

@@ -1,7 +1,6 @@
 package com.yanry.testdriver.server.spring;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.extend.window.WindowManager;
+import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.distribute.Const;
 import com.yanry.testdriver.ui.mobile.distribute.ServerReception;
 import lib.common.model.Singletons;
@@ -33,18 +32,17 @@ public abstract class CommunicatorController {
         executor = Executors.newCachedThreadPool();
     }
 
-    protected abstract void populateGraph(Graph graph, WindowManager manager);
+    protected abstract void populateGraph(TestManager manager);
 
     @GetMapping(Const.HTTP_PATH_PREPARE)
     public String prepare(HttpServletResponse response) {
         String token = UUID.randomUUID().toString();
         ServerReception reception = new ServerReception();
-        Graph graph = new Graph(false);
-        WindowManager manager = new WindowManager(graph);
-        populateGraph(graph, manager);
+        TestManager manager = new TestManager(false);
+        populateGraph(manager);
         receptionMap.put(token, reception);
         response.setHeader(Const.HTTP_HEADER_TOKEN, token);
-        return reception.prepare(graph).toString();
+        return reception.prepare(manager).toString();
     }
 
     @GetMapping(Const.HTTP_PATH_TRAVERSE)

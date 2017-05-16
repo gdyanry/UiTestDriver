@@ -1,22 +1,22 @@
 package com.yanry.testdriver.ui.mobile.extend.action;
 
-import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
+
+import java.util.function.Supplier;
 
 /**
  * Created by rongyu.yan on 2/18/2017.
  */
 @Presentable
-public class Click implements ActionEvent {
-    private View view;
+public class Click<V extends View, R> extends ActionEvent<V, R> {
 
-    public Click(View view) {
-        this.view = view;
+    public Click(Supplier<V> dataSupplier) {
+        super(dataSupplier);
     }
 
-    @Presentable
-    public View getView() {
-        return view;
+    public Click(V data) {
+        super(data);
     }
 }

@@ -8,18 +8,12 @@ import com.yanry.testdriver.ui.mobile.extend.view.EditText;
  * Created by rongyu.yan on 2/28/2017.
  */
 @Presentable
-public class EnterText implements ActionEvent {
-    private EditText view;
+public class EnterText<R> extends ActionEvent<EditText, R> {
     private String text;
 
     public EnterText(EditText view, String text) {
-        this.view = view;
+        super(view);
         this.text = text;
-    }
-
-    @Presentable
-    public EditText getView() {
-        return view;
     }
 
     @Presentable

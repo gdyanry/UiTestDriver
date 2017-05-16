@@ -1,10 +1,11 @@
 package com.yanry.testdriver.ui.mobile;
 
-import com.yanry.testdriver.ui.mobile.base.*;
+import com.yanry.testdriver.ui.mobile.base.Graph;
+import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.extend.window.Visibility;
-import com.yanry.testdriver.ui.mobile.extend.window.Window;
+import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
 import lib.common.util.StringUtil;
@@ -64,11 +65,8 @@ public class Util {
         return obj;
     }
 
-    public static Path createPath(Graph graph, Window window, Event event, Expectation expectation) {
+    public static Path createPath(Graph graph, Event event, Expectation expectation) {
         Path path = new Path(event, expectation);
-        if (window != null) {
-            path.put(window.getState(), Visibility.Foreground);
-        }
         path.put(graph.getProcessState(), true);
         graph.addPath(path);
         return path;

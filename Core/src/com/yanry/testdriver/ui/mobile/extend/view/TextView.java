@@ -1,7 +1,8 @@
 package com.yanry.testdriver.ui.mobile.extend.view;
 
-import com.yanry.testdriver.ui.mobile.base.*;
-import com.yanry.testdriver.ui.mobile.base.expectation.StatelessProperty;
+import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
+import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
 /**
@@ -20,11 +21,10 @@ public class TextView extends View {
     }
 
     @Presentable
-    public class TextValue implements StatelessProperty<String> {
+    public class TextValue extends QueryableProperty {
 
-        @Presentable
-        public TextView getView() {
-            return TextView.this;
+        public TextValue() {
+            super(TextView.this);
         }
     }
 }

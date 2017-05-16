@@ -3,11 +3,12 @@
  */
 package com.yanry.testdriver.ui.mobile.extend.view;
 
-import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
+import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
-import com.yanry.testdriver.ui.mobile.extend.window.Visibility;
-import com.yanry.testdriver.ui.mobile.extend.window.Window;
 
 /**
  * @author yanry
@@ -18,33 +19,31 @@ import com.yanry.testdriver.ui.mobile.extend.window.Window;
 public class View {
     private ViewContainer parent;
     private ViewSelector selector;
+    private boolean defaultVisibility;
+    private ViewVisibility visibility;
 
-    public View(ViewContainer parent, ViewSelector selector) {
+    public View(ViewContainer parent, ViewSelector selector, boolean defaultVisibility) {
         this.parent = parent;
         this.selector = selector;
+        this.defaultVisibility = defaultVisibility;
+        visibility = new ViewVisibility();
     }
 
-    public void present(Path path) {
-        present(path, parent);
+    public View(ViewContainer parent, ViewSelector selector) {
+        this(parent, selector, true);
     }
 
-    private void present(Path path, ViewContainer container) {
-        if (container instanceof Tab) {
-            Tab tab = (Tab) container;
-            path.put(tab.getCurrentTab(), tab);
-            present(path, tab.getParent());
-        } else if (container instanceof Window) {
-            path.put(((Window)container).getState(), Visibility.Foreground);
-        }
-    }
-
-    public Window getWindow() {
-        if (parent instanceof Window) {
-            return (Window) parent;
-        } else if (parent instanceof Tab) {
-            return ((Tab) parent).getWindow();
+    public TestManager.Window getWindow() {
+        if (parent instanceof TestManager.Window) {
+            return (TestManager.Window) parent;
+        } else if (parent instanceof View) {
+            return ((View) parent).getWindow();
         }
         return null;
+    }
+
+    public ViewVisibility getVisibility() {
+        return visibility;
     }
 
     @Presentable
@@ -55,5 +54,23 @@ public class View {
     @Presentable
     public Object getSelector() {
         return selector;
+    }
+
+    public class ViewVisibility extends SearchableSwitchableProperty<Boolean> {
+
+        @Override
+        protected Boolean checkValue() {
+            return defaultVisibility;
+        }
+
+        @Override
+        protected Graph getGraph() {
+            return getWindow().getGraph();
+        }
+
+        @Override
+        protected boolean ifNeedVerification() {
+            return true;
+        }
     }
 }

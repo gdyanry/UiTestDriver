@@ -2,12 +2,11 @@ package com.yanry.testdriver.client.appium;
 
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.base.process.StartProcess;
-import com.yanry.testdriver.ui.mobile.extend.window.Window;
 import com.yanry.testdriver.ui.mobile.distribute.HttpClientReception;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
-import com.yanry.testdriver.ui.mobile.extend.expectation.GeneralExpectation;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
+import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
 import lib.common.model.json.JSONArray;
@@ -54,13 +53,13 @@ public abstract class BaseAppiumClient extends HttpClientReception {
                 JSONObject property = instruction.getJSONObject("property");
                 boolean isWithin = timing.getBoolean("isWithin");
                 int second = timing.getInt("second");
-                if (property.getString(".").equals(Window.WindowState.class.getSimpleName())) {
+                if (property.getString(".").equals(TestManager.Window.VisibilityState.class.getSimpleName())) {
                     return isWindowPresent(property.getJSONObject("window").getString("tag"), isWithin, second) ? 1
                             : 0;
                 }
                 return checkState(property, instruction.getJSONArray("options"), isWithin, second);
             }
-            if (type.equals(GeneralExpectation.class.getSimpleName())) {
+            if (type.equals(GeneralTransientExpectation.class.getSimpleName())) {
                 JSONObject timing = instruction.getJSONObject("timing");
                 return verifyExpectation(instruction.getString("tag"), timing.getBoolean("isWithin"), timing.getInt
                         ("second"), instruction.getInt("duration")) ? 1 : 0;

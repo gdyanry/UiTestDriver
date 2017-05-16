@@ -1,44 +1,50 @@
 package com.yanry.testdriver.ui.mobile.base.process;
 
-import com.yanry.testdriver.ui.mobile.base.*;
-import com.yanry.testdriver.ui.mobile.base.event.StateTransitionEvent;
-import com.yanry.testdriver.ui.mobile.base.StateProperty;
+import com.yanry.testdriver.ui.mobile.base.Graph;
+import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.event.StateSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
 
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Created by rongyu.yan on 3/9/2017.
  */
-public abstract class ProcessState extends StateProperty<Boolean> {
-    private StateTransitionEvent<Boolean> startProcessEvent;
-    private StateTransitionEvent<Boolean> stopProcessEvent;
+public class ProcessState extends UnsearchableSwitchableProperty<Boolean> {
+    private Graph graph;
+    private StateSwitchEvent<Boolean> startProcessEvent;
+    private StateSwitchEvent<Boolean> stopProcessEvent;
 
-    public ProcessState() {
-        startProcessEvent = new StateTransitionEvent<>(this, true, v -> v == false);
-        stopProcessEvent = new StateTransitionEvent<>(this, false, v -> v == true);
+    public ProcessState(Graph graph) {
+        this.graph = graph;
+        startProcessEvent = new StateSwitchEvent<>(this, false, true);
+        stopProcessEvent = new StateSwitchEvent<>(this, true, false);
     }
 
-    public StateTransitionEvent<Boolean> getStartProcessEvent() {
+    public StateSwitchEvent<Boolean> getStartProcessEvent() {
         return startProcessEvent;
     }
 
-    public StateTransitionEvent<Boolean> getStopProcessEvent() {
+    public StateSwitchEvent<Boolean> getStopProcessEvent() {
         return stopProcessEvent;
     }
 
     @Override
-    public boolean transitTo(Predicate<Boolean> to, List<Path> superPathContainer) {
-        return getGraph().transitToState(this, to, superPathContainer);
+    protected boolean doSwitch(Boolean to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {
+        if (to) {
+            return getGraph().performAction(new StartProcess());
+        }
+        return getGraph().performAction(new StopProcess());
     }
 
     @Override
-    public Boolean checkValue() {
-        return false;
+    protected Graph getGraph() {
+        return graph;
     }
 
     @Override
-    public boolean ifNeedVerification() {
+    protected Boolean checkValue() {
         return false;
     }
 }

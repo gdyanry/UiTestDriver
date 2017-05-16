@@ -18,6 +18,4 @@ public abstract class AbstractExpectation implements Expectation {
     public Timing getTiming() {
         return timing;
     }
-
-    protected abstract Graph getGraph();
 }

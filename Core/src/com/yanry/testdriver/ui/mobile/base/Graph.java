@@ -6,13 +6,12 @@ package com.yanry.testdriver.ui.mobile.base;
 import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.event.StateTransitionEvent;
+import com.yanry.testdriver.ui.mobile.base.event.StateSwitchEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.StatefulExpectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
-import com.yanry.testdriver.ui.mobile.base.process.StartProcess;
-import com.yanry.testdriver.ui.mobile.base.process.StopProcess;
+import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
 import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
@@ -20,9 +19,7 @@ import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import lib.common.util.ConsoleUtil;
 
 import java.util.*;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -51,16 +48,7 @@ public class Graph implements Communicator {
         rollingPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
-        processState = new ProcessState() {
-            @Override
-            protected Graph getGraph() {
-                return Graph.this;
-            }
-        };
-        addPath(new Path(new StartProcess(), processState.getExpectation(Timing.IMMEDIATELY, true))
-                .addInitState(processState, false));
-        addPath(new Path(new StopProcess(), processState.getExpectation(Timing.IMMEDIATELY, false))
-                .addInitState(processState, true));
+        processState = new ProcessState(this);
     }
 
     public ProcessState getProcessState() {
@@ -143,11 +131,12 @@ public class Graph implements Communicator {
 
     private boolean internalRoll(Path path, List<Path> superPathContainer) {
         // make sure environment states are satisfied.
-        Optional<Map.Entry<StateProperty, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
-                equals(state.getKey().getCurrentValue())).findAny();
+        // TODO 按状态优先级排序
+        Optional<Map.Entry<SwitchableProperty, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
+                equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
-            Map.Entry<StateProperty, Object> state = any.get();
-            if (state.getKey().transitTo(v -> state.getValue().equals(v), null)) {
+            Map.Entry<SwitchableProperty, Object> state = any.get();
+            if (state.getKey().switchTo(state.getValue(), null)) {
                 return internalRoll(path, superPathContainer);
             } else {
                 if (unprocessedPaths.remove(path)) {
@@ -159,11 +148,13 @@ public class Graph implements Communicator {
         // trigger event
         Event inputEvent = path.getEvent();
         List<Path> siblingPathContainer = new LinkedList<>();
-        if (inputEvent instanceof StateTransitionEvent) {
-            StateTransitionEvent event = (StateTransitionEvent) inputEvent;
-            // roll path for this transition event.
-            if (!event.getProperty().transitTo(event.getFrom(), null) ||
-                    !event.getProperty().transitTo(v -> event.getTo().equals(v), siblingPathContainer)) {
+        if (inputEvent instanceof StateSwitchEvent) {
+            StateSwitchEvent event = (StateSwitchEvent) inputEvent;
+            // roll path for this switch event.
+            if (!event.getProperty().switchTo(event.getFrom(), null) ||
+                    // sibling path container of current path becomes super path container of the path where switch
+                    // event takes place!
+                    !event.getProperty().switchTo(event.getTo(), siblingPathContainer)) {
                 if (unprocessedPaths.remove(path)) {
                     testRecords.add(new MissedPath(path, event.getProperty()));
                 }
@@ -171,6 +162,7 @@ public class Graph implements Communicator {
             }
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
+            event.processPreAction();
             if (performAction(event)) {
                 testRecords.add(event);
                 siblingPathContainer.addAll(allPaths.stream().filter(p -> p.getEvent() == inputEvent && p
@@ -219,19 +211,19 @@ public class Graph implements Communicator {
         return isPass;
     }
 
-    public <V> boolean verifySuperPaths(StateProperty<V> property, V from, V to, List<Path> superPathContainer,
-                                        Supplier<Boolean> doTransit) {
+    public <V> boolean verifySuperPaths(SwitchableProperty<V> property, V from, V to, List<Path> superPathContainer,
+                                        Supplier<Boolean> doSwitch) {
         List<Path> paths = allPaths.stream().filter(p -> {
-            if (!rollingPaths.contains(p) && p.getEvent() instanceof StateTransitionEvent) {
-                StateTransitionEvent transitionEvent = (StateTransitionEvent) p.getEvent();
+            if (!rollingPaths.contains(p) && p.getEvent() instanceof StateSwitchEvent) {
+                StateSwitchEvent transitionEvent = (StateSwitchEvent) p.getEvent();
                 if (transitionEvent.getProperty() == property && transitionEvent.getTo() == to
-                        && (from == null || transitionEvent.getFrom().test(from)) && p.isSatisfied()) {
+                        && (from == null || transitionEvent.getFrom().equals(from)) && p.isSatisfied()) {
                     return true;
                 }
             }
             return false;
         }).collect(Collectors.toList());
-        if (doTransit.get()) {
+        if (doSwitch.get()) {
             if (superPathContainer == null) {
                 for (Path path : paths) {
                     if (debug) {
@@ -247,28 +239,47 @@ public class Graph implements Communicator {
         return false;
     }
 
-    public <V> boolean transitToState(StateProperty<V> property, Predicate<V> to, List<Path> superPathContainer) {
-        if (to.test(property.getCurrentValue())) {
-            return true;
-        }
-        return findTransitionPathToRoll(superPathContainer, (p, pe) -> pe.getProperty().equals(property) && to.test(
-                (V) pe.getValue()));
+    public <V> boolean switchToState(SearchableSwitchableProperty<V> property, V to, List<Path> superPathContainer, Supplier<Boolean>
+            finalCheck) {
+        return findPathToRoll(superPathContainer, (path, prop, toVal) -> prop.equals
+                (property) && to.equals(toVal), finalCheck == null ? () -> to.equals(property.getCurrentValue()) : finalCheck);
     }
 
-    public boolean findTransitionPathToRoll(List<Path> superPathContainer, BiPredicate<Path, StatefulExpectation>
-            judge) {
+    public <V> boolean findPathToRoll(List<Path> superPathContainer, SwitchPredicate<V> predicate,
+                                      Supplier<Boolean> finalCheck) {
         return allPaths.stream().filter(p -> {
-            if (failedPaths.contains(p) || !(p.getExpectation() instanceof StatefulExpectation)) {
-                return false;
+            if (!failedPaths.contains(p) && !rollingPaths.contains(p)) {
+                if (p.getExpectation() instanceof SearchableSwitchableProperty.SwitchablePropertyExpectation) {
+                    SearchableSwitchableProperty<V>.SwitchablePropertyExpectation expectation =
+                            (SearchableSwitchableProperty<V>.SwitchablePropertyExpectation) p.getExpectation();
+                    if (predicate.test(p, expectation.getProperty(), expectation.getValue())) {
+                        return true;
+                    }
+                }
+                for (Consumer<List<Path>> followingAction : p.getFollowingActions()) {
+                    if (followingAction instanceof SearchableSwitchableProperty.SwitchablePropertyExpectation) {
+                        SearchableSwitchableProperty<V>.SwitchablePropertyExpectation expectation =
+                                (SearchableSwitchableProperty<V>.SwitchablePropertyExpectation) followingAction;
+                        if (predicate.test(p, expectation.getProperty(), expectation.getValue())) {
+                            return true;
+                        }
+                    }
+                }
             }
-            StatefulExpectation expectation = (StatefulExpectation) p.getExpectation();
-            return judge.test(p, expectation);
-        }).sorted(Comparator.comparingInt(p -> (p.isSatisfied() ? 0 : 1))).anyMatch(p -> {
+            return false;
+        }).sorted(Comparator.comparingInt(p -> {
+            // TODO 细化排序值，寻找最短路径
+            int i = p.isSatisfied() ? 0 : 1;
+            if (debug) {
+                ConsoleUtil.debug("%n>>>>compare %s: %s%n", i, Util.getPresentation(p));
+            }
+            return i;
+        })).filter(p -> {
             if (debug) {
                 ConsoleUtil.debug("%n>>>>transit roll: %s%n", Util.getPresentation(p));
             }
-            return roll(p, superPathContainer);
-        });
+            return roll(p, superPathContainer) && finalCheck.get();
+        }).findFirst().isPresent();
     }
 
     @Override
@@ -279,7 +290,7 @@ public class Graph implements Communicator {
                 return value;
             }
         }
-        return null;
+        throw new NullPointerException(Util.getPresentation(stateToCheck).toString());
     }
 
     @Override
@@ -298,6 +309,17 @@ public class Graph implements Communicator {
             Boolean result = communicator.verifyExpectation(expectation);
             if (result != null) {
                 return result;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String queryValue(QueryableProperty property) {
+        for (Communicator communicator : communicators) {
+            String value = communicator.queryValue(property);
+            if (value != null) {
+                return value;
             }
         }
         return null;

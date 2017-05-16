@@ -4,8 +4,9 @@
 package com.yanry.testdriver.ui.mobile.base;
 
 import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.event.StateTransitionEvent;
+import com.yanry.testdriver.ui.mobile.base.event.StateSwitchEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 import lib.common.model.Singletons;
 
 import java.util.*;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
  *         Jan 5, 2017
  */
 @Presentable
-public class Path extends HashMap<StateProperty, Object> {
+public class Path extends HashMap<SwitchableProperty, Object> {
     private Event event;
     private Expectation expectation;
     private Set<Consumer<List<Path>>> followingActions;
@@ -30,7 +31,7 @@ public class Path extends HashMap<StateProperty, Object> {
         hashCode = Singletons.get(Random.class).nextInt();
     }
 
-    public <V> Path addInitState(StateProperty<V> property, V value) {
+    public <V> Path addInitState(SwitchableProperty<V> property, V value) {
         put(property, value);
         return this;
     }
@@ -41,15 +42,15 @@ public class Path extends HashMap<StateProperty, Object> {
     }
 
     public void preProcess() {
-        if (event instanceof StateTransitionEvent) {
-            StateTransitionEvent transitionEvent = (StateTransitionEvent) event;
-            StateProperty property = transitionEvent.getProperty();
+        if (event instanceof StateSwitchEvent) {
+            StateSwitchEvent transitionEvent = (StateSwitchEvent) event;
+            SwitchableProperty property = transitionEvent.getProperty();
             remove(property);
         }
     }
 
     public boolean isSatisfied() {
-        return entrySet().stream().allMatch(state -> state.getKey().getCurrentValue().equals(state.getValue()));
+        return entrySet().stream().allMatch(state -> state.getValue().equals(state.getKey().getCurrentValue()));
     }
 
     public Set<Consumer<List<Path>>> getFollowingActions() {
