@@ -24,7 +24,7 @@ public class TextView extends View {
     public class TextValue extends QueryableProperty {
 
         public TextValue() {
-            super(TextView.this);
+            super(getWindow().getGraph(), TextView.this);
         }
     }
 }

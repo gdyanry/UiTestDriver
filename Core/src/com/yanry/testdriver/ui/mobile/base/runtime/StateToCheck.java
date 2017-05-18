@@ -1,23 +1,23 @@
 package com.yanry.testdriver.ui.mobile.base.runtime;
 
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.CacheSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 
 /**
  * Created by rongyu.yan on 3/13/2017.
  */
 @Presentable
 public class StateToCheck<V> {
-    private CacheSwitchableProperty<V> property;
+    private CacheProperty<V> property;
     private V[] options;
 
-    public StateToCheck(CacheSwitchableProperty<V> property, V[] options) {
+    public StateToCheck(CacheProperty<V> property, V...options) {
         this.property = property;
         this.options = options;
     }
 
     @Presentable
-    public CacheSwitchableProperty<V> getProperty() {
+    public CacheProperty<V> getProperty() {
         return property;
     }
 

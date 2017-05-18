@@ -1,8 +1,6 @@
 package com.yanry.testdriver.ui.mobile.extend.view.container;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
@@ -30,18 +28,14 @@ public class ListView extends View implements ViewContainer {
         return size;
     }
 
-    public void verifySize(Graph graph, int expectedSize, Function<Expectation, Path> verifySizePath) {
+    public void verifySize(int expectedSize, Function<Expectation, Path> verifySizePath) {
         String strSize = String.valueOf(expectedSize);
-        verifySizePath.apply(size.getStaticExpectation(graph, Timing.IMMEDIATELY, strSize))
-                .addFollowingAction((superPaths) -> size.setValue(strSize));
+        verifySizePath.apply(size.getStaticExpectation(Timing.IMMEDIATELY, strSize));
     }
 
-    public Supplier<ListViewItem> getRandomItem(Graph graph) {
+    public Supplier<ListViewItem> getRandomItem() {
         return () -> {
-            if (!size.hasValue()) {
-                size.doQuery(graph);
-            }
-            int iSize = Integer.parseInt(size.getValue(true));
+            int iSize = Integer.parseInt(size.getCurrentValue());
             if (iSize > 0) {
                 return new ListViewItem(this, new ByIndex(Singletons.get(Random.class).nextInt(iSize)));
             }
@@ -57,7 +51,7 @@ public class ListView extends View implements ViewContainer {
     public class ListViewSize extends QueryableProperty {
 
         public ListViewSize() {
-            super(ListView.this);
+            super(getWindow().getGraph(), ListView.this);
         }
     }
 }

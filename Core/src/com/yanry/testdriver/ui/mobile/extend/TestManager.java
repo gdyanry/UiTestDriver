@@ -4,15 +4,15 @@ import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.SwitchPredicate;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.event.StateSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.expectation.AbstractExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableProperty;
 import com.yanry.testdriver.ui.mobile.extend.action.ClickOutside;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
@@ -33,7 +33,7 @@ import static com.yanry.testdriver.ui.mobile.extend.TestManager.Visibility.*;
 public class TestManager extends Graph {
     private LinkedList<Window> windowStack;
     private HashMap<Class<? extends Window>, Window> windowInstances;
-    private HashMap<Class<? extends SwitchableProperty>, SwitchableProperty> propertyInstances;
+    private HashMap<Class<? extends Property>, Property> propertyInstances;
 
     public TestManager(boolean debug) {
         super(debug);
@@ -42,7 +42,7 @@ public class TestManager extends Graph {
         propertyInstances = new HashMap<>();
         Util.createPath(this, getProcessState().getStopProcessEvent(), new ActionExpectation() {
             @Override
-            public void run() {
+            protected void run(List<Path> superPathContainer) {
                 windowStack.clear();
             }
         });
@@ -55,8 +55,8 @@ public class TestManager extends Graph {
         });
     }
 
-    public void registerProperties(SwitchableProperty... properties) {
-        for (SwitchableProperty property : properties) {
+    public void registerProperties(Property... properties) {
+        for (Property property : properties) {
             propertyInstances.put(property.getClass(), property);
         }
     }
@@ -74,19 +74,20 @@ public class TestManager extends Graph {
     public abstract class Window implements ViewContainer {
         private VisibilityState visibility;
         private ForegroundVerification foregroundVerification;
-        private StateSwitchEvent<Visibility> createEvent;
-        private StateSwitchEvent<Visibility> closeEvent;
-        private StateSwitchEvent<Visibility> resumeEvent;
-        private StateSwitchEvent<Visibility> pauseEvent;
+        private ValueSwitchEvent<Visibility> createEvent;
+        private ValueSwitchEvent<Visibility> closeEvent;
+        private ValueSwitchEvent<Visibility> resumeEvent;
+        private ValueSwitchEvent<Visibility> pauseEvent;
         private HashMap<String, View> registeredViews;
+        private HashMap<String, Property> registeredProps;
 
         public Window() {
             visibility = new VisibilityState();
             foregroundVerification = new ForegroundVerification();
-            createEvent = new StateSwitchEvent<>(visibility, NotCreated, Foreground);
-            closeEvent = new StateSwitchEvent<>(visibility, Foreground, NotCreated);
-            resumeEvent = new StateSwitchEvent<>(visibility, Background, Foreground);
-            pauseEvent = new StateSwitchEvent<>(visibility, Foreground, Background);
+            createEvent = new ValueSwitchEvent<>(visibility, NotCreated, Foreground);
+            closeEvent = new ValueSwitchEvent<>(visibility, Foreground, NotCreated);
+            resumeEvent = new ValueSwitchEvent<>(visibility, Background, Foreground);
+            pauseEvent = new ValueSwitchEvent<>(visibility, Foreground, Background);
             registeredViews = new HashMap<>();
         }
 
@@ -94,47 +95,61 @@ public class TestManager extends Graph {
 
         public Path showOnStartUp(Timing timing) {
             return Util.createPath(TestManager.this, getProcessState().getStartProcessEvent(),
-                    foregroundVerification.getStaticExpectation(timing, true)).addFollowingAction((superPaths) ->
-                    verifySuperPaths(visibility, NotCreated, Foreground, superPaths, () -> {
-                        windowStack.add(this);
-                        return true;
+                    foregroundVerification.getStaticExpectation(timing, true).addFollowingExpectation(new ActionExpectation() {
+                        @Override
+                        protected void run(List<Path> superPathContainer) {
+                            verifySuperPaths(visibility, NotCreated, Foreground, superPathContainer, () -> {
+                                windowStack.add(Window.this);
+                                return true;
+                            });
+                        }
                     }));
         }
 
         public Path popWindow(Window newWindow, Event inputEvent, Timing timing, boolean closeCurrent, boolean
                 singleInstance) {
             return createPath(inputEvent, newWindow.foregroundVerification.getStaticExpectation
-                    (timing, true)).addFollowingAction((superPaths) -> {
-                if (closeCurrent) {
-                    verifySuperPaths(visibility, Foreground, NotCreated, superPaths, () -> {
+                    (timing, true).addFollowingExpectation(new ActionExpectation() {
+                @Override
+                protected void run(List<Path> superPathContainer) {
+                    if (closeCurrent) {
+                        verifySuperPaths(visibility, Foreground, NotCreated, superPathContainer, () -> {
+                            windowStack.removeLastOccurrence(this);
+                            return true;
+                        });
+                    } else {
+                        verifySuperPaths(visibility, Foreground, Background, superPathContainer, () -> true);
+                    }
+                    if (singleInstance) {
+                        windowStack.removeIf(w -> w == newWindow);
+                    }
+                    verifySuperPaths(newWindow.visibility, NotCreated, Foreground, superPathContainer, () -> {
+                        windowStack.add(newWindow);
+                        return true;
+                    });
+                }
+            }));
+        }
+
+        public Path close(Event inputEvent, Timing timing, Expectation... followingExpectations) {
+            AbstractExpectation expectation = foregroundVerification.getStaticExpectation(timing,
+                    false).addFollowingExpectation(new ActionExpectation() {
+                @Override
+                protected void run(List<Path> superPathContainer) {
+                    verifySuperPaths(visibility, Foreground, NotCreated, superPathContainer, () -> {
                         windowStack.removeLastOccurrence(this);
                         return true;
                     });
-                } else {
-                    verifySuperPaths(visibility, Foreground, Background, superPaths, () -> true);
-                }
-                if (singleInstance) {
-                    windowStack.removeIf(w -> w == newWindow);
-                }
-                verifySuperPaths(newWindow.visibility, NotCreated, Foreground, superPaths, () -> {
-                    windowStack.add(newWindow);
-                    return true;
-                });
-            });
-        }
-
-        public Path close(Event inputEvent, Timing timing) {
-            return createPath(inputEvent, foregroundVerification.getStaticExpectation(timing,
-                    false)).addFollowingAction((superPaths) -> {
-                verifySuperPaths(visibility, Foreground, NotCreated, superPaths, () -> {
-                    windowStack.removeLastOccurrence(this);
-                    return true;
-                });
-                if (!windowStack.isEmpty()) {
-                    verifySuperPaths(windowStack.getLast().visibility, Background, Foreground,
-                            superPaths, () -> true);
+                    if (!windowStack.isEmpty()) {
+                        verifySuperPaths(windowStack.getLast().visibility, Background, Foreground,
+                                superPathContainer, () -> true);
+                    }
                 }
             });
+            for (Expectation followingExpectation : followingExpectations) {
+                expectation.addFollowingExpectation(followingExpectation);
+            }
+            return createPath(inputEvent, expectation);
         }
 
         public Path closeOnTouchOutside() {
@@ -145,23 +160,23 @@ public class TestManager extends Graph {
             return Util.createPath(getGraph(), event, expectation).addInitState(visibility, Foreground);
         }
 
-        public SwitchableProperty<Visibility> getVisibility() {
+        public Property<Visibility> getVisibility() {
             return visibility;
         }
 
-        public StateSwitchEvent<Visibility> getCreateEvent() {
+        public ValueSwitchEvent<Visibility> getCreateEvent() {
             return createEvent;
         }
 
-        public StateSwitchEvent<Visibility> getCloseEvent() {
+        public ValueSwitchEvent<Visibility> getCloseEvent() {
             return closeEvent;
         }
 
-        public StateSwitchEvent<Visibility> getResumeEvent() {
+        public ValueSwitchEvent<Visibility> getResumeEvent() {
             return resumeEvent;
         }
 
-        public StateSwitchEvent<Visibility> getPauseEvent() {
+        public ValueSwitchEvent<Visibility> getPauseEvent() {
             return pauseEvent;
         }
 
@@ -173,7 +188,7 @@ public class TestManager extends Graph {
             return windowInstances.get(clz);
         }
 
-        public <V, P extends SwitchableProperty<V>> P getProperty(Class<P> clz) {
+        public <V, P extends Property<V>> P getProperty(Class<P> clz) {
             return (P) propertyInstances.get(clz);
         }
 
@@ -185,12 +200,20 @@ public class TestManager extends Graph {
             return (V) registeredViews.get(tag);
         }
 
+        public <V> void registerProperty(String tag, Property<V> property) {
+            registeredProps.put(tag, property);
+        }
+
+        public <V, P extends Property<V>> P getProperty(String tag) {
+            return (P) registeredProps.get(tag);
+        }
+
         @Override
         public void present(Path path) {
             path.addInitState(visibility, Foreground);
         }
 
-        public class VisibilityState extends UnsearchableSwitchableProperty<Visibility> {
+        public class VisibilityState extends UnsearchableProperty<Visibility> {
 
             @Override
             protected boolean doSwitch(Visibility to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {
@@ -220,9 +243,9 @@ public class TestManager extends Graph {
                                     finalCheck);
                         }
                     case Background:
-                        return findPathToRoll(superPathContainer, (SwitchPredicate<Boolean>) (path, property, toValue) ->
-                                foregroundVerification != property && property.getClass() == ForegroundVerification.class &&
-                                        toValue.equals(true) && path.get(visibility) == Foreground, finalCheck);
+                        return findPathToRoll(superPathContainer, p -> p.get(visibility) == Foreground, (p, v) ->
+                                foregroundVerification != p && p.getClass() == ForegroundVerification.class &&
+                                        v.equals(true), finalCheck);
                 }
                 return false;
             }
@@ -250,7 +273,7 @@ public class TestManager extends Graph {
             }
         }
 
-        public class ForegroundVerification extends SearchableSwitchableProperty<Boolean> {
+        public class ForegroundVerification extends SearchableProperty<Boolean> {
             @Presentable
             public Window getWindow() {
                 return Window.this;
@@ -272,7 +295,7 @@ public class TestManager extends Graph {
             }
 
             @Override
-            protected boolean ifNeedVerification() {
+            protected boolean isVisibleToUser() {
                 return true;
             }
         }

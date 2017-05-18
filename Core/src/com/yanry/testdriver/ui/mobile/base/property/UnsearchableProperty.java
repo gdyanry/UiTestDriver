@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  * <p>
  * Created by rongyu.yan on 5/12/2017.
  */
-public abstract class UnsearchableSwitchableProperty<V> extends CacheSwitchableProperty<V> {
+public abstract class UnsearchableProperty<V> extends CacheProperty<V> {
 
     protected abstract boolean doSwitch(V to, List<Path> superPathContainer, Supplier<Boolean> finalCheck);
 
@@ -21,8 +21,8 @@ public abstract class UnsearchableSwitchableProperty<V> extends CacheSwitchableP
     public ActionExpectation getActionExpectation(V to) {
         return new ActionExpectation() {
             @Override
-            public void run() {
-                getGraph().verifySuperPaths(UnsearchableSwitchableProperty.this, getCurrentValue(), to, null,
+            protected void run(List<Path> superPathContainer) {
+                getGraph().verifySuperPaths(UnsearchableProperty.this, getCurrentValue(), to, superPathContainer,
                         () -> {
                             setCacheValue(to);
                             return true;

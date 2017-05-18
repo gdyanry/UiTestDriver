@@ -1,13 +1,12 @@
 package com.yanry.testdriver.sample.debug.window;
 
 import com.yanry.testdriver.sample.debug.TestApp;
-import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
+import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
 import com.yanry.testdriver.ui.mobile.extend.property.LoginState;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ByText;
 
 /**

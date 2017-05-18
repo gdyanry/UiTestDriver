@@ -12,6 +12,6 @@ public class FilterOnMain extends TestManager.Window {
 
     @Override
     protected void addCases() {
-
+        closeOnTouchOutside();
     }
 }

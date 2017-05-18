@@ -6,7 +6,7 @@ import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 /**
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * <p>
  * Created by rongyu.yan on 5/9/2017.
  */
-public abstract class SearchableSwitchableProperty<V> extends CacheSwitchableProperty<V> {
+public abstract class SearchableProperty<V> extends CacheProperty<V> {
     protected abstract Graph getGraph();
 
     @Override
@@ -22,7 +22,7 @@ public abstract class SearchableSwitchableProperty<V> extends CacheSwitchablePro
         return getGraph().switchToState(this, to, superPathContainer, finalCheck);
     }
 
-    protected abstract boolean ifNeedVerification();
+    protected abstract boolean isVisibleToUser();
 
     public SwitchablePropertyExpectation getStaticExpectation(Timing timing, V value) {
         return new SwitchablePropertyExpectation(timing, value);
@@ -32,22 +32,22 @@ public abstract class SearchableSwitchableProperty<V> extends CacheSwitchablePro
         return new SwitchablePropertyExpectation(timing, valueSupplier);
     }
 
-    public class SwitchablePropertyExpectation extends PropertyExpectation<V, SearchableSwitchableProperty<V>> implements Consumer<List<Path>> {
+    public class SwitchablePropertyExpectation extends PropertyExpectation<V, SearchableProperty<V>> {
 
         private SwitchablePropertyExpectation(Timing timing, V value) {
-            super(timing, SearchableSwitchableProperty.this, value);
+            super(timing, SearchableProperty.this, value);
         }
 
         private SwitchablePropertyExpectation(Timing timing, Supplier<V> valueSupplier) {
-            super(timing, SearchableSwitchableProperty.this, valueSupplier);
+            super(timing, SearchableProperty.this, valueSupplier);
         }
 
         @Override
         protected boolean doVerify(List<Path> superPathContainer) {
             // this path might become transition event of other paths
-            return getGraph().verifySuperPaths(SearchableSwitchableProperty.this, getCurrentValue(),
+            return getGraph().verifySuperPaths(SearchableProperty.this, getCurrentValue(),
                     getValue(), superPathContainer, () -> {
-                        if (ifNeedVerification() && !getGraph().verifyExpectation(this)) {
+                        if (isVisibleToUser() && !getGraph().verifyExpectation(this)) {
                             setCacheValue(null);
                             return false;
                         } else {
@@ -59,16 +59,12 @@ public abstract class SearchableSwitchableProperty<V> extends CacheSwitchablePro
 
         @Override
         public boolean ifRecord() {
-            return ifNeedVerification();
+            return isVisibleToUser();
         }
 
         @Override
-        public void accept(List<Path> paths) {
-            if (ifNeedVerification()) {
-                throw new IllegalStateException("the property's ifNeedVerification() method should return false when " +
-                        "used as following action.");
-            }
-            verify(paths);
+        protected boolean selfSwitchTest(BiPredicate<SearchableProperty, Object> predicate) {
+            return predicate.test(SearchableProperty.this, getValue());
         }
     }
 }

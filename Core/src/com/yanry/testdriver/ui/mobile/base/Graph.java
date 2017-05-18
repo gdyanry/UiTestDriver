@@ -4,14 +4,12 @@
 package com.yanry.testdriver.ui.mobile.base;
 
 import com.yanry.testdriver.ui.mobile.Util;
-import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
-import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.event.StateSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.event.*;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
 import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
@@ -19,7 +17,8 @@ import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import lib.common.util.ConsoleUtil;
 
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -132,10 +131,10 @@ public class Graph implements Communicator {
     private boolean internalRoll(Path path, List<Path> superPathContainer) {
         // make sure environment states are satisfied.
         // TODO 按状态优先级排序
-        Optional<Map.Entry<SwitchableProperty, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
+        Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
-            Map.Entry<SwitchableProperty, Object> state = any.get();
+            Map.Entry<Property, Object> state = any.get();
             if (state.getKey().switchTo(state.getValue(), null)) {
                 return internalRoll(path, superPathContainer);
             } else {
@@ -148,15 +147,24 @@ public class Graph implements Communicator {
         // trigger event
         Event inputEvent = path.getEvent();
         List<Path> siblingPathContainer = new LinkedList<>();
-        if (inputEvent instanceof StateSwitchEvent) {
-            StateSwitchEvent event = (StateSwitchEvent) inputEvent;
+        if (inputEvent instanceof ValueSwitchEvent) {
+            ValueSwitchEvent event = (ValueSwitchEvent) inputEvent;
             // roll path for this switch event.
             if (!event.getProperty().switchTo(event.getFrom(), null) ||
                     // sibling path container of current path becomes super path container of the path where switch
                     // event takes place!
                     !event.getProperty().switchTo(event.getTo(), siblingPathContainer)) {
                 if (unprocessedPaths.remove(path)) {
-                    testRecords.add(new MissedPath(path, event.getProperty()));
+                    testRecords.add(new MissedPath(path, event));
+                }
+                return false;
+            }
+        } else if (inputEvent instanceof PredicateSwitchEvent) {
+            PredicateSwitchEvent event = (PredicateSwitchEvent) inputEvent;
+            if (!switchToState(event.getProperty(), event.getFrom(), siblingPathContainer) || !switchToState(event
+                    .getProperty(), event.getTo(), siblingPathContainer)) {
+                if (unprocessedPaths.remove(path)) {
+                    testRecords.add(new MissedPath(path, event));
                 }
                 return false;
             }
@@ -173,6 +181,11 @@ public class Graph implements Communicator {
                 }
                 return false;
             }
+        } else {
+            if (unprocessedPaths.remove(path)) {
+                testRecords.add(new MissedPath(path, inputEvent));
+            }
+            return false;
         }
         // collect paths that share the same environment states and event
         final boolean[] result = new boolean[1];
@@ -195,30 +208,40 @@ public class Graph implements Communicator {
 
     private boolean verify(Path path, List<Path> superPathContainer) {
         Expectation expectation = path.getExpectation();
-        boolean isPass = expectation.verify(superPathContainer);
+        boolean isPass = expectation.verifyBunch(superPathContainer);
         if (expectation.ifRecord()) {
             testRecords.add(new Assertion(expectation, isPass));
         }
         if (!isPass) {
             failedPaths.add(path);
-        } else if (!path.getFollowingActions().isEmpty()) {
-            for (Consumer<List<Path>> followingAction : path.getFollowingActions()) {
-                followingAction.accept(superPathContainer);
-            }
         }
         unprocessedPaths.remove(path);
         rollingPaths.remove(path);
         return isPass;
     }
 
-    public <V> boolean verifySuperPaths(SwitchableProperty<V> property, V from, V to, List<Path> superPathContainer,
+    public <V> boolean verifySuperPaths(Property<V> property, V from, V to, List<Path> superPathContainer,
                                         Supplier<Boolean> doSwitch) {
         List<Path> paths = allPaths.stream().filter(p -> {
-            if (!rollingPaths.contains(p) && p.getEvent() instanceof StateSwitchEvent) {
-                StateSwitchEvent transitionEvent = (StateSwitchEvent) p.getEvent();
-                if (transitionEvent.getProperty() == property && transitionEvent.getTo() == to
-                        && (from == null || transitionEvent.getFrom().equals(from)) && p.isSatisfied()) {
-                    return true;
+            if (!rollingPaths.contains(p)) {
+                if (p.getEvent() instanceof ValueSwitchEvent) {
+                    ValueSwitchEvent switchEvent = (ValueSwitchEvent) p.getEvent();
+                    if (switchEvent.getProperty() == property && switchEvent.getTo() == to
+                            && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied()) {
+                        return true;
+                    }
+                } else if (p.getEvent() instanceof PredicateSwitchEvent) {
+                    PredicateSwitchEvent switchEvent = (PredicateSwitchEvent) p.getEvent();
+                    if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
+                            switchEvent.getFrom().test(from)) && p.isSatisfied()) {
+                        return true;
+                    }
+                } else if (p.getEvent() instanceof PassiveSwitchEvent) {
+                    PassiveSwitchEvent switchEvent = (PassiveSwitchEvent) p.getEvent();
+                    if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
+                            switchEvent.getFrom().test(from)) && p.isSatisfied()) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -239,32 +262,28 @@ public class Graph implements Communicator {
         return false;
     }
 
-    public <V> boolean switchToState(SearchableSwitchableProperty<V> property, V to, List<Path> superPathContainer, Supplier<Boolean>
-            finalCheck) {
-        return findPathToRoll(superPathContainer, (path, prop, toVal) -> prop.equals
-                (property) && to.equals(toVal), finalCheck == null ? () -> to.equals(property.getCurrentValue()) : finalCheck);
+    private <V> boolean switchToState(SearchableProperty<V> property, Predicate<V> to, List<Path>
+            superPathContainer) {
+        if (to.test(property.getCurrentValue())) {
+            return true;
+        }
+        return findPathToRoll(superPathContainer, null, (p, v) -> p == property && to.test((V) v), () -> to.test
+                (property.getCurrentValue()));
     }
 
-    public <V> boolean findPathToRoll(List<Path> superPathContainer, SwitchPredicate<V> predicate,
-                                      Supplier<Boolean> finalCheck) {
+    public <V> boolean switchToState(SearchableProperty<V> property, V to, List<Path> superPathContainer, Supplier<Boolean>
+            finalCheck) {
+        return findPathToRoll(superPathContainer, null, (prop, toVal) -> prop == property && to.equals(toVal), finalCheck
+                == null ? () -> to.equals(property.getCurrentValue()) : finalCheck);
+    }
+
+    public boolean findPathToRoll(List<Path> superPathContainer, Predicate<Path> pathPredicate,
+                                  BiPredicate<SearchableProperty, Object> statePredicate,
+                                  Supplier<Boolean> finalCheck) {
         return allPaths.stream().filter(p -> {
-            if (!failedPaths.contains(p) && !rollingPaths.contains(p)) {
-                if (p.getExpectation() instanceof SearchableSwitchableProperty.SwitchablePropertyExpectation) {
-                    SearchableSwitchableProperty<V>.SwitchablePropertyExpectation expectation =
-                            (SearchableSwitchableProperty<V>.SwitchablePropertyExpectation) p.getExpectation();
-                    if (predicate.test(p, expectation.getProperty(), expectation.getValue())) {
-                        return true;
-                    }
-                }
-                for (Consumer<List<Path>> followingAction : p.getFollowingActions()) {
-                    if (followingAction instanceof SearchableSwitchableProperty.SwitchablePropertyExpectation) {
-                        SearchableSwitchableProperty<V>.SwitchablePropertyExpectation expectation =
-                                (SearchableSwitchableProperty<V>.SwitchablePropertyExpectation) followingAction;
-                        if (predicate.test(p, expectation.getProperty(), expectation.getValue())) {
-                            return true;
-                        }
-                    }
-                }
+            if (!failedPaths.contains(p) && !rollingPaths.contains(p) && !(p.getEvent() instanceof
+                    PassiveSwitchEvent)) {
+                return (pathPredicate == null || pathPredicate.test(p)) && p.getExpectation().switchTest(statePredicate);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {

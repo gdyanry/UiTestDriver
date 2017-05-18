@@ -1,8 +1,8 @@
 package com.yanry.testdriver.sample.debug;
 
-import com.yanry.testdriver.ui.mobile.base.*;
-import com.yanry.testdriver.ui.mobile.base.property.CacheSwitchableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.Graph;
+import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.action.SwitchState;
 
@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 /**
  * Created by rongyu.yan on 2/27/2017.
  */
-public class NetworkState extends UnsearchableSwitchableProperty<NetworkState.Network> {
+public class NetworkState extends UnsearchableProperty<NetworkState.Network> {
     private Graph graph;
 
     public NetworkState(Graph graph) {

@@ -2,7 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
 import com.yanry.testdriver.ui.mobile.extend.view.ValidateEditText;
 
@@ -22,12 +22,12 @@ public class LoginPathHandler {
         this.etUser = etUser;
         this.etPwd = etPwd;
         currentUser.getUserPasswordMap().entrySet().forEach(e -> {
-            etUser.addPositiveCase(e.getKey());
-            etPwd.addPositiveCase(e.getValue());
+            etUser.addPositiveCases(e.getKey());
+            etPwd.addPositiveCases(e.getValue());
         });
     }
 
-    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<SearchableSwitchableProperty<String>
+    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<SearchableProperty<String>
             .SwitchablePropertyExpectation, Path> getSuccessLoginPath) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> getSuccessLoginPath.apply(currentUser
                 .getStaticExpectation(timing, e.getKey())).addInitState(etUser.getInputContent(), e.getKey())

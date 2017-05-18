@@ -30,8 +30,8 @@ public class LoginPage extends TestManager.Window {
     protected void addCases() {
         showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).put(getProperty(LoginState.class),
                 false);
-        ValidateEditText etUser = new ValidateEditText(this, new ByDesc(DESC_USER), null);
-        ValidateEditText etPwd = new ValidateEditText(this, new ByDesc(DESC_PWD), etUser.getValidity());
+        ValidateEditText etUser = new ValidateEditText(this, new ByDesc(DESC_USER));
+        ValidateEditText etPwd = new ValidateEditText(this, new ByDesc(DESC_PWD));
         // 页面打开时输入框内容为空
         createPath(getCreateEvent(), etUser.getInputContent().getActionExpectation(""));
         createPath(getCreateEvent(), etPwd.getInputContent().getActionExpectation(""));
@@ -42,29 +42,29 @@ public class LoginPage extends TestManager.Window {
                 "用户名不能为空"));
         etUser.addNegativeCase("A lan", clickLogin, new Toast(Timing.IMMEDIATELY, TestApp
                 .TOAST_DURATION, getGraph(), "用户名不能包含空格"));
-        etUser.addPositiveCase("daming.wang");
+        etUser.addPositiveCases("daming.wang");
         etPwd.setEmptyValidationCase(clickLogin, new Toast(Timing.IMMEDIATELY, TestApp.TOAST_DURATION, getGraph(),
-                "密码不能为空"));
+                "密码不能为空"), etUser.getValidity());
         etPwd.addNegativeCase("124", clickLogin, new Toast(Timing.IMMEDIATELY, TestApp.TOAST_DURATION, getGraph(),
-                "密码长度不能小于6"));
-        etPwd.addPositiveCase("123456");
+                "密码长度不能小于6"), etUser.getValidity());
+        etPwd.addPositiveCases("123456");
         // 无网络连接
         NetworkState networkState = getProperty(NetworkState.class);
-        etPwd.getValidity().addValidationPassToPath(createPath(clickLogin, new Toast
-                (Timing.IMMEDIATELY, TestApp.TOAST_DURATION, getGraph(), "无网络连接")).addInitState(networkState,
-                NetworkState.Network.Disconnected), true);
+        createPath(clickLogin, new Toast(Timing.IMMEDIATELY, TestApp.TOAST_DURATION, getGraph(), "无网络连接"))
+                .addInitState(networkState, NetworkState.Network.Disconnected).addInitState(etUser.getValidity(),
+                true).addInitState(etPwd.getValidity(), true);
         // 请求对话框
-        etPwd.getValidity().addValidationPassToPath(createPath(clickLogin, new
-                RequestDialog(Timing.IMMEDIATELY, TestApp.HTTP_TIMEOUT, getGraph())).addInitState(networkState, NetworkState
-                .Network.Abnormal), true);
-        etPwd.getValidity().addValidationPassToPath(createPath(clickLogin, new
-                RequestDialog(Timing.IMMEDIATELY, TestApp.HTTP_TIMEOUT, getGraph())).addInitState(networkState, NetworkState
-                .Network.Normal), true);
+        createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, TestApp.HTTP_TIMEOUT, getGraph())).addInitState
+                (networkState, NetworkState.Network.Abnormal).addInitState(etUser.getValidity(), true).addInitState
+                (etPwd.getValidity(), true);
+        createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, TestApp.HTTP_TIMEOUT, getGraph())).addInitState(networkState,
+                NetworkState.Network.Normal).addInitState(etUser.getValidity(), true).addInitState(etPwd.getValidity
+                (), true);
         // 连接超时
         Timing withinTimeout = new Timing(true, TestApp.HTTP_TIMEOUT);
-        etPwd.getValidity().addValidationPassToPath(createPath(clickLogin, new Toast
-                (withinTimeout, TestApp.TOAST_DURATION, getGraph(), "网络错误")).addInitState(networkState, NetworkState
-                .Network.Abnormal), true);
+        createPath(clickLogin, new Toast(withinTimeout, TestApp.TOAST_DURATION, getGraph(), "网络错误"))
+                .addInitState(networkState, NetworkState.Network.Abnormal).addInitState(etUser.getValidity(), true)
+                .addInitState(etPwd.getValidity(), true);
         // 请求成功
         LoginPathHandler loginPathHandler = new LoginPathHandler(getProperty(CurrentUser.class), etUser, etPwd);
         // login state

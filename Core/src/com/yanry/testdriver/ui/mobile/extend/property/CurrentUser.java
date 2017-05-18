@@ -1,20 +1,16 @@
 package com.yanry.testdriver.ui.mobile.extend.property;
 
-import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.property.CacheSwitchableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
-import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.base.Graph;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
+import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * Created by rongyu.yan on 4/18/2017.
  */
-public class CurrentUser extends SearchableSwitchableProperty<String> {
+public class CurrentUser extends SearchableProperty<String> {
     private Graph graph;
     private HashMap<String, String> userPasswordMap;
 
@@ -33,7 +29,7 @@ public class CurrentUser extends SearchableSwitchableProperty<String> {
     }
 
     @Override
-    protected boolean ifNeedVerification() {
+    protected boolean isVisibleToUser() {
         return false;
     }
 

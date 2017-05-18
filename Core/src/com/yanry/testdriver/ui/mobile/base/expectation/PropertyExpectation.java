@@ -1,6 +1,5 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
@@ -11,7 +10,7 @@ import java.util.function.Supplier;
 /**
  * Created by rongyu.yan on 5/10/2017.
  */
-public abstract class PropertyExpectation<V, P extends Property> extends AbstractExpectation {
+public abstract class PropertyExpectation<V, P extends Property<V>> extends AbstractExpectation {
     private P property;
     private V value;
     private Supplier<V> valueSupplier;
@@ -41,7 +40,7 @@ public abstract class PropertyExpectation<V, P extends Property> extends Abstrac
     }
 
     @Override
-    public boolean verify(List<Path> superPathContainer) {
+    protected boolean verify(List<Path> superPathContainer) {
         if (valueSupplier != null) {
             value = valueSupplier.get();
             boolean pass = doVerify(superPathContainer);

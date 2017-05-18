@@ -2,8 +2,8 @@ package com.yanry.testdriver.ui.mobile.base.process;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.event.StateSwitchEvent;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableProperty;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -11,22 +11,22 @@ import java.util.function.Supplier;
 /**
  * Created by rongyu.yan on 3/9/2017.
  */
-public class ProcessState extends UnsearchableSwitchableProperty<Boolean> {
+public class ProcessState extends UnsearchableProperty<Boolean> {
     private Graph graph;
-    private StateSwitchEvent<Boolean> startProcessEvent;
-    private StateSwitchEvent<Boolean> stopProcessEvent;
+    private ValueSwitchEvent<Boolean> startProcessEvent;
+    private ValueSwitchEvent<Boolean> stopProcessEvent;
 
     public ProcessState(Graph graph) {
         this.graph = graph;
-        startProcessEvent = new StateSwitchEvent<>(this, false, true);
-        stopProcessEvent = new StateSwitchEvent<>(this, true, false);
+        startProcessEvent = new ValueSwitchEvent<>(this, false, true);
+        stopProcessEvent = new ValueSwitchEvent<>(this, true, false);
     }
 
-    public StateSwitchEvent<Boolean> getStartProcessEvent() {
+    public ValueSwitchEvent<Boolean> getStartProcessEvent() {
         return startProcessEvent;
     }
 
-    public StateSwitchEvent<Boolean> getStopProcessEvent() {
+    public ValueSwitchEvent<Boolean> getStopProcessEvent() {
         return stopProcessEvent;
     }
 

@@ -4,13 +4,12 @@ import com.yanry.testdriver.sample.debug.window.AboutPage;
 import com.yanry.testdriver.sample.debug.window.LoginPage;
 import com.yanry.testdriver.sample.debug.window.MainPage;
 import com.yanry.testdriver.ui.mobile.Util;
-import com.yanry.testdriver.ui.mobile.base.*;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
+import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.communicator.ConsoleCommunicator;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
 import com.yanry.testdriver.ui.mobile.extend.property.LoginState;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
 
 import java.util.List;
 

@@ -3,7 +3,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableProperty;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
@@ -27,7 +27,7 @@ public class EditText extends View {
         return inputContent;
     }
 
-    public class InputContent extends UnsearchableSwitchableProperty<String> {
+    public class InputContent extends UnsearchableProperty<String> {
 
         @Presentable
         public EditText getEditText() {

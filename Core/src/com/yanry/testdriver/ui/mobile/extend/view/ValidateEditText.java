@@ -1,10 +1,9 @@
 package com.yanry.testdriver.ui.mobile.extend.view;
 
-import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.extend.property.DependantValidation;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
@@ -21,27 +20,32 @@ public class ValidateEditText extends EditText {
     private Set<String> validContents;
     private Set<String> invalidContents;
 
-    public ValidateEditText(ViewContainer parent, ViewSelector selector, DependantValidation dependant) {
+    public ValidateEditText(ViewContainer parent, ViewSelector selector) {
         super(parent, selector);
-        validity = new ValidityState(dependant);
+        validity = new ValidityState();
         validContents = new HashSet<>();
         invalidContents = new HashSet<>();
     }
 
-    public void addPositiveCase(String content) {
-        validContents.add(content);
+    public void addPositiveCases(String... contents) {
+        for (String content : contents) {
+            validContents.add(content);
+        }
     }
 
-    public Path addNegativeCase(String content, Event event, Expectation expectation) {
+    public Path addNegativeCase(String content, Event event, Expectation expectation, Property<Boolean>...
+            preValidities) {
         invalidContents.add(content);
         Path path = getWindow().createPath(event, expectation).addInitState(getInputContent(), content);
-        validity.addValidationPassToPath(path, false);
         getParent().present(path);
+        for (Property<Boolean> preValidity : preValidities) {
+            path.addInitState(preValidity, true);
+        }
         return path;
     }
 
-    public Path setEmptyValidationCase(Event event, Expectation expectation) {
-        return addNegativeCase("", event, expectation);
+    public Path setEmptyValidationCase(Event event, Expectation expectation, Property<Boolean>...preValidities) {
+        return addNegativeCase("", event, expectation, preValidities);
     }
 
     public ValidityState getValidity() {
@@ -52,11 +56,7 @@ public class ValidateEditText extends EditText {
         return validContents;
     }
 
-    public class ValidityState extends DependantValidation {
-
-        public ValidityState(DependantValidation dependant) {
-            super(dependant);
-        }
+    public class ValidityState extends Property<Boolean> {
 
         @Override
         protected boolean switchTo(Boolean to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {

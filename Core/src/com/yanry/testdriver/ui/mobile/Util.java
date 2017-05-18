@@ -5,7 +5,6 @@ import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
 import lib.common.util.StringUtil;

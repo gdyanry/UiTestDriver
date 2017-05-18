@@ -5,9 +5,9 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
-import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
 /**
@@ -56,7 +56,12 @@ public class View {
         return selector;
     }
 
-    public class ViewVisibility extends SearchableSwitchableProperty<Boolean> {
+    public class ViewVisibility extends SearchableProperty<Boolean> {
+
+        @Presentable
+        public View getView() {
+            return View.this;
+        }
 
         @Override
         protected Boolean checkValue() {
@@ -69,7 +74,7 @@ public class View {
         }
 
         @Override
-        protected boolean ifNeedVerification() {
+        protected boolean isVisibleToUser() {
             return true;
         }
     }
