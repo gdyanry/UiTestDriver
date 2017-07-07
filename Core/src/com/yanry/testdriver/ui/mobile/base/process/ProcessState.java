@@ -1,17 +1,13 @@
 package com.yanry.testdriver.ui.mobile.base.process;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableProperty;
-
-import java.util.List;
-import java.util.function.Supplier;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
 
 /**
  * Created by rongyu.yan on 3/9/2017.
  */
-public class ProcessState extends UnsearchableProperty<Boolean> {
+public class ProcessState extends UnsearchableSwitchableProperty<Boolean> {
     private Graph graph;
     private ValueSwitchEvent<Boolean> startProcessEvent;
     private ValueSwitchEvent<Boolean> stopProcessEvent;
@@ -31,7 +27,7 @@ public class ProcessState extends UnsearchableProperty<Boolean> {
     }
 
     @Override
-    protected boolean doSwitch(Boolean to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {
+    protected boolean doSwitch(Boolean to) {
         if (to) {
             return getGraph().performAction(new StartProcess());
         }

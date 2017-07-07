@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.event;
 
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.Property;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 
 import java.util.function.Predicate;
 
@@ -9,7 +9,7 @@ import java.util.function.Predicate;
  * Created by rongyu.yan on 5/17/2017.
  */
 @Presentable
-public class PassiveSwitchEvent<V, P extends Property<V>> implements Event {
+public class PassiveSwitchEvent<V, P extends SwitchableProperty<V>> implements Event {
     private P property;
     private Predicate<V> from;
     private Predicate<V> to;

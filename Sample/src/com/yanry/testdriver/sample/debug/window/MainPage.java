@@ -23,7 +23,7 @@ public class MainPage extends TestManager.Window {
                 true);
         Click clickLogout = new Click(new View(this, new ByText("退出登录")));
         popWindow(getWindow(LoginPage.class), clickLogout, Timing.IMMEDIATELY, true, true);
-        createPath(clickLogout, getProperty(CurrentUser.class).getStaticExpectation
+        createPath(clickLogout, getProperty(CurrentUser.class).getExpectation
                 (Timing.IMMEDIATELY, ""));
         popWindow(getWindow(AboutPage.class), new Click<>(new View(this, new ByText("关于"))), Timing
                 .IMMEDIATELY, false, true);

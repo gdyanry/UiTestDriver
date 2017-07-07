@@ -29,7 +29,7 @@ public class SelectDateOnMain extends TestManager.Window {
         });
         // 校验日期标签是否正确显示
         close(clickItem, Timing.IMMEDIATELY, getWindow(Main.class).<TextView>getView(Main.TV_DATE).getText()
-                .getDynamicExpectation(Timing.IMMEDIATELY, () -> {
+                .getExpectation(Timing.IMMEDIATELY, () -> {
                     String[] result = clickItem.getPreActionResult();
                     return String.format("%s-%s-%s", result[2], result[1], result[0]);
                 }));

@@ -3,7 +3,7 @@ package com.yanry.testdriver.ui.mobile.base.expectation;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
 
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -26,7 +26,7 @@ public abstract class NotPropertyExpectation extends AbstractExpectation {
     }
 
     @Override
-    protected boolean selfSwitchTest(BiPredicate<SearchableProperty, Object> predicate) {
+    protected boolean selfSwitchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
         return false;
     }
 

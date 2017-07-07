@@ -5,15 +5,21 @@ import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
+import java.util.function.Supplier;
+
 /**
  * Created by rongyu.yan on 4/21/2017.
  */
 public class TextView extends View {
     private TextValue text;
 
-    public TextView(ViewContainer parent, ViewSelector selector) {
-        super(parent, selector);
+    public TextView(ViewContainer parent, ViewSelector selector, Supplier<Boolean> defaultVisibility) {
+        super(parent, selector, defaultVisibility);
         text = new TextValue();
+    }
+
+    public TextView(ViewContainer parent, ViewSelector selector) {
+        this(parent, selector, null);
     }
 
     public TextValue getText() {

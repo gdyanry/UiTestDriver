@@ -1,15 +1,13 @@
 package com.yanry.testdriver.ui.mobile.extend.view;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -18,16 +16,20 @@ import java.util.function.Supplier;
 public class EditText extends View {
     private InputContent inputContent;
 
-    public EditText(ViewContainer parent, ViewSelector selector) {
-        super(parent, selector);
+    public EditText(ViewContainer parent, ViewSelector selector, Supplier<Boolean> defaultVisibility) {
+        super(parent, selector, defaultVisibility);
         inputContent = new InputContent();
+    }
+
+    public EditText(ViewContainer parent, ViewSelector selector) {
+        this(parent, selector, null);
     }
 
     public InputContent getInputContent() {
         return inputContent;
     }
 
-    public class InputContent extends UnsearchableProperty<String> {
+    public class InputContent extends UnsearchableSwitchableProperty<String> {
 
         @Presentable
         public EditText getEditText() {
@@ -35,8 +37,8 @@ public class EditText extends View {
         }
 
         @Override
-        protected boolean doSwitch(String to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {
-            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground, superPathContainer) &&
+        protected boolean doSwitch(String to) {
+            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground, null) &&
                     getGraph().performAction(new EnterText(EditText.this, to));
         }
 

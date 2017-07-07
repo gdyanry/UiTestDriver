@@ -5,16 +5,15 @@ import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
- * Property that does not switch through searching the graph.
+ * SwitchableProperty that does not switch through searching the graph.
  * <p>
  * Created by rongyu.yan on 5/12/2017.
  */
-public abstract class UnsearchableProperty<V> extends CacheProperty<V> {
+public abstract class UnsearchableSwitchableProperty<V> extends CacheSwitchableProperty<V> {
 
-    protected abstract boolean doSwitch(V to, List<Path> superPathContainer, Supplier<Boolean> finalCheck);
+    protected abstract boolean doSwitch(V to);
 
     protected abstract Graph getGraph();
 
@@ -22,7 +21,7 @@ public abstract class UnsearchableProperty<V> extends CacheProperty<V> {
         return new ActionExpectation() {
             @Override
             protected void run(List<Path> superPathContainer) {
-                getGraph().verifySuperPaths(UnsearchableProperty.this, getCurrentValue(), to, superPathContainer,
+                getGraph().verifySuperPaths(UnsearchableSwitchableProperty.this, getCurrentValue(), to, superPathContainer,
                         () -> {
                             setCacheValue(to);
                             return true;
@@ -32,9 +31,9 @@ public abstract class UnsearchableProperty<V> extends CacheProperty<V> {
     }
 
     @Override
-    protected boolean switchTo(V to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {
-        return getGraph().verifySuperPaths(this, getCurrentValue(), to, superPathContainer, () -> {
-            if (doSwitch(to, superPathContainer, finalCheck)) {
+    protected boolean doSwitch(V to, List<Path> parentPaths) {
+        return getGraph().verifySuperPaths(this, getCurrentValue(), to, parentPaths, () -> {
+            if (doSwitch(to)) {
                 setCacheValue(to);
                 return true;
             }

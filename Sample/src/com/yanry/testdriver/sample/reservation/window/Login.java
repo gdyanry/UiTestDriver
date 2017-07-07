@@ -40,25 +40,25 @@ public class Login extends TestManager.Window {
 
         createPath(getCreateEvent(), etUser.getInputContent().getActionExpectation(""));
         createPath(getCreateEvent(), etPwd.getInputContent().getActionExpectation(""));
-        etUser.setEmptyValidationCase(clickLogin, userErrorView.getVisibility().getStaticExpectation(Timing
-                .IMMEDIATELY, true).addFollowingExpectation(userErrorView.getText().getStaticExpectation
+        etUser.setEmptyValidationCase(clickLogin, userErrorView.getVisibility().getExpectation(Timing
+                .IMMEDIATELY, true).addFollowingExpectation(userErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "用户名不能为空")));
-        etPwd.setEmptyValidationCase(clickLogin, pwdErrorView.getVisibility().getStaticExpectation(Timing
-                .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getStaticExpectation
+        etPwd.setEmptyValidationCase(clickLogin, pwdErrorView.getVisibility().getExpectation(Timing
+                .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "密码不能为空")), etUser.getValidity());
         createPath(new PassiveSwitchEvent<>(etUser.getInputContent(), v -> true, v -> true), userErrorView
-                .getVisibility().getStaticExpectation(Timing.IMMEDIATELY, false)).addInitState(userErrorView
+                .getVisibility().getExpectation(Timing.IMMEDIATELY, false)).addInitState(userErrorView
                 .getVisibility(), true);
         createPath(new PassiveSwitchEvent<>(etPwd.getInputContent(), v -> true, v -> true), pwdErrorView
-                .getVisibility().getStaticExpectation(Timing.IMMEDIATELY, false)).addInitState(pwdErrorView
+                .getVisibility().getExpectation(Timing.IMMEDIATELY, false)).addInitState(pwdErrorView
                 .getVisibility(), true);
         etUser.addPositiveCases("xiaoxiaoming");
         etPwd.addPositiveCases("123456");
-        etUser.addNegativeCase("xiao ming", clickLogin, userErrorView.getVisibility().getStaticExpectation
-                (Timing.IMMEDIATELY, true).addFollowingExpectation(userErrorView.getText().getStaticExpectation
+        etUser.addNegativeCase("xiao ming", clickLogin, userErrorView.getVisibility().getExpectation
+                (Timing.IMMEDIATELY, true).addFollowingExpectation(userErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "用户名不能含有空格")));
-        etPwd.addNegativeCase("123", clickLogin, pwdErrorView.getVisibility().getStaticExpectation(Timing
-                .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getStaticExpectation
+        etPwd.addNegativeCase("123", clickLogin, pwdErrorView.getVisibility().getExpectation(Timing
+                .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "密码长度不能小于6个字符")), etUser.getValidity());
         // no connection
         createPath(clickLogin, new Toast(Timing.IMMEDIATELY, TOAST_DURATION, getGraph(),

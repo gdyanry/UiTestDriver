@@ -28,6 +28,7 @@ public class ReservationController extends CommunicatorController {
         manager.registerProperties(currentUser, loginState, connectivity);
         manager.registerWindows(new Main(manager), new MenuOnMain(manager), new Login(manager), new FilterOnMain
                 (manager), new SelectDateOnMain(manager), new SpecificationOnMain(manager), new Reserve(manager), new
-                PeriodicReserve(manager), new SelectRoom(manager), new MyReservation(manager));
+                PeriodicReserve(manager), new SelectRoom(manager), new MyReservation(manager), new SelectStartTime
+                (manager), new SelectEndTime(manager));
     }
 }

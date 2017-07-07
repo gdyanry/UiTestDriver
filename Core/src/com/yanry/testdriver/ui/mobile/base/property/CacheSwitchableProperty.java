@@ -5,12 +5,12 @@ package com.yanry.testdriver.ui.mobile.base.property;
  * <p>
  * Created by rongyu.yan on 5/9/2017.
  */
-public abstract class CacheProperty<V> extends Property<V> {
+public abstract class CacheSwitchableProperty<V> extends SwitchableProperty<V> {
     private V cacheValue;
 
     protected abstract V checkValue();
 
-    void setCacheValue(V cacheValue) {
+    public void setCacheValue(V cacheValue) {
         this.cacheValue = cacheValue;
     }
 

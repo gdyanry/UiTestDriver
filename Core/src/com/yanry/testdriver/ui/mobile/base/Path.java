@@ -6,7 +6,7 @@ package com.yanry.testdriver.ui.mobile.base;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.base.property.Property;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 import lib.common.model.Singletons;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.Random;
  *         Jan 5, 2017
  */
 @Presentable
-public class Path extends HashMap<Property, Object> {
+public class Path extends HashMap<SwitchableProperty, Object> {
     private Event event;
     private Expectation expectation;
     private int hashCode;
@@ -29,7 +29,7 @@ public class Path extends HashMap<Property, Object> {
         hashCode = Singletons.get(Random.class).nextInt();
     }
 
-    public <V> Path addInitState(Property<V> property, V value) {
+    public <V> Path addInitState(SwitchableProperty<V> property, V value) {
         put(property, value);
         return this;
     }
@@ -37,7 +37,7 @@ public class Path extends HashMap<Property, Object> {
     public void preProcess() {
         if (event instanceof ValueSwitchEvent) {
             ValueSwitchEvent transitionEvent = (ValueSwitchEvent) event;
-            Property property = transitionEvent.getProperty();
+            SwitchableProperty property = transitionEvent.getProperty();
             remove(property);
         }
     }

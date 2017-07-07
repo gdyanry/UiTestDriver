@@ -2,7 +2,7 @@ package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +18,13 @@ public abstract class AbstractExpectation implements Expectation {
 
     protected abstract boolean verify(List<Path> superPathContainer);
 
-    protected abstract boolean selfSwitchTest(BiPredicate<SearchableProperty, Object> predicate);
+    /**
+     *
+     * @param endStatePredicate
+     * @return whether this expectation itself satisfies the given end state predicate, excluding its following
+     * expectations.
+     */
+    protected abstract boolean selfSwitchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate);
 
     public AbstractExpectation(Timing timing) {
         this.timing = timing;
@@ -45,10 +51,10 @@ public abstract class AbstractExpectation implements Expectation {
     }
 
     @Override
-    public boolean switchTest(BiPredicate<SearchableProperty, Object> predicate) {
-        if (selfSwitchTest(predicate)) {
+    public boolean switchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+        if (selfSwitchTest(endStatePredicate)) {
             return true;
         }
-        return followingExpectations.stream().anyMatch(e -> e.switchTest(predicate));
+        return followingExpectations.stream().anyMatch(e -> e.switchTest(endStatePredicate));
     }
 }

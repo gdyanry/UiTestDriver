@@ -5,7 +5,7 @@ import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
@@ -27,7 +27,7 @@ public class Tab extends View implements ViewContainer {
     }
 
     public Path show(Event event) {
-        Path path = getWindow().createPath(event, currentTab.getStaticExpectation(Timing
+        Path path = getWindow().createPath(event, currentTab.getExpectation(Timing
                 .IMMEDIATELY, this));
         present(path);
         return path;
@@ -50,7 +50,7 @@ public class Tab extends View implements ViewContainer {
         getParent().present(path);
     }
 
-    public static class CurrentTab extends SearchableProperty<Tab> {
+    public static class CurrentTab extends SearchableSwitchableProperty<Tab> {
         private Graph graph;
         private List<Tab> tabs;
 

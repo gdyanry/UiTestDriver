@@ -4,7 +4,7 @@
 package com.yanry.testdriver.ui.mobile.base.event;
 
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.Property;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 
 /**
  * @author yanry
@@ -13,18 +13,18 @@ import com.yanry.testdriver.ui.mobile.base.property.Property;
  */
 @Presentable
 public class ValueSwitchEvent<V> implements Event {
-    private Property<V> property;
+    private SwitchableProperty<V> property;
     private V from;
     private V to;
 
-    public ValueSwitchEvent(Property<V> property, V from, V to) {
+    public ValueSwitchEvent(SwitchableProperty<V> property, V from, V to) {
         this.property = property;
         this.from = from;
         this.to = to;
     }
 
     @Presentable
-    public Property<V> getProperty() {
+    public SwitchableProperty<V> getProperty() {
         return property;
     }
 

@@ -14,38 +14,38 @@ import java.util.function.Supplier;
  * <p>
  * Created by rongyu.yan on 5/9/2017.
  */
-public abstract class SearchableProperty<V> extends CacheProperty<V> {
+public abstract class SearchableSwitchableProperty<V> extends CacheSwitchableProperty<V> {
     protected abstract Graph getGraph();
 
     @Override
-    protected boolean switchTo(V to, List<Path> superPathContainer, Supplier<Boolean> finalCheck) {
-        return getGraph().switchToState(this, to, superPathContainer, finalCheck);
+    protected boolean doSwitch(V to, List<Path> parentPaths) {
+        return getGraph().switchToState(this, to, parentPaths);
     }
 
     protected abstract boolean isVisibleToUser();
 
-    public SwitchablePropertyExpectation getStaticExpectation(Timing timing, V value) {
+    public SwitchablePropertyExpectation getExpectation(Timing timing, V value) {
         return new SwitchablePropertyExpectation(timing, value);
     }
 
-    public SwitchablePropertyExpectation getDynamicExpectation(Timing timing, Supplier<V> valueSupplier) {
+    public SwitchablePropertyExpectation getExpectation(Timing timing, Supplier<V> valueSupplier) {
         return new SwitchablePropertyExpectation(timing, valueSupplier);
     }
 
-    public class SwitchablePropertyExpectation extends PropertyExpectation<V, SearchableProperty<V>> {
+    public class SwitchablePropertyExpectation extends PropertyExpectation<V, SearchableSwitchableProperty<V>> {
 
         private SwitchablePropertyExpectation(Timing timing, V value) {
-            super(timing, SearchableProperty.this, value);
+            super(timing, SearchableSwitchableProperty.this, value);
         }
 
         private SwitchablePropertyExpectation(Timing timing, Supplier<V> valueSupplier) {
-            super(timing, SearchableProperty.this, valueSupplier);
+            super(timing, SearchableSwitchableProperty.this, valueSupplier);
         }
 
         @Override
         protected boolean doVerify(List<Path> superPathContainer) {
             // this path might become transition event of other paths
-            return getGraph().verifySuperPaths(SearchableProperty.this, getCurrentValue(),
+            return getGraph().verifySuperPaths(SearchableSwitchableProperty.this, getCurrentValue(),
                     getValue(), superPathContainer, () -> {
                         if (isVisibleToUser() && !getGraph().verifyExpectation(this)) {
                             setCacheValue(null);
@@ -63,8 +63,8 @@ public abstract class SearchableProperty<V> extends CacheProperty<V> {
         }
 
         @Override
-        protected boolean selfSwitchTest(BiPredicate<SearchableProperty, Object> predicate) {
-            return predicate.test(SearchableProperty.this, getValue());
+        protected boolean selfSwitchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+            return endStatePredicate.test(SearchableSwitchableProperty.this, getValue());
         }
     }
 }
