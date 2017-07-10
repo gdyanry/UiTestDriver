@@ -193,12 +193,12 @@ public class Graph implements Communicator {
         siblingPathContainer.stream().distinct().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             if (p == path) {
                 if (debug) {
-                    ConsoleUtil.debug("%n>>>>verify(%s): %s%n", parentPaths == null, Util.getPresentation(p));
+                    ConsoleUtil.debug("%n>>>>selfVerify(%s): %s%n", parentPaths == null, Util.getPresentation(p));
                 }
                 result[0] = verify(p, parentPaths);
             } else {
                 if (debug) {
-                    ConsoleUtil.debug("%n>>>>verify sibling: %s%n", Util.getPresentation(p));
+                    ConsoleUtil.debug("%n>>>>selfVerify sibling: %s%n", Util.getPresentation(p));
                 }
                 verify(p, null);
             }
@@ -208,7 +208,7 @@ public class Graph implements Communicator {
 
     private boolean verify(Path path, List<Path> parentPaths) {
         Expectation expectation = path.getExpectation();
-        boolean isPass = expectation.verifyBunch(parentPaths);
+        boolean isPass = expectation.verify(parentPaths);
         if (expectation.ifRecord()) {
             testRecords.add(new Assertion(expectation, isPass));
         }
@@ -250,7 +250,7 @@ public class Graph implements Communicator {
             if (parentPaths == null) {
                 for (Path path : paths) {
                     if (debug) {
-                        ConsoleUtil.debug("%n>>>>verify super: %s%n", Util.getPresentation(path));
+                        ConsoleUtil.debug("%n>>>>selfVerify super: %s%n", Util.getPresentation(path));
                     }
                     verify(path, null);
                 }
@@ -286,7 +286,7 @@ public class Graph implements Communicator {
         return allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p) && !rollingPaths.contains(p) && !(p.getEvent() instanceof
                     PassiveSwitchEvent)) {
-                return (pathPredicate == null || pathPredicate.test(p)) && p.getExpectation().switchTest(endStatePredicate);
+                return (pathPredicate == null || pathPredicate.test(p)) && p.getExpectation().isSatisfied(endStatePredicate);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {

@@ -43,7 +43,7 @@ public abstract class SearchableSwitchableProperty<V> extends CacheSwitchablePro
         }
 
         @Override
-        protected boolean doVerify(List<Path> superPathContainer) {
+        protected boolean doSelfVerify(List<Path> superPathContainer) {
             // this path might become transition event of other paths
             return getGraph().verifySuperPaths(SearchableSwitchableProperty.this, getCurrentValue(),
                     getValue(), superPathContainer, () -> {
@@ -63,7 +63,7 @@ public abstract class SearchableSwitchableProperty<V> extends CacheSwitchablePro
         }
 
         @Override
-        protected boolean selfSwitchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+        protected boolean isSelfSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
             return endStatePredicate.test(SearchableSwitchableProperty.this, getValue());
         }
     }

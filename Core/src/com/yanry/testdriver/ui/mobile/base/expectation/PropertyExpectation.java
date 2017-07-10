@@ -7,7 +7,7 @@ import com.yanry.testdriver.ui.mobile.base.property.Property;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
+/** A key-value pair (aka state) expectation
  * Created by rongyu.yan on 5/10/2017.
  */
 public abstract class PropertyExpectation<V, P extends Property<V>> extends AbstractExpectation {
@@ -27,7 +27,7 @@ public abstract class PropertyExpectation<V, P extends Property<V>> extends Abst
         this.valueSupplier = valueSupplier;
     }
 
-    protected abstract boolean doVerify(List<Path> superPathContainer);
+    protected abstract boolean doSelfVerify(List<Path> superPathContainer);
 
     @Presentable
     public P getProperty() {
@@ -40,13 +40,13 @@ public abstract class PropertyExpectation<V, P extends Property<V>> extends Abst
     }
 
     @Override
-    protected boolean verify(List<Path> superPathContainer) {
+    protected boolean selfVerify(List<Path> superPathContainer) {
         if (valueSupplier != null) {
             value = valueSupplier.get();
-            boolean pass = doVerify(superPathContainer);
+            boolean pass = doSelfVerify(superPathContainer);
             value = null;
             return pass;
         }
-        return doVerify(superPathContainer);
+        return doSelfVerify(superPathContainer);
     }
 }

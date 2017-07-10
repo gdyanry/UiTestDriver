@@ -6,7 +6,7 @@ import com.yanry.testdriver.ui.mobile.base.Presentable;
 /**
  * Created by rongyu.yan on 4/24/2017.
  */
-public class TransientExpectation extends NotPropertyExpectation {
+public class TransientExpectation extends NonPropertyExpectation {
     private int duration;
     private Graph graph;
 

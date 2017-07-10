@@ -9,24 +9,25 @@ import java.util.List;
 import java.util.function.BiPredicate;
 
 /**
+ *  This class represents a transient expectation such as a toast or a loading dialog.
  * Created by rongyu.yan on 3/9/2017.
  */
 @Presentable
-public abstract class NotPropertyExpectation extends AbstractExpectation {
+public abstract class NonPropertyExpectation extends AbstractExpectation {
 
-    public NotPropertyExpectation(Timing timing) {
+    public NonPropertyExpectation(Timing timing) {
         super(timing);
     }
 
     protected abstract Graph getGraph();
 
     @Override
-    protected boolean verify(List<Path> superPathContainer) {
+    protected boolean selfVerify(List<Path> superPathContainer) {
         return getGraph().verifyExpectation(this);
     }
 
     @Override
-    protected boolean selfSwitchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+    protected boolean isSelfSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
         return false;
     }
 

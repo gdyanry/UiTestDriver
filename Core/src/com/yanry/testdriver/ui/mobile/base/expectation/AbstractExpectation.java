@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.BiPredicate;
 
 /**
+ * Expectation that has a timing and following expectations. Following expectations are verified only when this expectation passes its verification at runtime.
  * Created by rongyu.yan on 4/24/2017.
  */
 @Presentable
@@ -16,20 +17,20 @@ public abstract class AbstractExpectation implements Expectation {
     private Timing timing;
     private List<Expectation> followingExpectations;
 
-    protected abstract boolean verify(List<Path> superPathContainer);
-
-    /**
-     *
-     * @param endStatePredicate
-     * @return whether this expectation itself satisfies the given end state predicate, excluding its following
-     * expectations.
-     */
-    protected abstract boolean selfSwitchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate);
-
     public AbstractExpectation(Timing timing) {
         this.timing = timing;
         followingExpectations = new LinkedList<>();
     }
+
+    protected abstract boolean selfVerify(List<Path> superPathContainer);
+
+    /**
+     *
+     * @param endStatePredicate
+     * @return whether this expectation itself isSatisfied the given end state predicate, excluding its following
+     * expectations.
+     */
+    protected abstract boolean isSelfSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate);
 
     public AbstractExpectation addFollowingExpectation(Expectation expectation) {
         followingExpectations.add(expectation);
@@ -42,19 +43,19 @@ public abstract class AbstractExpectation implements Expectation {
     }
 
     @Override
-    public boolean verifyBunch(List<Path> superPathContainer) {
-        if (verify(superPathContainer)) {
-            followingExpectations.forEach(e -> e.verifyBunch(superPathContainer));
+    public boolean verify(List<Path> superPathContainer) {
+        if (selfVerify(superPathContainer)) {
+            followingExpectations.forEach(e -> e.verify(superPathContainer));
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean switchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
-        if (selfSwitchTest(endStatePredicate)) {
+    public boolean isSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+        if (isSelfSatisfied(endStatePredicate)) {
             return true;
         }
-        return followingExpectations.stream().anyMatch(e -> e.switchTest(endStatePredicate));
+        return followingExpectations.stream().anyMatch(e -> e.isSatisfied(endStatePredicate));
     }
 }

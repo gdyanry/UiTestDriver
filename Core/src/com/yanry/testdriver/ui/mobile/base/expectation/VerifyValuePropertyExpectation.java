@@ -26,12 +26,12 @@ public class VerifyValuePropertyExpectation<V> extends PropertyExpectation<V, Pr
     }
 
     @Override
-    protected boolean selfSwitchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+    protected boolean isSelfSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
         return false;
     }
 
     @Override
-    protected boolean doVerify(List<Path> superPathContainer) {
+    protected boolean doSelfVerify(List<Path> superPathContainer) {
         return getValue().equals(getProperty().getCurrentValue());
     }
 }

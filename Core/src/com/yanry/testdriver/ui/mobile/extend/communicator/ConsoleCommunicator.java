@@ -41,7 +41,7 @@ public class ConsoleCommunicator extends SerializedCommunicator {
 
     @Override
     protected String verifyExpectation(int repeat, Expectation expectation) {
-        return getInput(repeat, "verify", expectation, () -> {
+        return getInput(repeat, "selfVerify", expectation, () -> {
             System.out.println("0 - false");
             System.out.println("1 - true");
             System.out.println("-1 - unknown");

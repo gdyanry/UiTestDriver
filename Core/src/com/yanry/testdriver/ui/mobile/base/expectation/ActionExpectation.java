@@ -15,13 +15,13 @@ public abstract class ActionExpectation implements Expectation {
     protected abstract void run(List<Path> superPathContainer);
 
     @Override
-    public boolean verifyBunch(List<Path> superPathContainer) {
+    public boolean verify(List<Path> superPathContainer) {
         run(superPathContainer);
         return true;
     }
 
     @Override
-    public boolean switchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+    public boolean isSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
         return false;
     }
 

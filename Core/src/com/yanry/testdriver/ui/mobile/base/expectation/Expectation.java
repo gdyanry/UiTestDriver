@@ -10,14 +10,14 @@ import java.util.function.BiPredicate;
  * Created by rongyu.yan on 2/9/2017.
  */
 public interface Expectation {
-    boolean verifyBunch(List<Path> superPathContainer);
+    boolean verify(List<Path> superPathContainer);
 
     /**
      *
      * @param endStatePredicate
-     * @return whether this expectation satisfies the given end state predicate.
+     * @return whether this expectation isSatisfied the given end state predicate.
      */
-    boolean switchTest(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate);
+    boolean isSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate);
 
     boolean ifRecord();
 }
