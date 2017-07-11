@@ -10,9 +10,9 @@ import com.yanry.testdriver.ui.mobile.base.expectation.AbstractExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
 import com.yanry.testdriver.ui.mobile.extend.action.ClickOutside;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
@@ -212,7 +212,7 @@ public class TestManager extends Graph {
             path.addInitState(visibility, Foreground);
         }
 
-        public class VisibilityState extends UnsearchableSwitchableProperty<Visibility> {
+        public class VisibilityState extends SwitchBySelfProperty<Visibility> {
 
             @Override
             protected boolean doSwitch(Visibility to) {
@@ -269,7 +269,7 @@ public class TestManager extends Graph {
             }
         }
 
-        public class ForegroundVerification extends SearchableSwitchableProperty<Boolean> {
+        public class ForegroundVerification extends SwitchBySearchProperty<Boolean> {
             @Presentable
             public Window getWindow() {
                 return Window.this;

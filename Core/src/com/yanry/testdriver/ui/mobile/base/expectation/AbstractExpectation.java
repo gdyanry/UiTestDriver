@@ -2,7 +2,7 @@ package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +30,7 @@ public abstract class AbstractExpectation implements Expectation {
      * @return whether this expectation itself isSatisfied the given end state predicate, excluding its following
      * expectations.
      */
-    protected abstract boolean isSelfSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate);
+    protected abstract boolean isSelfSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate);
 
     public AbstractExpectation addFollowingExpectation(Expectation expectation) {
         followingExpectations.add(expectation);
@@ -52,7 +52,7 @@ public abstract class AbstractExpectation implements Expectation {
     }
 
     @Override
-    public boolean isSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+    public boolean isSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
         if (isSelfSatisfied(endStatePredicate)) {
             return true;
         }

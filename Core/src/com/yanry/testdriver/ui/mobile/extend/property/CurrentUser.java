@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.extend.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Created by rongyu.yan on 4/18/2017.
  */
-public class CurrentUser extends SearchableSwitchableProperty<String> {
+public class CurrentUser extends SwitchBySearchProperty<String> {
     private Graph graph;
     private HashMap<String, String> userPasswordMap;
 

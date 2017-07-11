@@ -2,7 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
@@ -30,7 +30,7 @@ public class CheckBox extends TextView {
         return checkState;
     }
 
-    public class CheckState extends UnsearchableSwitchableProperty<Boolean> {
+    public class CheckState extends SwitchBySelfProperty<Boolean> {
 
         @Presentable
         public CheckBox getCheckBox() {

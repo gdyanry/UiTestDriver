@@ -8,7 +8,7 @@ import com.yanry.testdriver.ui.mobile.base.event.*;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
@@ -262,7 +262,7 @@ public class Graph implements Communicator {
         return false;
     }
 
-    private <V> boolean switchTo(SearchableSwitchableProperty<V> property, Predicate<V> to, List<Path>
+    private <V> boolean switchTo(SwitchBySearchProperty<V> property, Predicate<V> to, List<Path>
             parentPaths) {
         if (to.test(property.getCurrentValue())) {
             return true;
@@ -270,7 +270,7 @@ public class Graph implements Communicator {
         return findPathToRoll(parentPaths, null, (p, v) -> p == property && to.test((V) v));
     }
 
-    public <V> boolean switchToState(SearchableSwitchableProperty<V> property, V to, List<Path> parentPaths) {
+    public <V> boolean switchToState(SwitchBySearchProperty<V> property, V to, List<Path> parentPaths) {
         return findPathToRoll(parentPaths, null, (prop, toVal) -> prop == property && to.equals(toVal));
     }
 
@@ -282,7 +282,7 @@ public class Graph implements Communicator {
      * @return
      */
     public boolean findPathToRoll(List<Path> parentPaths, Predicate<Path> pathPredicate,
-                                  BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+                                  BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
         return allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p) && !rollingPaths.contains(p) && !(p.getEvent() instanceof
                     PassiveSwitchEvent)) {

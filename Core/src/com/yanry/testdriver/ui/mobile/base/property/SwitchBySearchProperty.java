@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * <p>
  * Created by rongyu.yan on 5/9/2017.
  */
-public abstract class SearchableSwitchableProperty<V> extends CacheSwitchableProperty<V> {
+public abstract class SwitchBySearchProperty<V> extends CacheSwitchableProperty<V> {
     protected abstract Graph getGraph();
 
     @Override
@@ -32,20 +32,20 @@ public abstract class SearchableSwitchableProperty<V> extends CacheSwitchablePro
         return new SwitchablePropertyExpectation(timing, valueSupplier);
     }
 
-    public class SwitchablePropertyExpectation extends PropertyExpectation<V, SearchableSwitchableProperty<V>> {
+    public class SwitchablePropertyExpectation extends PropertyExpectation<V, SwitchBySearchProperty<V>> {
 
         private SwitchablePropertyExpectation(Timing timing, V value) {
-            super(timing, SearchableSwitchableProperty.this, value);
+            super(timing, SwitchBySearchProperty.this, value);
         }
 
         private SwitchablePropertyExpectation(Timing timing, Supplier<V> valueSupplier) {
-            super(timing, SearchableSwitchableProperty.this, valueSupplier);
+            super(timing, SwitchBySearchProperty.this, valueSupplier);
         }
 
         @Override
         protected boolean doSelfVerify(List<Path> superPathContainer) {
             // this path might become transition event of other paths
-            return getGraph().verifySuperPaths(SearchableSwitchableProperty.this, getCurrentValue(),
+            return getGraph().verifySuperPaths(SwitchBySearchProperty.this, getCurrentValue(),
                     getValue(), superPathContainer, () -> {
                         if (isVisibleToUser() && !getGraph().verifyExpectation(this)) {
                             setCacheValue(null);
@@ -63,8 +63,8 @@ public abstract class SearchableSwitchableProperty<V> extends CacheSwitchablePro
         }
 
         @Override
-        protected boolean isSelfSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
-            return endStatePredicate.test(SearchableSwitchableProperty.this, getValue());
+        protected boolean isSelfSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
+            return endStatePredicate.test(SwitchBySearchProperty.this, getValue());
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.event;
 
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 
 import java.util.function.Predicate;
 
@@ -10,18 +10,18 @@ import java.util.function.Predicate;
  */
 @Presentable
 public class PredicateSwitchEvent<V> implements Event {
-    private SearchableSwitchableProperty<V> property;
+    private SwitchBySearchProperty<V> property;
     private Predicate<V> from;
     private Predicate<V> to;
 
-    public PredicateSwitchEvent(SearchableSwitchableProperty<V> property, Predicate<V> from, Predicate<V> to) {
+    public PredicateSwitchEvent(SwitchBySearchProperty<V> property, Predicate<V> from, Predicate<V> to) {
         this.property = property;
         this.from = from;
         this.to = to;
     }
 
     @Presentable
-    public SearchableSwitchableProperty<V> getProperty() {
+    public SwitchBySearchProperty<V> getProperty() {
         return property;
     }
 

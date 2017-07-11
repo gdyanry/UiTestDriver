@@ -1,14 +1,14 @@
 package com.yanry.testdriver.sample.debug;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.action.SwitchState;
 
 /**
  * Created by rongyu.yan on 2/27/2017.
  */
-public class NetworkState extends UnsearchableSwitchableProperty<NetworkState.Network> {
+public class NetworkState extends SwitchBySelfProperty<NetworkState.Network> {
     private Graph graph;
 
     public NetworkState(Graph graph) {

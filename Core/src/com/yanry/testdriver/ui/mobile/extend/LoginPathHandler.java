@@ -2,7 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
 import com.yanry.testdriver.ui.mobile.extend.view.ValidateEditText;
 
@@ -27,7 +27,7 @@ public class LoginPathHandler {
         });
     }
 
-    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<SearchableSwitchableProperty<String>
+    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<SwitchBySearchProperty<String>
             .SwitchablePropertyExpectation, Path> getSuccessLoginPath) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> getSuccessLoginPath.apply(currentUser
                 .getExpectation(timing, e.getKey())).addInitState(etUser.getInputContent(), e.getKey())

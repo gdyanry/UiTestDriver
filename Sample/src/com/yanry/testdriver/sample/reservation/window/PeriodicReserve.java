@@ -3,7 +3,7 @@ package com.yanry.testdriver.sample.reservation.window;
 import com.yanry.testdriver.sample.reservation.server.Config;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
@@ -97,7 +97,7 @@ public class PeriodicReserve extends TestManager.Window {
                 (startTimeValidity, true).addInitState(endTimeValidity, true).addInitState(dayOfWeekValidity, false);
     }
 
-    public class Validity extends SearchableSwitchableProperty<Boolean> {
+    public class Validity extends SwitchBySearchProperty<Boolean> {
 
         @Override
         protected Boolean checkValue() {
@@ -115,7 +115,7 @@ public class PeriodicReserve extends TestManager.Window {
         }
     }
 
-    public class DayOfWeekValue extends SearchableSwitchableProperty<boolean[]> {
+    public class DayOfWeekValue extends SwitchBySearchProperty<boolean[]> {
 
         @Override
         protected boolean[] checkValue() {
@@ -133,7 +133,7 @@ public class PeriodicReserve extends TestManager.Window {
         }
     }
 
-    public class DayOfWeekValidity extends SearchableSwitchableProperty<Boolean> {
+    public class DayOfWeekValidity extends SwitchBySearchProperty<Boolean> {
         private DayOfWeekValue value;
 
         public DayOfWeekValidity(DayOfWeekValue value) {

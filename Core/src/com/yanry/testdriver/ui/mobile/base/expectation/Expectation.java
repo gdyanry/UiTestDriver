@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -17,7 +17,7 @@ public interface Expectation {
      * @param endStatePredicate
      * @return whether this expectation isSatisfied the given end state predicate.
      */
-    boolean isSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate);
+    boolean isSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate);
 
     boolean ifRecord();
 }

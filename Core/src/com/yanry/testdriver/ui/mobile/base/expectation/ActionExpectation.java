@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.property.SearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -21,7 +21,7 @@ public abstract class ActionExpectation implements Expectation {
     }
 
     @Override
-    public boolean isSatisfied(BiPredicate<SearchableSwitchableProperty, Object> endStatePredicate) {
+    public boolean isSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
         return false;
     }
 

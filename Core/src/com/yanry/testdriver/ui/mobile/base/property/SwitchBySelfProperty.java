@@ -11,7 +11,7 @@ import java.util.List;
  * <p>
  * Created by rongyu.yan on 5/12/2017.
  */
-public abstract class UnsearchableSwitchableProperty<V> extends CacheSwitchableProperty<V> {
+public abstract class SwitchBySelfProperty<V> extends CacheSwitchableProperty<V> {
 
     protected abstract boolean doSwitch(V to);
 
@@ -21,7 +21,7 @@ public abstract class UnsearchableSwitchableProperty<V> extends CacheSwitchableP
         return new ActionExpectation() {
             @Override
             protected void run(List<Path> superPathContainer) {
-                getGraph().verifySuperPaths(UnsearchableSwitchableProperty.this, getCurrentValue(), to, superPathContainer,
+                getGraph().verifySuperPaths(SwitchBySelfProperty.this, getCurrentValue(), to, superPathContainer,
                         () -> {
                             setCacheValue(to);
                             return true;

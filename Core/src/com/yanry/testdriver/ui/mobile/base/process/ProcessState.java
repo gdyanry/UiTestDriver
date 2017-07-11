@@ -2,12 +2,12 @@ package com.yanry.testdriver.ui.mobile.base.process;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
-import com.yanry.testdriver.ui.mobile.base.property.UnsearchableSwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
 
 /**
  * Created by rongyu.yan on 3/9/2017.
  */
-public class ProcessState extends UnsearchableSwitchableProperty<Boolean> {
+public class ProcessState extends SwitchBySelfProperty<Boolean> {
     private Graph graph;
     private ValueSwitchEvent<Boolean> startProcessEvent;
     private ValueSwitchEvent<Boolean> stopProcessEvent;

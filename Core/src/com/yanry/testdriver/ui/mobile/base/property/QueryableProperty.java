@@ -8,6 +8,7 @@ import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import java.util.function.Supplier;
 
 /**
+ * Property with no cache and is not switchable.
  * Created by rongyu.yan on 4/26/2017.
  */
 @Presentable
