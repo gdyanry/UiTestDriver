@@ -7,6 +7,7 @@ import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.event.*;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
+import com.yanry.testdriver.ui.mobile.base.property.QueryProperty;
 import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
@@ -337,7 +338,7 @@ public class Graph implements Communicator {
     }
 
     @Override
-    public String queryValue(QueryableProperty property) {
+    public String queryValue(QueryProperty property) {
         for (Communicator communicator : communicators) {
             String value = communicator.queryValue(property);
             if (value != null) {

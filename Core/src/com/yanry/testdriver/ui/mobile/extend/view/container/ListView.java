@@ -1,10 +1,12 @@
 package com.yanry.testdriver.ui.mobile.extend.view.container;
 
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
+import com.yanry.testdriver.ui.mobile.base.property.QueryProperty;
 import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ByIndex;
@@ -71,10 +73,16 @@ public class ListView extends View implements ViewContainer {
         getParent().present(path);
     }
 
-    public class ListViewSize extends QueryableProperty {
+    public class ListViewSize extends QueryProperty {
 
-        public ListViewSize() {
-            super(getWindow().getGraph(), ListView.this);
+        @Override
+        protected Graph getGraph() {
+            return getWindow().getGraph();
+        }
+
+        @Override
+        public Object getIdentifier() {
+            return ListView.this;
         }
     }
 }

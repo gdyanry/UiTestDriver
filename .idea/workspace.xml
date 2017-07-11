@@ -2,28 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1b7566a6-9429-4064-8b31-aa854c6a404c" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryProperty.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/Graph.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/Graph.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/event/PredicateSwitchEvent.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/event/PredicateSwitchEvent.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/AbstractExpectation.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/AbstractExpectation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/ActionExpectation.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/ActionExpectation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/Expectation.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/Expectation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/NonPropertyExpectation.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/NonPropertyExpectation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/VerifyValuePropertyExpectation.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/VerifyValuePropertyExpectation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/process/ProcessState.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/process/ProcessState.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryableProperty.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryableProperty.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/LoginPathHandler.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/LoginPathHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/TestManager.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/TestManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/property/CurrentUser.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/property/CurrentUser.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/CheckBox.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/CheckBox.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/EditText.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/EditText.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/View.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/View.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/Tab.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/Tab.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/debug/NetworkState.java" afterPath="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/debug/NetworkState.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/property/NetworkConnectivity.java" afterPath="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/property/NetworkConnectivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/PeriodicReserve.java" afterPath="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/PeriodicReserve.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SearchableSwitchableProperty.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchBySearchProperty.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/UnsearchableSwitchableProperty.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchBySelfProperty.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/runtime/Communicator.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/runtime/Communicator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/ListView.java" afterPath="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/ListView.java" />
     </list>
     <ignored path="$PROJECT_DIR$/SpringServer/.gradle/" />
     <ignored path="$PROJECT_DIR$/SpringServer/build/" />
@@ -145,22 +128,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
-      <file leaf-file-name="PropertyExpectation.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/PropertyExpectation.java">
+      <file leaf-file-name="CacheSwitchableProperty.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/CacheSwitchableProperty.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="589">
-              <caret line="45" column="22" lean-forward="false" selection-start-line="45" selection-start-column="22" selection-end-line="45" selection-end-column="22" />
+            <state relative-caret-position="323">
+              <caret line="19" column="38" lean-forward="true" selection-start-line="19" selection-start-column="38" selection-end-line="19" selection-end-column="38" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SwitchableProperty.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchableProperty.java">
+      <file leaf-file-name="QueryProperty.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryProperty.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="209">
-              <caret line="16" column="14" lean-forward="true" selection-start-line="16" selection-start-column="14" selection-end-line="16" selection-end-column="14" />
-              <folding />
+            <state relative-caret-position="247">
+              <caret line="13" column="40" lean-forward="false" selection-start-line="13" selection-start-column="40" selection-end-line="13" selection-end-column="40" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#516#517#0" expanded="true" />
+                <element signature="e#566#567#0" expanded="true" />
+                <element signature="e#649#650#0" expanded="true" />
+                <element signature="e#677#678#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -168,28 +157,18 @@
       <file leaf-file-name="Graph.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/Graph.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="179" column="65" lean-forward="true" selection-start-line="179" selection-start-column="65" selection-end-line="179" selection-end-column="65" />
+            <state relative-caret-position="551">
+              <caret line="340" column="25" lean-forward="false" selection-start-line="340" selection-start-column="25" selection-end-line="340" selection-end-column="25" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Property.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/Property.java">
+      <file leaf-file-name="Communicator.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/runtime/Communicator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
-              <caret line="5" column="17" lean-forward="false" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CacheSwitchableProperty.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/CacheSwitchableProperty.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="133">
-              <caret line="7" column="22" lean-forward="false" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
+            <state relative-caret-position="646">
+              <caret line="37" column="35" lean-forward="false" selection-start-line="37" selection-start-column="22" selection-end-line="37" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -198,54 +177,63 @@
       <file leaf-file-name="QueryableProperty.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryableProperty.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+            <state relative-caret-position="399">
+              <caret line="28" column="31" lean-forward="false" selection-start-line="28" selection-start-column="31" selection-end-line="28" selection-end-column="31" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NonPropertyExpectation.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/NonPropertyExpectation.java">
+      <file leaf-file-name="Expectation.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/Expectation.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="456">
-              <caret line="36" column="5" lean-forward="false" selection-start-line="36" selection-start-column="5" selection-end-line="36" selection-end-column="5" />
+            <state relative-caret-position="323">
+              <caret line="21" column="23" lean-forward="true" selection-start-line="21" selection-start-column="23" selection-end-line="21" selection-end-column="23" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ActionExpectation.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/ActionExpectation.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="152">
+              <caret line="12" column="22" lean-forward="false" selection-start-line="12" selection-start-column="22" selection-end-line="12" selection-end-column="22" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AbstractExpectation.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/AbstractExpectation.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="594">
+              <caret line="46" column="22" lean-forward="false" selection-start-line="46" selection-start-column="12" selection-end-line="46" selection-end-column="22" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ListView.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/ListView.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="380">
+              <caret line="44" column="48" lean-forward="false" selection-start-line="44" selection-start-column="34" selection-end-line="44" selection-end-column="48" />
               <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#624#625#0" expanded="false" />
-                <element signature="e#653#654#0" expanded="false" />
-                <element signature="e#776#777#0" expanded="false" />
-                <element signature="e#833#834#0" expanded="false" />
+                <element signature="e#2748#2749#0" expanded="true" />
+                <element signature="e#2801#2802#0" expanded="true" />
+                <element signature="e#2860#2861#0" expanded="true" />
+                <element signature="e#2904#2905#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SwitchBySearchProperty.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchBySearchProperty.java">
+      <file leaf-file-name="Login.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/Login.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="16" column="22" lean-forward="false" selection-start-line="16" selection-start-column="22" selection-end-line="16" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SwitchBySelfProperty.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchBySelfProperty.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
-              <caret line="13" column="22" lean-forward="false" selection-start-line="13" selection-start-column="22" selection-end-line="13" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="LoginState.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/property/LoginState.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="418">
-              <caret line="28" column="27" lean-forward="false" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="27" />
+            <state relative-caret-position="399">
+              <caret line="43" column="84" lean-forward="false" selection-start-line="43" selection-start-column="84" selection-end-line="43" selection-end-column="84" />
               <folding />
             </state>
           </provider>
@@ -268,7 +256,9 @@
     </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="ROOT_SYNC" value="SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_COMMON_BRANCH" value="master" />
   </component>
   <component name="GradleLocalSettings">
     <option name="myGradleHomes">
@@ -965,9 +955,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/event/PassivePredicateSwitchEvent.java" />
-        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/event/PredicateSwitchEvent.java" />
-        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/runtime/StateToCheck.java" />
         <option value="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/server/Config.java" />
         <option value="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/FilterOnMain.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/property/DependantValidation.java" />
@@ -983,7 +970,6 @@
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/Property.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QSwitchableProperty.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryableSwitchableProperty.java" />
-        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/ListView.java" />
         <option value="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/SelectStartTime.java" />
         <option value="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/server/ReservationController.java" />
         <option value="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/SelectTime.java" />
@@ -1003,7 +989,6 @@
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/VerifyValuePropertyExpectation.java" />
         <option value="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/PeriodicReserve.java" />
         <option value="$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/SelectDayOfWeek.java" />
-        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/Graph.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/ActionExpectation.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/Expectation.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/AbstractExpectation.java" />
@@ -1016,6 +1001,11 @@
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchBySearchProperty.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SelfSwitchableProperty.java" />
         <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchBySelfProperty.java" />
+        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/CacheSwitchableProperty.java" />
+        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryProperty.java" />
+        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/Graph.java" />
+        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/runtime/Communicator.java" />
+        <option value="$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/ListView.java" />
       </list>
     </option>
   </component>
@@ -2024,7 +2014,14 @@
       <option name="project" value="LOCAL" />
       <updated>1499664966962</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="#">
+      <created>1499751385704</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1499751385704</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TodoView">
@@ -2055,7 +2052,7 @@
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18826406" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24938875" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24816626" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972974" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24972972" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -2156,27 +2153,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/event/ActionEvent.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="32" column="28" lean-forward="false" selection-start-line="32" selection-start-column="16" selection-end-line="32" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/SelectStartTime.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="55">
-          <caret line="8" column="4" lean-forward="false" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/SelectTime.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="379">
-          <caret line="25" column="30" lean-forward="false" selection-start-line="25" selection-start-column="30" selection-end-line="25" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/SelectDateOnMain.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="163">
@@ -2188,13 +2164,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="433">
           <caret line="19" column="53" lean-forward="false" selection-start-line="19" selection-start-column="53" selection-end-line="19" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/Login.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="256">
-          <caret line="48" column="23" lean-forward="false" selection-start-line="48" selection-start-column="23" selection-end-line="48" selection-end-column="23" />
         </state>
       </provider>
     </entry>
@@ -2391,34 +2360,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/Expectation.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="12" column="18" lean-forward="false" selection-start-line="12" selection-start-column="18" selection-end-line="12" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/SelectDayOfWeek.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="437">
           <caret line="34" column="37" lean-forward="true" selection-start-line="34" selection-start-column="37" selection-end-line="34" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/ActionExpectation.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="17" column="25" lean-forward="false" selection-start-line="17" selection-start-column="25" selection-end-line="17" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/AbstractExpectation.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="15" column="66" lean-forward="false" selection-start-line="15" selection-start-column="66" selection-end-line="15" selection-end-column="66" />
           <folding />
         </state>
       </provider>
@@ -2442,16 +2387,6 @@
         <state relative-caret-position="418">
           <caret line="28" column="27" lean-forward="false" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="27" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/ListView.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="25" column="38" lean-forward="false" selection-start-line="25" selection-start-column="38" selection-end-line="25" selection-end-column="38" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2479,22 +2414,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/Graph.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="179" column="65" lean-forward="true" selection-start-line="179" selection-start-column="65" selection-end-line="179" selection-end-column="65" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/CacheSwitchableProperty.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="7" column="22" lean-forward="false" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchBySearchProperty.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="171">
@@ -2511,14 +2430,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryableProperty.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/Property.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="95">
@@ -2527,10 +2438,109 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_05/src.zip!/java/util/function/Supplier.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="40" column="17" lean-forward="false" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/SwitchableProperty.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="16" column="14" lean-forward="true" selection-start-line="16" selection-start-column="14" selection-end-line="16" selection-end-column="14" />
+        <state relative-caret-position="399">
+          <caret line="26" column="73" lean-forward="true" selection-start-line="26" selection-start-column="73" selection-end-line="26" selection-end-column="73" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/CacheSwitchableProperty.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="19" column="38" lean-forward="true" selection-start-line="19" selection-start-column="38" selection-end-line="19" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/runtime/Communicator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="37" column="35" lean-forward="false" selection-start-line="37" selection-start-column="22" selection-end-line="37" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/Graph.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="551">
+          <caret line="340" column="25" lean-forward="false" selection-start-line="340" selection-start-column="25" selection-end-line="340" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryProperty.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="13" column="40" lean-forward="false" selection-start-line="13" selection-start-column="40" selection-end-line="13" selection-end-column="40" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#516#517#0" expanded="true" />
+            <element signature="e#566#567#0" expanded="true" />
+            <element signature="e#649#650#0" expanded="true" />
+            <element signature="e#677#678#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Sample/src/com/yanry/testdriver/sample/reservation/window/Login.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="43" column="84" lean-forward="false" selection-start-line="43" selection-start-column="84" selection-end-line="43" selection-end-column="84" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/extend/view/container/ListView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="44" column="48" lean-forward="false" selection-start-line="44" selection-start-column="34" selection-end-line="44" selection-end-column="48" />
+          <folding>
+            <element signature="e#2748#2749#0" expanded="true" />
+            <element signature="e#2801#2802#0" expanded="true" />
+            <element signature="e#2860#2861#0" expanded="true" />
+            <element signature="e#2904#2905#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/Expectation.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="21" column="23" lean-forward="true" selection-start-line="21" selection-start-column="23" selection-end-line="21" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/property/QueryableProperty.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="28" column="31" lean-forward="false" selection-start-line="28" selection-start-column="31" selection-end-line="28" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/ActionExpectation.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="12" column="22" lean-forward="false" selection-start-line="12" selection-start-column="22" selection-end-line="12" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/src/com/yanry/testdriver/ui/mobile/base/expectation/AbstractExpectation.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="594">
+          <caret line="46" column="22" lean-forward="false" selection-start-line="46" selection-start-column="12" selection-end-line="46" selection-end-column="22" />
           <folding />
         </state>
       </provider>
