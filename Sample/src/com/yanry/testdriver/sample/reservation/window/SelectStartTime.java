@@ -1,6 +1,8 @@
 package com.yanry.testdriver.sample.reservation.window;
 
+import com.yanry.testdriver.sample.reservation.window.PeriodicReserve.Validity;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.view.TextView;
 
 /**
  * Created by rongyu.yan on 5/19/2017.
@@ -11,13 +13,13 @@ public class SelectStartTime extends SelectTime {
     }
 
     @Override
-    protected String getTextViewTag() {
-        return PeriodicReserve.TV_START_TIME;
+    protected TextView getTextView(PeriodicReserve reserve) {
+        return reserve.getTvStartTime();
     }
 
     @Override
-    protected String getValidityTag() {
-        return PeriodicReserve.PROP_START_TIME_VALIDITY;
+    protected Validity getValidity(PeriodicReserve reserve) {
+        return reserve.getStartTimeValidity();
     }
 
     @Override

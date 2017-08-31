@@ -3,7 +3,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
@@ -37,18 +37,18 @@ public class ValidateEditText extends EditText {
         }
     }
 
-    public Path addNegativeCase(String content, Event event, Expectation expectation, SwitchableProperty<Boolean>...
+    public Path addNegativeCase(String content, Event event, Expectation expectation, Property<Boolean>...
             preValidities) {
         invalidContents.add(content);
         Path path = getWindow().createPath(event, expectation).addInitState(getInputContent(), content);
         getParent().present(path);
-        for (SwitchableProperty<Boolean> preValidity : preValidities) {
+        for (Property<Boolean> preValidity : preValidities) {
             path.addInitState(preValidity, true);
         }
         return path;
     }
 
-    public Path setEmptyValidationCase(Event event, Expectation expectation, SwitchableProperty<Boolean>...preValidities) {
+    public Path setEmptyValidationCase(Event event, Expectation expectation, Property<Boolean>...preValidities) {
         return addNegativeCase("", event, expectation, preValidities);
     }
 
@@ -60,7 +60,7 @@ public class ValidateEditText extends EditText {
         return validContents;
     }
 
-    public class ValidityState extends SwitchableProperty<Boolean> {
+    public class ValidityState extends Property<Boolean> {
 
         @Override
         protected boolean doSwitch(Boolean to, List<Path> superPathContainer) {

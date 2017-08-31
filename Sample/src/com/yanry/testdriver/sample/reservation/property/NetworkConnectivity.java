@@ -17,7 +17,7 @@ public class NetworkConnectivity extends SwitchBySelfProperty<Boolean> {
 
     @Override
     protected Boolean checkValue() {
-        return graph.checkState(new StateToCheck<Boolean>(this, false, true));
+        return graph.checkState(new StateToCheck<>(this, false, true));
     }
 
     @Override

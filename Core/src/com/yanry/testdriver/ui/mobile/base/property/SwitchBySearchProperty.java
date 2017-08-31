@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * <p>
  * Created by rongyu.yan on 5/9/2017.
  */
-public abstract class SwitchBySearchProperty<V> extends CacheSwitchableProperty<V> {
+public abstract class SwitchBySearchProperty<V> extends CacheProperty<V> {
     protected abstract Graph getGraph();
 
     @Override

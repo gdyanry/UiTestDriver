@@ -10,11 +10,10 @@ import com.yanry.testdriver.ui.mobile.base.expectation.AbstractExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
 import com.yanry.testdriver.ui.mobile.extend.action.ClickOutside;
-import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
@@ -32,7 +31,7 @@ import static com.yanry.testdriver.ui.mobile.extend.TestManager.Visibility.*;
 public class TestManager extends Graph {
     private LinkedList<Window> windowStack;
     private HashMap<Class<? extends Window>, Window> windowInstances;
-    private HashMap<Class<? extends SwitchableProperty>, SwitchableProperty> propertyInstances;
+    private HashMap<Class<? extends Property>, Property> propertyInstances;
 
     public TestManager(boolean debug) {
         super(debug);
@@ -54,8 +53,8 @@ public class TestManager extends Graph {
         });
     }
 
-    public void registerProperties(SwitchableProperty... properties) {
-        for (SwitchableProperty property : properties) {
+    public void registerProperties(Property... properties) {
+        for (Property property : properties) {
             propertyInstances.put(property.getClass(), property);
         }
     }
@@ -77,8 +76,6 @@ public class TestManager extends Graph {
         private ValueSwitchEvent<Visibility> closeEvent;
         private ValueSwitchEvent<Visibility> resumeEvent;
         private ValueSwitchEvent<Visibility> pauseEvent;
-        private HashMap<String, View> registeredViews;
-        private HashMap<String, SwitchableProperty> registeredProps;
 
         public Window() {
             visibility = new VisibilityState();
@@ -87,7 +84,6 @@ public class TestManager extends Graph {
             closeEvent = new ValueSwitchEvent<>(visibility, Foreground, NotCreated);
             resumeEvent = new ValueSwitchEvent<>(visibility, Background, Foreground);
             pauseEvent = new ValueSwitchEvent<>(visibility, Foreground, Background);
-            registeredViews = new HashMap<>();
         }
 
         protected abstract void addCases();
@@ -159,7 +155,7 @@ public class TestManager extends Graph {
             return Util.createPath(getGraph(), event, expectation).addInitState(visibility, Foreground);
         }
 
-        public SwitchableProperty<Visibility> getVisibility() {
+        public Property<Visibility> getVisibility() {
             return visibility;
         }
 
@@ -183,28 +179,12 @@ public class TestManager extends Graph {
             return TestManager.this;
         }
 
-        public Window getWindow(Class<? extends Window> clz) {
-            return windowInstances.get(clz);
+        public <W extends Window> W getWindow(Class<W> clz) {
+            return (W) windowInstances.get(clz);
         }
 
-        public <V, P extends SwitchableProperty<V>> P getProperty(Class<P> clz) {
+        public <V, P extends Property<V>> P getProperty(Class<P> clz) {
             return (P) propertyInstances.get(clz);
-        }
-
-        public void registerView(String tag, View view) {
-            registeredViews.put(tag, view);
-        }
-
-        public <V extends View> V getView(String tag) {
-            return (V) registeredViews.get(tag);
-        }
-
-        public <V> void registerProperty(String tag, SwitchableProperty<V> property) {
-            registeredProps.put(tag, property);
-        }
-
-        public <V, P extends SwitchableProperty<V>> P getProperty(String tag) {
-            return (P) registeredProps.get(tag);
         }
 
         @Override

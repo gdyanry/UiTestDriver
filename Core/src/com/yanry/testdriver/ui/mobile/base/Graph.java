@@ -7,10 +7,8 @@ import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.event.*;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
-import com.yanry.testdriver.ui.mobile.base.property.QueryProperty;
-import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchableProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
 import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
@@ -19,8 +17,8 @@ import lib.common.util.ConsoleUtil;
 
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -132,10 +130,10 @@ public class Graph implements Communicator {
     private boolean internalRoll(Path path, List<Path> parentPaths) {
         // make sure environment states are satisfied.
         // TODO 按状态优先级排序
-        Optional<Map.Entry<SwitchableProperty, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
+        Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
-            Map.Entry<SwitchableProperty, Object> state = any.get();
+            Map.Entry<Property, Object> state = any.get();
             if (state.getKey().switchTo(state.getValue(), null)) {
                 return internalRoll(path, parentPaths);
             } else {
@@ -221,42 +219,42 @@ public class Graph implements Communicator {
         return isPass;
     }
 
-    public <V> boolean verifySuperPaths(SwitchableProperty<V> property, V from, V to, List<Path> parentPaths,
-                                        Supplier<Boolean> doSwitch) {
-        List<Path> paths = allPaths.stream().filter(p -> {
-            if (!rollingPaths.contains(p)) {
-                if (p.getEvent() instanceof ValueSwitchEvent) {
-                    ValueSwitchEvent switchEvent = (ValueSwitchEvent) p.getEvent();
-                    if (switchEvent.getProperty() == property && switchEvent.getTo() == to
-                            && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied()) {
-                        return true;
-                    }
-                } else if (p.getEvent() instanceof PredicateSwitchEvent) {
-                    PredicateSwitchEvent switchEvent = (PredicateSwitchEvent) p.getEvent();
-                    if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
-                            switchEvent.getFrom().test(from)) && p.isSatisfied()) {
-                        return true;
-                    }
-                } else if (p.getEvent() instanceof PassiveSwitchEvent) {
-                    PassiveSwitchEvent switchEvent = (PassiveSwitchEvent) p.getEvent();
-                    if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
-                            switchEvent.getFrom().test(from)) && p.isSatisfied()) {
-                        return true;
+    public <V> boolean verifySuperPaths(Property<V> property, V from, V to, List<Path> parentPaths,
+                                        BooleanSupplier switchAction) {
+        if (switchAction.getAsBoolean()) {
+            List<Path> superPaths = allPaths.stream().filter(p -> {
+                if (!rollingPaths.contains(p)) {
+                    if (p.getEvent() instanceof ValueSwitchEvent) {
+                        ValueSwitchEvent switchEvent = (ValueSwitchEvent) p.getEvent();
+                        if (switchEvent.getProperty() == property && switchEvent.getTo() == to
+                                && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied()) {
+                            return true;
+                        }
+                    } else if (p.getEvent() instanceof PredicateSwitchEvent) {
+                        PredicateSwitchEvent switchEvent = (PredicateSwitchEvent) p.getEvent();
+                        if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
+                                switchEvent.getFrom().test(from)) && p.isSatisfied()) {
+                            return true;
+                        }
+                    } else if (p.getEvent() instanceof PassiveSwitchEvent) {
+                        PassiveSwitchEvent switchEvent = (PassiveSwitchEvent) p.getEvent();
+                        if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
+                                switchEvent.getFrom().test(from)) && p.isSatisfied()) {
+                            return true;
+                        }
                     }
                 }
-            }
-            return false;
-        }).collect(Collectors.toList());
-        if (doSwitch.get()) {
+                return false;
+            }).collect(Collectors.toList());
             if (parentPaths == null) {
-                for (Path path : paths) {
+                for (Path path : superPaths) {
                     if (debug) {
                         ConsoleUtil.debug("%n>>>>selfVerify super: %s%n", Util.getPresentation(path));
                     }
                     verify(path, null);
                 }
             } else {
-                parentPaths.addAll(paths);
+                parentPaths.addAll(superPaths);
             }
             return true;
         }
@@ -332,17 +330,6 @@ public class Graph implements Communicator {
             Boolean result = communicator.verifyExpectation(expectation);
             if (result != null) {
                 return result;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public String queryValue(QueryProperty property) {
-        for (Communicator communicator : communicators) {
-            String value = communicator.queryValue(property);
-            if (value != null) {
-                return value;
             }
         }
         return null;

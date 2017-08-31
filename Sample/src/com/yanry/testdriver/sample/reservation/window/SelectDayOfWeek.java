@@ -27,11 +27,9 @@ public class SelectDayOfWeek extends TestManager.Window {
         Click<View, Object> clickConfirm = new Click<>(new View(this, new ByText("确定")));
         close(clickConfirm, Timing.IMMEDIATELY);
         CheckBox[] checkBoxes = new CheckBox[7];
-        TestManager.Window fromWindow = getWindow(PeriodicReserve.class);
-        PeriodicReserve.DayOfWeekValue dayOfWeekValue = fromWindow.getProperty(PeriodicReserve
-                .PROP_DAY_OF_WEEK_VALUE);
-        PeriodicReserve.DayOfWeekValidity dayOfWeekValidity = fromWindow.getProperty
-                (PeriodicReserve.PROP_START_TIME_VALIDITY);
+        PeriodicReserve fromWindow = getWindow(PeriodicReserve.class);
+        PeriodicReserve.DayOfWeekValue dayOfWeekValue = fromWindow.getDayOfWeekValue();
+        PeriodicReserve.DayOfWeekValidity dayOfWeekValidity = fromWindow.getDayOfWeekValidity();
         for (int i = 0; i < 7; i++) {
             checkBoxes[i] = new CheckBox(this, new ByIndex(i));
             int finalIndex = i;
@@ -48,7 +46,7 @@ public class SelectDayOfWeek extends TestManager.Window {
             path.addInitState(checkBox.getCheckState(), false);
         }
         // day of week value
-        TextView tvDayOfWeek = fromWindow.getView(PeriodicReserve.TV_DAY_OF_WEEK);
+        TextView tvDayOfWeek = fromWindow.getTvDayOfWeek();
         createPath(clickConfirm, dayOfWeekValue.getExpectation(Timing.IMMEDIATELY, () -> {
             for (int i = 0; i < checkBoxes.length; i++) {
                 CheckBox checkBox = checkBoxes[i];
@@ -56,7 +54,33 @@ public class SelectDayOfWeek extends TestManager.Window {
             }
             return dayOfWeekValue.getCurrentValue();
         }).addFollowingExpectation(tvDayOfWeek.getText().getExpectation(Timing.IMMEDIATELY, () -> {
-            
+            StringBuilder stringBuilder = new StringBuilder();
+            boolean[] bArr = dayOfWeekValue.getCurrentValue();
+            if (bArr[0]) {
+                stringBuilder.append("星期一，");
+            }
+            if (bArr[1]) {
+                stringBuilder.append("星期二，");
+            }
+            if (bArr[2]) {
+                stringBuilder.append("星期三，");
+            }
+            if (bArr[3]) {
+                stringBuilder.append("星期四，");
+            }
+            if (bArr[4]) {
+                stringBuilder.append("星期五，");
+            }
+            if (bArr[5]) {
+                stringBuilder.append("星期六，");
+            }
+            if (bArr[6]) {
+                stringBuilder.append("星期日，");
+            }
+            if (stringBuilder.length() > 0) {
+                stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+            }
+            return stringBuilder.toString();
         })));
     }
 }

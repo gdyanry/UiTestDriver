@@ -12,11 +12,15 @@ import com.yanry.testdriver.ui.mobile.extend.view.selector.ByText;
  * Created by rongyu.yan on 5/12/2017.
  */
 public class Main extends TestManager.Window {
-    public static String TV_DATE;
+    private TextView tvDate;
 
     public Main(TestManager manager) {
         manager.super();
-        registerView(TV_DATE, new TextView(this, new ByDesc("日期标签")));
+        tvDate = new TextView(this, new ByDesc("日期标签"));
+    }
+
+    public TextView getTvDate() {
+        return tvDate;
     }
 
     @Override
@@ -24,7 +28,6 @@ public class Main extends TestManager.Window {
         showOnStartUp(Timing.IMMEDIATELY);
         popWindow(getWindow(SelectDateOnMain.class), new Click<>(new View(this, new ByDesc("选择日期图标"))), Timing
                 .IMMEDIATELY, false, true);
-        TextView tvDate = getView(TV_DATE);
         popWindow(getWindow(SelectDateOnMain.class), new Click<>(tvDate), Timing.IMMEDIATELY, false, true);
         popWindow(getWindow(FilterOnMain.class), new Click(new View(this, new ByText("筛选"))), Timing.IMMEDIATELY,
                 false, false);

@@ -1,7 +1,9 @@
 package com.yanry.testdriver.ui.mobile.extend.view;
 
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
+import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
@@ -27,10 +29,21 @@ public class TextView extends View {
     }
 
     @Presentable
-    public class TextValue extends QueryableProperty {
+    public class TextValue extends SwitchBySearchProperty<String> {
 
-        public TextValue() {
-            super(getWindow().getGraph(), TextView.this);
+        @Override
+        protected Graph getGraph() {
+            return getWindow().getGraph();
+        }
+
+        @Override
+        protected boolean isVisibleToUser() {
+            return true;
+        }
+
+        @Override
+        protected String checkValue() {
+            return getGraph().checkState(new StateToCheck<>(this));
         }
     }
 }

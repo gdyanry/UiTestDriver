@@ -59,11 +59,11 @@ public abstract class BaseAppiumClient extends HttpClientReception {
                 }
                 return checkState(property, instruction.getJSONArray("options"), isWithin, second);
             }
-            if (type.equals(GeneralTransientExpectation.class.getSimpleName())) {
-                JSONObject timing = instruction.getJSONObject("timing");
-                return verifyExpectation(instruction.getString("tag"), timing.getBoolean("isWithin"), timing.getInt
-                        ("second"), instruction.getInt("duration")) ? 1 : 0;
-            }
+//            if (type.equals(GeneralTransientExpectation.class.getSimpleName())) {
+//                JSONObject timing = instruction.getJSONObject("timing");
+//                return verifyExpectation(instruction.getString("tag"), timing.getBoolean("isWithin"), timing.getInt
+//                        ("second"), instruction.getInt("duration")) ? 1 : 0;
+//            }
             if (type.equals(Toast.class.getSimpleName())) {
                 // TODO
                 // {".":"Toast","message":"无网络连接","duration":2000,"timing":{".":"Timing","second":0,"isWithin":false}}

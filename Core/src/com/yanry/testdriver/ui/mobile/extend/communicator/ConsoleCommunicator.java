@@ -3,7 +3,6 @@ package com.yanry.testdriver.ui.mobile.extend.communicator;
 import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import lib.common.util.ConsoleUtil;
 
@@ -41,15 +40,10 @@ public class ConsoleCommunicator extends SerializedCommunicator {
 
     @Override
     protected String verifyExpectation(int repeat, Expectation expectation) {
-        return getInput(repeat, "selfVerify", expectation, () -> {
+        return getInput(repeat, "verify", expectation, () -> {
             System.out.println("0 - false");
             System.out.println("1 - true");
             System.out.println("-1 - unknown");
         });
-    }
-
-    @Override
-    public String queryValue(QueryableProperty property) {
-        return getInput(0, "doQuery", property, null);
     }
 }

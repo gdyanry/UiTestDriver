@@ -6,8 +6,8 @@ import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.QueryProperty;
-import com.yanry.testdriver.ui.mobile.base.property.QueryableProperty;
+import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
+import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ByIndex;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
@@ -35,19 +35,19 @@ public class ListView extends View implements ViewContainer {
         getWindow().createPath(event, new ActionExpectation() {
             @Override
             protected void run(List<Path> superPathContainer) {
-                size.clearValue();
+                size.setCacheValue(null);
             }
         });
     }
 
     public void verifySize(int expectedSize, Function<Expectation, Path> verifySizePath) {
         String strSize = String.valueOf(expectedSize);
-        verifySizePath.apply(size.getExpectation(Timing.IMMEDIATELY, strSize));
+        verifySizePath.apply(size.getExpectation(Timing.IMMEDIATELY, expectedSize));
     }
 
     public Supplier<ListViewItem> getRandomItem() {
         return () -> {
-            int iSize = Integer.parseInt(size.getCurrentValue());
+            int iSize = size.getCurrentValue();
             if (iSize > 0) {
                 return new ListViewItem(this, new ByIndex(Singletons.get(Random.class).nextInt(iSize)));
             }
@@ -57,7 +57,7 @@ public class ListView extends View implements ViewContainer {
 
     public Supplier<ListViewItem> getItem(Predicate<ListViewItem> predicate) {
         return () -> {
-            int iSize = Integer.parseInt(size.getCurrentValue());
+            int iSize = size.getCurrentValue();
             for (int i = 0; i < iSize; i++) {
                 ListViewItem item = new ListViewItem(this, new ByIndex(i));
                 if (predicate.test(item)) {
@@ -73,7 +73,7 @@ public class ListView extends View implements ViewContainer {
         getParent().present(path);
     }
 
-    public class ListViewSize extends QueryProperty {
+    public class ListViewSize extends SwitchBySearchProperty<Integer> {
 
         @Override
         protected Graph getGraph() {
@@ -81,8 +81,13 @@ public class ListView extends View implements ViewContainer {
         }
 
         @Override
-        public Object getIdentifier() {
-            return ListView.this;
+        protected boolean isVisibleToUser() {
+            return true;
+        }
+
+        @Override
+        protected Integer checkValue() {
+            return getGraph().checkState(new StateToCheck<>(this));
         }
     }
 }

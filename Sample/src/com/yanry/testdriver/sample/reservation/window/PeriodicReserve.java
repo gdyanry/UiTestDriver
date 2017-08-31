@@ -21,45 +21,77 @@ public class PeriodicReserve extends TestManager.Window {
     public static String DESC_V_SUBMIT;
     public static String DESC_ITEM_ROOM;
     public static String TV_ROOM;
-    public static String PROP_ROOM_VALIDITY;
     public static String TV_START_TIME;
-    public static String PROP_START_TIME_VALIDITY;
     public static String DESC_ITEM_START_TIME;
     public static String DESC_ITEM_END_TIME;
-    public static String PROP_END_TIME_VALIDITY;
     public static String TV_END_TIME;
-    public static String PROP_DAY_OF_WEEK_VALUE;
-    public static String PROP_DAY_OF_WEEK_VALIDITY;
     public static String DESC_ITEM_DAY_OF_WEEK;
     public static String TV_DAY_OF_WEEK;
 
+    private TextView tvRoom;
+    private TextView tvStartTime;
+    private TextView tvEndTime;
+    private TextView tvDayOfWeek;
+
+    private Validity roomValidity;
+    private Validity startTimeValidity;
+    private Validity endTimeValidity;
+    private DayOfWeekValue dayOfWeekValue;
+    private DayOfWeekValidity dayOfWeekValidity;
+
     public PeriodicReserve(TestManager manager) {
         manager.super();
+    }
+
+    public TextView getTvRoom() {
+        return tvRoom;
+    }
+
+    public TextView getTvStartTime() {
+        return tvStartTime;
+    }
+
+    public TextView getTvEndTime() {
+        return tvEndTime;
+    }
+
+    public TextView getTvDayOfWeek() {
+        return tvDayOfWeek;
+    }
+
+    public Validity getRoomValidity() {
+        return roomValidity;
+    }
+
+    public Validity getStartTimeValidity() {
+        return startTimeValidity;
+    }
+
+    public Validity getEndTimeValidity() {
+        return endTimeValidity;
+    }
+
+    public DayOfWeekValue getDayOfWeekValue() {
+        return dayOfWeekValue;
+    }
+
+    public DayOfWeekValidity getDayOfWeekValidity() {
+        return dayOfWeekValidity;
     }
 
     @Override
     protected void addCases() {
         ValidateEditText etTopic = new ValidateEditText(this, new ByDesc(DESC_ET_TOPIC));
         Click clickSubmit = new Click(new View(this, new ByDesc(DESC_V_SUBMIT)));
-        TextView tvRoom = new TextView(this, new ByDesc(TV_ROOM));
-        Validity roomValidity = new Validity();
-        TextView tvStartTime = new TextView(this, new ByDesc(TV_START_TIME));
-        Validity startTimeValidity = new Validity();
-        Validity endTimeValidity = new Validity();
-        TextView tvEndTime = new TextView(this, new ByDesc(TV_END_TIME));
-        DayOfWeekValue dayOfWeekValue = new DayOfWeekValue();
-        DayOfWeekValidity dayOfWeekValidity = new DayOfWeekValidity(dayOfWeekValue);
-        TextView tvDayOfWeed = new TextView(this, new ByDesc(TV_DAY_OF_WEEK));
-
-        registerView(TV_ROOM, tvRoom);
-        registerProperty(PROP_ROOM_VALIDITY, roomValidity);
-        registerView(TV_START_TIME, tvStartTime);
-        registerProperty(PROP_START_TIME_VALIDITY, startTimeValidity);
-        registerProperty(PROP_END_TIME_VALIDITY, endTimeValidity);
-        registerView(TV_END_TIME, tvEndTime);
-        registerProperty(PROP_DAY_OF_WEEK_VALUE, dayOfWeekValue);
-        registerProperty(PROP_DAY_OF_WEEK_VALIDITY, dayOfWeekValidity);
-        registerView(TV_DAY_OF_WEEK, tvDayOfWeed);
+        tvRoom = new TextView(this, new ByDesc(TV_ROOM));
+        roomValidity = new Validity();
+        tvStartTime = new TextView(this, new ByDesc(TV_START_TIME));
+        startTimeValidity = new Validity();
+        endTimeValidity = new Validity();
+        tvEndTime = new TextView(this, new ByDesc(TV_END_TIME));
+        dayOfWeekValue = new DayOfWeekValue();
+        dayOfWeekValidity = new DayOfWeekValidity(dayOfWeekValue);
+        tvDayOfWeek = new TextView(this, new ByDesc(TV_DAY_OF_WEEK));
 
         close(new Click<>(new View(this, new ByDesc(DESC_IC_QUIT))), Timing.IMMEDIATELY);
 

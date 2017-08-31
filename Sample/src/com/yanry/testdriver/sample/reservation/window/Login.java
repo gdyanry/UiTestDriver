@@ -46,6 +46,7 @@ public class Login extends TestManager.Window {
         etPwd.setEmptyValidationCase(clickLogin, pwdErrorView.getVisibility().getExpectation(Timing
                 .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "密码不能为空")), etUser.getValidity());
+        // 输入内容时隐藏错误提示视图
         createPath(new PassiveSwitchEvent<>(etUser.getInputContent(), v -> true, v -> true), userErrorView
                 .getVisibility().getExpectation(Timing.IMMEDIATELY, false)).addInitState(userErrorView
                 .getVisibility(), true);

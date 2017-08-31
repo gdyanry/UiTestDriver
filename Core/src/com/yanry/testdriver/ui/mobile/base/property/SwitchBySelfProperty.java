@@ -7,11 +7,11 @@ import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 import java.util.List;
 
 /**
- * SwitchableProperty that does not switch through searching the graph.
+ * Property that does not switch through searching the graph.
  * <p>
  * Created by rongyu.yan on 5/12/2017.
  */
-public abstract class SwitchBySelfProperty<V> extends CacheSwitchableProperty<V> {
+public abstract class SwitchBySelfProperty<V> extends CacheProperty<V> {
 
     protected abstract boolean doSwitch(V to);
 

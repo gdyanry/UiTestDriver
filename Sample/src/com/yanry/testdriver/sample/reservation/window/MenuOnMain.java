@@ -13,11 +13,11 @@ import com.yanry.testdriver.ui.mobile.extend.view.selector.ByText;
  * Created by rongyu.yan on 5/12/2017.
  */
 public class MenuOnMain extends TestManager.Window {
-    public static String TV_LOGIN;
+    private TextView tvLogin;
 
     public MenuOnMain(TestManager manager) {
         manager.super();
-        registerView(TV_LOGIN, new TextView(this, new ByDesc("登录菜单项")));
+        tvLogin = new TextView(this, new ByDesc("登录菜单项"));
     }
 
     @Override
@@ -26,12 +26,11 @@ public class MenuOnMain extends TestManager.Window {
                 true, false);
         popWindow(getWindow(MyReservation.class), new Click(new View(this, new ByText("我的预订"))), Timing.IMMEDIATELY,
                 true, false);
-        TextView vLogin = getView(TV_LOGIN);
         LoginState loginState = getProperty(LoginState.class);
-        createPath(getCreateEvent(), vLogin.getText().getExpectation(Timing
+        createPath(getCreateEvent(), tvLogin.getText().getExpectation(Timing
                 .IMMEDIATELY, () -> loginState.getCurrentValue() ? "登录" : "退出登录"));
-        close(new Click(vLogin), Timing.IMMEDIATELY).put(loginState, true);
-        popWindow(getWindow(Login.class), new Click(vLogin), Timing.IMMEDIATELY, false, false)
+        close(new Click(tvLogin), Timing.IMMEDIATELY).put(loginState, true);
+        popWindow(getWindow(Login.class), new Click(tvLogin), Timing.IMMEDIATELY, false, false)
                 .put(loginState, false);
         closeOnTouchOutside();
     }
