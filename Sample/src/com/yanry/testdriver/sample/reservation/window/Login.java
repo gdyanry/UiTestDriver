@@ -38,8 +38,8 @@ public class Login extends TestManager.Window {
         TextView userErrorView = new TextView(this, new ByDesc(USER_VALIDATION));
         TextView pwdErrorView = new TextView(this, new ByDesc(PWD_VALIDATION));
 
-        createPath(getCreateEvent(), etUser.getInputContent().getActionExpectation(""));
-        createPath(getCreateEvent(), etPwd.getInputContent().getActionExpectation(""));
+        createPath(getCreateEvent(), etUser.getInputContent().getExpectation(""));
+        createPath(getCreateEvent(), etPwd.getInputContent().getExpectation(""));
         etUser.setEmptyValidationCase(clickLogin, userErrorView.getVisibility().getExpectation(Timing
                 .IMMEDIATELY, true).addFollowingExpectation(userErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "用户名不能为空")));

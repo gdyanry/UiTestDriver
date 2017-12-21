@@ -13,7 +13,7 @@ import java.util.function.BiPredicate;
  * Created by rongyu.yan on 3/9/2017.
  */
 @Presentable
-public abstract class NonPropertyExpectation extends AbstractExpectation {
+public abstract class NonPropertyExpectation extends Expectation {
 
     public NonPropertyExpectation(Timing timing) {
         super(timing);

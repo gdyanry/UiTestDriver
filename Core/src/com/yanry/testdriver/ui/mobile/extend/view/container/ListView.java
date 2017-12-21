@@ -3,7 +3,7 @@ package com.yanry.testdriver.ui.mobile.extend.view.container;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.DynamicExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
@@ -32,10 +32,11 @@ public class ListView extends View implements ViewContainer {
     }
 
     public void refresh(Event event) {
-        getWindow().createPath(event, new ActionExpectation() {
+        getWindow().createPath(event, new DynamicExpectation() {
             @Override
-            protected void run(List<Path> superPathContainer) {
+            protected boolean selfVerify(List<Path> superPathContainer) {
                 size.setCacheValue(null);
+                return true;
             }
         });
     }

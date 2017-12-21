@@ -6,10 +6,7 @@ import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
-import com.yanry.testdriver.ui.mobile.base.expectation.AbstractExpectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
+import com.yanry.testdriver.ui.mobile.base.expectation.*;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
@@ -38,10 +35,11 @@ public class TestManager extends Graph {
         windowStack = new LinkedList<>();
         windowInstances = new HashMap<>();
         propertyInstances = new HashMap<>();
-        Util.createPath(this, getProcessState().getStopProcessEvent(), new ActionExpectation() {
+        Util.createPath(this, getProcessState().getStopProcessEvent(), new DynamicExpectation() {
             @Override
-            protected void run(List<Path> superPathContainer) {
+            protected boolean selfVerify(List<Path> superPathContainer) {
                 windowStack.clear();
+                return true;
             }
         });
     }
@@ -90,10 +88,10 @@ public class TestManager extends Graph {
 
         public Path showOnStartUp(Timing timing) {
             return Util.createPath(TestManager.this, getProcessState().getStartProcessEvent(),
-                    foregroundVerification.getExpectation(timing, true).addFollowingExpectation(new ActionExpectation() {
+                    foregroundVerification.getExpectation(timing, true).addFollowingExpectation(new DynamicExpectation() {
                         @Override
-                        protected void run(List<Path> superPathContainer) {
-                            verifySuperPaths(visibility, NotCreated, Foreground, superPathContainer, () -> {
+                        protected boolean selfVerify(List<Path> superPathContainer) {
+                            return verifySuperPaths(visibility, NotCreated, Foreground, superPathContainer, () -> {
                                 windowStack.add(Window.this);
                                 return true;
                             });
@@ -104,9 +102,9 @@ public class TestManager extends Graph {
         public Path popWindow(Window newWindow, Event inputEvent, Timing timing, boolean closeCurrent, boolean
                 singleInstance) {
             return createPath(inputEvent, newWindow.foregroundVerification.getExpectation
-                    (timing, true).addFollowingExpectation(new ActionExpectation() {
+                    (timing, true).addFollowingExpectation(new DynamicExpectation() {
                 @Override
-                protected void run(List<Path> superPathContainer) {
+                protected boolean selfVerify(List<Path> superPathContainer) {
                     if (closeCurrent) {
                         verifySuperPaths(visibility, Foreground, NotCreated, superPathContainer, () -> {
                             windowStack.removeLastOccurrence(this);
@@ -122,15 +120,16 @@ public class TestManager extends Graph {
                         windowStack.add(newWindow);
                         return true;
                     });
+                    return true;
                 }
             }));
         }
 
         public Path close(Event inputEvent, Timing timing, Expectation... followingExpectations) {
-            AbstractExpectation expectation = foregroundVerification.getExpectation(timing,
-                    false).addFollowingExpectation(new ActionExpectation() {
+            Expectation expectation = foregroundVerification.getExpectation(timing,
+                    false).addFollowingExpectation(new DynamicExpectation() {
                 @Override
-                protected void run(List<Path> superPathContainer) {
+                protected boolean selfVerify(List<Path> superPathContainer) {
                     verifySuperPaths(visibility, Foreground, NotCreated, superPathContainer, () -> {
                         windowStack.removeLastOccurrence(this);
                         return true;
@@ -139,6 +138,7 @@ public class TestManager extends Graph {
                         verifySuperPaths(windowStack.getLast().visibility, Background, Foreground,
                                 superPathContainer, () -> true);
                     }
+                    return true;
                 }
             });
             for (Expectation followingExpectation : followingExpectations) {

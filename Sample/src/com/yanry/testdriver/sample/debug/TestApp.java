@@ -23,8 +23,8 @@ public class TestApp {
 
     public static void main(String[] args) {
         TestManager manager = new TestManager(false);
-        ConsoleCommunicator interactor = new ConsoleCommunicator();
-        manager.registerCommunicator(interactor);
+        ConsoleCommunicator communicator = new ConsoleCommunicator();
+        manager.registerCommunicator(communicator);
         defineGraph(manager);
 
         // 打印测试记录

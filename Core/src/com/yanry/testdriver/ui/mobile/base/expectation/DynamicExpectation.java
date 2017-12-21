@@ -4,7 +4,7 @@ import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 
 import java.util.function.BiPredicate;
 
-public abstract class DynamicExpectation extends AbstractExpectation {
+public abstract class DynamicExpectation extends Expectation {
     public DynamicExpectation() {
         super(Timing.IMMEDIATELY);
     }

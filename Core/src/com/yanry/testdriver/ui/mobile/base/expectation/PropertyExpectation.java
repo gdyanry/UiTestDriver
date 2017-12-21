@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 /** A key-value pair (aka state) expectation
  * Created by rongyu.yan on 5/10/2017.
  */
-public abstract class PropertyExpectation<V, P extends Property<V>> extends AbstractExpectation {
+public abstract class PropertyExpectation<V, P extends Property<V>> extends Expectation {
     private P property;
     private V value;
     private Supplier<V> valueSupplier;

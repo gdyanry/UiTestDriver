@@ -11,12 +11,12 @@ import java.util.function.Supplier;
 /**
  * Created by rongyu.yan on 5/19/2017.
  */
-public class VerifyValuePropertyExpectation<V> extends PropertyExpectation<V, Property<V>> {
-    public VerifyValuePropertyExpectation(Timing timing, Property<V> property, V value) {
+public class VerifyValueExpectation<V> extends PropertyExpectation<V, Property<V>> {
+    public VerifyValueExpectation(Timing timing, Property<V> property, V value) {
         super(timing, property, value);
     }
 
-    public VerifyValuePropertyExpectation(Timing timing, Property<V> property, Supplier<V> valueSupplier) {
+    public VerifyValueExpectation(Timing timing, Property<V> property, Supplier<V> valueSupplier) {
         super(timing, property, valueSupplier);
     }
 

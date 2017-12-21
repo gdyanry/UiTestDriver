@@ -2,7 +2,8 @@ package com.yanry.testdriver.ui.mobile.base.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.DynamicExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 
 import java.util.List;
 
@@ -17,11 +18,11 @@ public abstract class SwitchBySelfProperty<V> extends CacheProperty<V> {
 
     protected abstract Graph getGraph();
 
-    public ActionExpectation getActionExpectation(V to) {
-        return new ActionExpectation() {
+    public Expectation getExpectation(V to) {
+        return new DynamicExpectation() {
             @Override
-            protected void run(List<Path> superPathContainer) {
-                getGraph().verifySuperPaths(SwitchBySelfProperty.this, getCurrentValue(), to, superPathContainer,
+            protected boolean selfVerify(List<Path> superPathContainer) {
+                return getGraph().verifySuperPaths(SwitchBySelfProperty.this, getCurrentValue(), to, superPathContainer,
                         () -> {
                             setCacheValue(to);
                             return true;

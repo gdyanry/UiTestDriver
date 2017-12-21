@@ -54,8 +54,7 @@ public abstract class BaseAppiumClient extends HttpClientReception {
                 boolean isWithin = timing.getBoolean("isWithin");
                 int second = timing.getInt("second");
                 if (property.getString(".").equals(TestManager.Window.VisibilityState.class.getSimpleName())) {
-                    return isWindowPresent(property.getJSONObject("window").getString("tag"), isWithin, second) ? 1
-                            : 0;
+                    return isWindowPresent(property.getJSONObject("window").getString("tag"), isWithin, second) ? 1 : 0;
                 }
                 return checkState(property, instruction.getJSONArray("options"), isWithin, second);
             }
