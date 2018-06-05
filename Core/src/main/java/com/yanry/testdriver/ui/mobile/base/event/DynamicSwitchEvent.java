@@ -9,12 +9,12 @@ import java.util.function.Predicate;
  * Created by rongyu.yan on 5/17/2017.
  */
 @Presentable
-public class PredicateSwitchEvent<V> implements Event {
+public class DynamicSwitchEvent<V> implements Event {
     private SwitchBySearchProperty<V> property;
     private Predicate<V> from;
     private Predicate<V> to;
 
-    public PredicateSwitchEvent(SwitchBySearchProperty<V> property, Predicate<V> from, Predicate<V> to) {
+    public DynamicSwitchEvent(SwitchBySearchProperty<V> property, Predicate<V> from, Predicate<V> to) {
         this.property = property;
         this.from = from;
         this.to = to;

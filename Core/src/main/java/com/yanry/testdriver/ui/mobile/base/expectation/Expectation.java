@@ -25,7 +25,6 @@ public abstract class Expectation {
     protected abstract boolean selfVerify(List<Path> superPathContainer);
 
     /**
-     *
      * @param endStatePredicate
      * @return whether this expectation itself isSatisfied the given end state predicate, excluding its following
      * expectations.
@@ -51,7 +50,6 @@ public abstract class Expectation {
     }
 
     /**
-     *
      * @param endStatePredicate
      * @return whether this expectation isSatisfied the given end state predicate.
      */
@@ -62,5 +60,8 @@ public abstract class Expectation {
         return followingExpectations.stream().anyMatch(e -> e.isSatisfied(endStatePredicate));
     }
 
+    /**
+     * @return 该期望是否为用户关注（需要输出到测试结果中）的。
+     */
     public abstract boolean ifRecord();
 }

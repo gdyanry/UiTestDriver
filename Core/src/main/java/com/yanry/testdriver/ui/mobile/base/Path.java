@@ -34,14 +34,6 @@ public class Path extends HashMap<Property, Object> {
         return this;
     }
 
-    public void preProcess() {
-        if (event instanceof ValueSwitchEvent) {
-            ValueSwitchEvent transitionEvent = (ValueSwitchEvent) event;
-            Property property = transitionEvent.getProperty();
-            remove(property);
-        }
-    }
-
     public boolean isSatisfied() {
         return entrySet().stream().allMatch(state -> state.getValue().equals(state.getKey().getCurrentValue()));
     }
