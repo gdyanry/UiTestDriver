@@ -1,0 +1,17 @@
+subprojects {
+    apply plugin: 'java'
+    group 'com.yanry.driver'
+    version '1.0-SNAPSHOT'
+
+    sourceCompatibility = 1.8
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+
+    dependencies {
+        implementation 'com.github.gdyanry:CommonLib:-SNAPSHOT'
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+    }
+}
