@@ -168,7 +168,7 @@ public class Graph implements Communicator, Loggable {
             }
         } else if (inputEvent instanceof DynamicSwitchEvent) {
             DynamicSwitchEvent event = (DynamicSwitchEvent) inputEvent;
-            if (!switchTo(event.getProperty(), event.getFrom(), null) || !switchToState(event
+            if (!switchTo(event.getProperty(), event.getFrom(), null) || !switchTo(event
                     .getProperty(), event.getTo(), siblings)) {
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, event));
@@ -199,14 +199,10 @@ public class Graph implements Communicator, Loggable {
         siblings.add(path);
         siblings.stream().distinct().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             if (p == path) {
-                if (debug) {
-                    ConsoleUtil.debug("%n>>>>selfVerify(%s): %s%n", parentPaths == null, Util.getPresentation(p));
-                }
+                log("%n>>>>selfVerify(%s): %s%n", parentPaths == null, Util.getPresentation(p));
                 result[0] = verify(p, parentPaths);
             } else {
-                if (debug) {
-                    ConsoleUtil.debug("%n>>>>selfVerify sibling: %s%n", Util.getPresentation(p));
-                }
+                log("%n>>>>selfVerify sibling: %s%n", Util.getPresentation(p));
                 verify(p, null);
             }
         });
@@ -256,9 +252,7 @@ public class Graph implements Communicator, Loggable {
             }).collect(Collectors.toList());
             if (parentPaths == null) {
                 for (Path path : superPaths) {
-                    if (debug) {
-                        ConsoleUtil.debug("%n>>>>selfVerify super: %s%n", Util.getPresentation(path));
-                    }
+                    log("%n>>>>selfVerify super: %s%n", Util.getPresentation(path));
                     verify(path, null);
                 }
             } else {
@@ -300,14 +294,10 @@ public class Graph implements Communicator, Loggable {
         }).sorted(Comparator.comparingInt(p -> {
             // TODO 细化排序值，寻找最短路径
             int i = p.isSatisfied() ? 0 : 1;
-            if (debug) {
-                ConsoleUtil.debug("%n>>>>compare %s: %s%n", i, Util.getPresentation(p));
-            }
+            log("%n>>>>compare %s: %s%n", i, Util.getPresentation(p));
             return i;
         })).filter(p -> {
-            if (debug) {
-                ConsoleUtil.debug("%n>>>>transit roll: %s%n", Util.getPresentation(p));
-            }
+            log("%n>>>>transit roll: %s%n", Util.getPresentation(p));
             return roll(p, parentPaths);
         }).findFirst().isPresent();
     }

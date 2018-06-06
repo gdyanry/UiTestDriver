@@ -19,7 +19,7 @@ public abstract class SwitchBySearchProperty<V> extends CacheProperty<V> {
 
     @Override
     protected boolean doSwitch(V to, List<Path> parentPaths) {
-        return getGraph().switchToState(this, to, parentPaths);
+        return getGraph().findPathToRoll(parentPaths, null, (prop, toVal) -> prop == this && to.equals(toVal));
     }
 
     protected abstract boolean isVisibleToUser();
