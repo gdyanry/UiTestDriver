@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Property that can do transition between its values. Direct subclasses are not supposed to be used as an
  * expectation in a path, meaning that the state transition of this property is accomplished by realizing the
- * {@link #doSwitch(Object, List)} method instead of searching paths from the graph.
+ * {@link #doSwitch(Object)} method instead of searching paths from the graph.
  *
  * @author yanry
  *         <p>
@@ -20,14 +20,14 @@ import java.util.List;
 @Presentable
 public abstract class Property<V> {
 
-    public boolean switchTo(V to, List<Path> parentPaths) {
+    public boolean switchTo(V to) {
         if (to.equals(getCurrentValue())) {
             return true;
         }
-        return doSwitch(to, parentPaths) && to.equals(getCurrentValue());
+        return doSwitch(to) && to.equals(getCurrentValue());
     }
 
-    protected abstract boolean doSwitch(V to, List<Path> parentPaths);
+    protected abstract boolean doSwitch(V to);
 
     public abstract V getCurrentValue();
 }

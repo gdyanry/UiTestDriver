@@ -43,8 +43,8 @@ public class CheckBox extends TextView {
         }
 
         @Override
-        protected boolean doSwitch(Boolean to) {
-            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground, null) &&
+        protected boolean dooSwitch(Boolean to) {
+            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground) &&
                     getGraph().performAction(new Click<>(CheckBox.this));
         }
 

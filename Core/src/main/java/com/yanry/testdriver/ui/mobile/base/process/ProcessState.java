@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.process;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
 
 /**
@@ -9,25 +9,25 @@ import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
  */
 public class ProcessState extends SwitchBySelfProperty<Boolean> {
     private Graph graph;
-    private ValueSwitchEvent<Boolean> startProcessEvent;
-    private ValueSwitchEvent<Boolean> stopProcessEvent;
+    private StateEvent<Boolean, ProcessState> startProcessEvent;
+    private StateEvent<Boolean, ProcessState> stopProcessEvent;
 
     public ProcessState(Graph graph) {
         this.graph = graph;
-        startProcessEvent = new ValueSwitchEvent<>(this, false, true);
-        stopProcessEvent = new ValueSwitchEvent<>(this, true, false);
+        startProcessEvent = new StateEvent<>(this, false, true);
+        stopProcessEvent = new StateEvent<>(this, true, false);
     }
 
-    public ValueSwitchEvent<Boolean> getStartProcessEvent() {
+    public StateEvent<Boolean, ProcessState> getStartProcessEvent() {
         return startProcessEvent;
     }
 
-    public ValueSwitchEvent<Boolean> getStopProcessEvent() {
+    public StateEvent<Boolean, ProcessState> getStopProcessEvent() {
         return stopProcessEvent;
     }
 
     @Override
-    protected boolean doSwitch(Boolean to) {
+    protected boolean dooSwitch(Boolean to) {
         if (to) {
             return getGraph().performAction(new StartProcess());
         }

@@ -16,12 +16,11 @@ public class LoginState extends Property<Boolean> {
     }
 
     @Override
-    protected boolean doSwitch(Boolean to, List<Path> superPathContainer) {
+    protected boolean doSwitch(Boolean to) {
         if (to) {
-            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(u,
-                    superPathContainer));
+            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(u));
         }
-        return currentUser.switchTo("", superPathContainer);
+        return currentUser.switchTo("");
     }
 
     @Override

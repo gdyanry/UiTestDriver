@@ -18,8 +18,8 @@ public abstract class SwitchBySearchProperty<V> extends CacheProperty<V> {
     protected abstract Graph getGraph();
 
     @Override
-    protected boolean doSwitch(V to, List<Path> parentPaths) {
-        return getGraph().findPathToRoll(parentPaths, null, (prop, toVal) -> prop == this && to.equals(toVal));
+    protected boolean doSwitch(V to) {
+        return getGraph().findPathToRoll(null, (prop, toVal) -> prop == this && to.equals(toVal));
     }
 
     protected abstract boolean isVisibleToUser();
@@ -43,10 +43,10 @@ public abstract class SwitchBySearchProperty<V> extends CacheProperty<V> {
         }
 
         @Override
-        protected boolean doSelfVerify(List<Path> superPathContainer) {
+        protected boolean doSelfVerify() {
             // this path might become transition event of other paths
             return getGraph().verifySuperPaths(SwitchBySearchProperty.this, getCurrentValue(),
-                    getValue(), superPathContainer, () -> {
+                    getValue(), () -> {
                         if (isVisibleToUser() && !getGraph().verifyExpectation(this)) {
                             setCacheValue(null);
                             return false;

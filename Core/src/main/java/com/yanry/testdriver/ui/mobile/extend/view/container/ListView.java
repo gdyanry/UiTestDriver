@@ -34,7 +34,7 @@ public class ListView extends View implements ViewContainer {
     public void refresh(Event event) {
         getWindow().createPath(event, new DynamicExpectation() {
             @Override
-            protected boolean selfVerify(List<Path> superPathContainer) {
+            protected boolean selfVerify() {
                 size.setCacheValue(null);
                 return true;
             }

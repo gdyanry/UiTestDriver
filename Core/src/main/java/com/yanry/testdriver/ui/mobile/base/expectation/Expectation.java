@@ -22,7 +22,7 @@ public abstract class Expectation {
         followingExpectations = new LinkedList<>();
     }
 
-    protected abstract boolean selfVerify(List<Path> superPathContainer);
+    protected abstract boolean selfVerify();
 
     /**
      * @param endStatePredicate
@@ -41,9 +41,9 @@ public abstract class Expectation {
         return timing;
     }
 
-    public boolean verify(List<Path> superPathContainer) {
-        if (selfVerify(superPathContainer)) {
-            followingExpectations.forEach(e -> e.verify(superPathContainer));
+    public boolean verify() {
+        if (selfVerify()) {
+            followingExpectations.forEach(e -> e.verify());
             return true;
         }
         return false;

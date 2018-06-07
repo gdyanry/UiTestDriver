@@ -1,13 +1,14 @@
 package com.yanry.testdriver.sample.reservation.window;
 
 import com.yanry.testdriver.sample.reservation.property.NetworkConnectivity;
-import com.yanry.testdriver.ui.mobile.base.event.PassiveSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.extend.LoginPathHandler;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
+import com.yanry.testdriver.ui.mobile.extend.view.EditText;
 import com.yanry.testdriver.ui.mobile.extend.view.TextView;
 import com.yanry.testdriver.ui.mobile.extend.view.ValidateEditText;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
@@ -47,10 +48,10 @@ public class Login extends TestManager.Window {
                 .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "密码不能为空")), etUser.getValidity());
         // 输入内容时隐藏错误提示视图
-        createPath(new PassiveSwitchEvent<>(etUser.getInputContent(), v -> true, v -> true), userErrorView
+        createPath(new StateEvent<String, EditText.InputContent>(etUser.getInputContent(), v -> true, v -> true), userErrorView
                 .getVisibility().getExpectation(Timing.IMMEDIATELY, false)).addInitState(userErrorView
                 .getVisibility(), true);
-        createPath(new PassiveSwitchEvent<>(etPwd.getInputContent(), v -> true, v -> true), pwdErrorView
+        createPath(new StateEvent<String, EditText.InputContent>(etPwd.getInputContent(), v -> true, v -> true), pwdErrorView
                 .getVisibility().getExpectation(Timing.IMMEDIATELY, false)).addInitState(pwdErrorView
                 .getVisibility(), true);
         etUser.addPositiveCases("xiaoxiaoming");

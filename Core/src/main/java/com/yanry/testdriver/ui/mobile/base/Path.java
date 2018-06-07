@@ -4,7 +4,6 @@
 package com.yanry.testdriver.ui.mobile.base;
 
 import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import lib.common.model.Singletons;

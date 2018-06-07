@@ -27,7 +27,7 @@ public abstract class PropertyExpectation<V, P extends Property<V>> extends Expe
         this.valueSupplier = valueSupplier;
     }
 
-    protected abstract boolean doSelfVerify(List<Path> superPathContainer);
+    protected abstract boolean doSelfVerify();
 
     @Presentable
     public P getProperty() {
@@ -40,13 +40,13 @@ public abstract class PropertyExpectation<V, P extends Property<V>> extends Expe
     }
 
     @Override
-    protected boolean selfVerify(List<Path> superPathContainer) {
+    protected boolean selfVerify() {
         if (valueSupplier != null) {
             value = valueSupplier.get();
-            boolean pass = doSelfVerify(superPathContainer);
+            boolean pass = doSelfVerify();
             value = null;
             return pass;
         }
-        return doSelfVerify(superPathContainer);
+        return doSelfVerify();
     }
 }

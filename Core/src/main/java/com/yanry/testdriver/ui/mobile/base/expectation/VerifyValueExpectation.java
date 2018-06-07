@@ -31,7 +31,7 @@ public class VerifyValueExpectation<V> extends PropertyExpectation<V, Property<V
     }
 
     @Override
-    protected boolean doSelfVerify(List<Path> superPathContainer) {
+    protected boolean doSelfVerify() {
         return getValue().equals(getProperty().getCurrentValue());
     }
 }

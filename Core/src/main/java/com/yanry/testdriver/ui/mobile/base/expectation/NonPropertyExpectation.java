@@ -22,7 +22,7 @@ public abstract class NonPropertyExpectation extends Expectation {
     protected abstract Graph getGraph();
 
     @Override
-    protected boolean selfVerify(List<Path> superPathContainer) {
+    protected boolean selfVerify() {
         return getGraph().verifyExpectation(this);
     }
 

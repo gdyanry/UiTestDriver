@@ -37,8 +37,8 @@ public class EditText extends View {
         }
 
         @Override
-        protected boolean doSwitch(String to) {
-            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground, null) &&
+        protected boolean dooSwitch(String to) {
+            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground) &&
                     getGraph().performAction(new EnterText(EditText.this, to));
         }
 

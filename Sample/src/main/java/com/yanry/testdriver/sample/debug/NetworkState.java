@@ -21,7 +21,7 @@ public class NetworkState extends SwitchBySelfProperty<NetworkState.Network> {
     }
 
     @Override
-    protected boolean doSwitch(Network to) {
+    protected boolean dooSwitch(Network to) {
         return getGraph().performAction(new SwitchState<>(this, to));
     }
 

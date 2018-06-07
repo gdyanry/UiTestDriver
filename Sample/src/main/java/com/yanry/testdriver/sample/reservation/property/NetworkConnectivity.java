@@ -21,7 +21,7 @@ public class NetworkConnectivity extends SwitchBySelfProperty<Boolean> {
     }
 
     @Override
-    protected boolean doSwitch(Boolean to) {
+    protected boolean dooSwitch(Boolean to) {
         return graph.performAction(new SwitchState(this, to));
     }
 

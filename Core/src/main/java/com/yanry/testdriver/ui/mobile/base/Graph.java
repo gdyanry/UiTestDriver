@@ -4,7 +4,9 @@
 package com.yanry.testdriver.ui.mobile.base;
 
 import com.yanry.testdriver.ui.mobile.Util;
-import com.yanry.testdriver.ui.mobile.base.event.*;
+import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
+import com.yanry.testdriver.ui.mobile.base.event.Event;
+import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
@@ -73,8 +75,8 @@ public class Graph implements Communicator, Loggable {
                 if (optionalPaths == null) {
                     optionalPaths = allPaths.parallelStream().filter(p -> {
                         // 如果路径的事件为属性变化，则该路径下的该属性的初始值定义是多余的，因为变化本身包含了属性的初值和终值
-                        if (p.getEvent() instanceof ValueSwitchEvent) {
-                            ValueSwitchEvent transitionEvent = (ValueSwitchEvent) p.getEvent();
+                        if (p.getEvent() instanceof StateEvent) {
+                            StateEvent transitionEvent = (StateEvent) p.getEvent();
                             Property property = transitionEvent.getProperty();
                             p.remove(property);
                         }
@@ -112,7 +114,7 @@ public class Graph implements Communicator, Loggable {
             rollingPaths.clear();
             Path path = unprocessedPaths.stream().findAny().get();
             log("%n>>>>roll: %s%n", Util.getPresentation(path));
-            roll(path, null);
+            roll(path);
         }
         List<Object> result = new ArrayList<>(records);
         isTraversing = false;
@@ -126,23 +128,23 @@ public class Graph implements Communicator, Loggable {
         isTraversing = false;
     }
 
-    private boolean roll(Path path, List<Path> parentPaths) {
+    private boolean roll(Path path) {
         // to avoid infinite loop
         if (!rollingPaths.add(path)) {
             return false;
         }
-        return internalRoll(path, parentPaths);
+        return internalRoll(path);
     }
 
-    private boolean internalRoll(Path path, List<Path> parentPaths) {
+    private boolean internalRoll(Path path) {
         // make sure environment states are satisfied.
         // TODO 按状态优先级排序
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
             Map.Entry<Property, Object> state = any.get();
-            if (state.getKey().switchTo(state.getValue(), null)) {
-                return internalRoll(path, parentPaths);
+            if (state.getKey().switchTo(state.getValue())) {
+                return internalRoll(path);
             } else {
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, state.getKey()));
@@ -151,25 +153,18 @@ public class Graph implements Communicator, Loggable {
                 return false;
             }
         }
+        // all environment states are satisfied by now.
         // trigger event
         Event inputEvent = path.getEvent();
+        // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
         List<Path> siblings = new LinkedList<>();
-        if (inputEvent instanceof ValueSwitchEvent) {
-            ValueSwitchEvent event = (ValueSwitchEvent) inputEvent;
+        if (inputEvent instanceof StateEvent) {
+            StateEvent event = (StateEvent) inputEvent;
             // roll path for this switch event.
-            if (!event.getProperty().switchTo(event.getFrom(), null) ||
+            if (!event.getProperty().switchTo(event.getFrom()) ||
                     // sibling paths of current path becomes super paths of the path where switch
                     // event takes place!
-                    !event.getProperty().switchTo(event.getTo(), siblings)) {
-                if (unprocessedPaths.remove(path)) {
-                    records.add(new MissedPath(path, event));
-                }
-                return false;
-            }
-        } else if (inputEvent instanceof DynamicSwitchEvent) {
-            DynamicSwitchEvent event = (DynamicSwitchEvent) inputEvent;
-            if (!switchTo(event.getProperty(), event.getFrom(), null) || !switchTo(event
-                    .getProperty(), event.getTo(), siblings)) {
+                    !event.getProperty().switchTo(event.getTo())) {
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, event));
                 }
@@ -178,6 +173,7 @@ public class Graph implements Communicator, Loggable {
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
             event.processPreAction();
+            // this is where the action event is performed!
             if (performAction(event)) {
                 records.add(event);
                 siblings.addAll(allPaths.stream().filter(p -> p.getEvent() == inputEvent && p
@@ -199,19 +195,18 @@ public class Graph implements Communicator, Loggable {
         siblings.add(path);
         siblings.stream().distinct().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             if (p == path) {
-                log("%n>>>>selfVerify(%s): %s%n", parentPaths == null, Util.getPresentation(p));
-                result[0] = verify(p, parentPaths);
+                result[0] = verify(p);
             } else {
-                log("%n>>>>selfVerify sibling: %s%n", Util.getPresentation(p));
-                verify(p, null);
+                verify(p);
             }
         });
         return result[0];
     }
 
-    private boolean verify(Path path, List<Path> parentPaths) {
+    private boolean verify(Path path) {
         Expectation expectation = path.getExpectation();
-        boolean isPass = expectation.verify(parentPaths);
+        // 如果该期望（或者与其关联的期望）为属性期望，则其verify实现中必须要调用verifySupperPaths。
+        boolean isPass = expectation.verify();
         if (expectation.ifRecord()) {
             records.add(new Assertion(expectation, isPass));
         }
@@ -223,71 +218,40 @@ public class Graph implements Communicator, Loggable {
         return isPass;
     }
 
-    public <V> boolean verifySuperPaths(Property<V> property, V from, V to, List<Path> parentPaths,
-                                        BooleanSupplier switchAction) {
+    public <V> boolean verifySuperPaths(Property<V> property, V from, V to, BooleanSupplier switchAction) {
+        // this is where the switch action actually takes place!
         if (switchAction.getAsBoolean()) {
-            List<Path> superPaths = allPaths.stream().filter(p -> {
+            allPaths.stream().filter(p -> {
                 if (!rollingPaths.contains(p)) {
-                    if (p.getEvent() instanceof ValueSwitchEvent) {
-                        ValueSwitchEvent switchEvent = (ValueSwitchEvent) p.getEvent();
-                        if (switchEvent.getProperty() == property && switchEvent.getTo() == to
-                                && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied()) {
-                            return true;
-                        }
-                    } else if (p.getEvent() instanceof DynamicSwitchEvent) {
-                        DynamicSwitchEvent switchEvent = (DynamicSwitchEvent) p.getEvent();
-                        if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
-                                switchEvent.getFrom().test(from)) && p.isSatisfied()) {
-                            return true;
-                        }
-                    } else if (p.getEvent() instanceof PassiveSwitchEvent) {
-                        PassiveSwitchEvent switchEvent = (PassiveSwitchEvent) p.getEvent();
-                        if (switchEvent.getProperty() == property && switchEvent.getTo().test(to) && (from == null ||
-                                switchEvent.getFrom().test(from)) && p.isSatisfied()) {
+                    if (p.getEvent() instanceof StateEvent) {
+                        StateEvent switchEvent = (StateEvent) p.getEvent();
+                        if (switchEvent.getProperty() == property && switchEvent.getTo().test(to)
+                                && (from == null || switchEvent.getFrom().test(from)) && p.isSatisfied()) {
                             return true;
                         }
                     }
                 }
                 return false;
-            }).collect(Collectors.toList());
-            if (parentPaths == null) {
-                for (Path path : superPaths) {
-                    log("%n>>>>selfVerify super: %s%n", Util.getPresentation(path));
-                    verify(path, null);
-                }
-            } else {
-                parentPaths.addAll(superPaths);
-            }
+            }).forEach(path -> {
+                verify(path);
+            });
             return true;
         }
         return false;
     }
 
-    private <V> boolean switchTo(SwitchBySearchProperty<V> property, Predicate<V> to, List<Path>
-            parentPaths) {
-        if (to.test(property.getCurrentValue())) {
-            return true;
-        }
-        return findPathToRoll(parentPaths, null, (p, v) -> p == property && to.test((V) v));
-    }
-
-    public <V> boolean switchToState(SwitchBySearchProperty<V> property, V to, List<Path> parentPaths) {
-        return findPathToRoll(parentPaths, null, (prop, toVal) -> prop == property && to.equals(toVal));
-    }
-
     /**
      * try paths that satisfy the given predicates until one successfully rolled.
      *
-     * @param parentPaths
      * @param pathPredicate
      * @param endStatePredicate
      * @return
      */
-    public boolean findPathToRoll(List<Path> parentPaths, Predicate<Path> pathPredicate,
+    public boolean findPathToRoll(Predicate<Path> pathPredicate,
                                   BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
         return allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p) && !rollingPaths.contains(p) && !(p.getEvent() instanceof
-                    PassiveSwitchEvent)) {
+                    StateEvent)) {
                 return (pathPredicate == null || pathPredicate.test(p)) && p.getExpectation().isSatisfied(endStatePredicate);
             }
             return false;
@@ -298,7 +262,7 @@ public class Graph implements Communicator, Loggable {
             return i;
         })).filter(p -> {
             log("%n>>>>transit roll: %s%n", Util.getPresentation(p));
-            return roll(p, parentPaths);
+            return roll(p);
         }).findFirst().isPresent();
     }
 

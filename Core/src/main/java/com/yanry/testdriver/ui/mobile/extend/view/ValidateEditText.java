@@ -63,11 +63,11 @@ public class ValidateEditText extends EditText {
     public class ValidityState extends Property<Boolean> {
 
         @Override
-        protected boolean doSwitch(Boolean to, List<Path> superPathContainer) {
+        protected boolean doSwitch(Boolean to) {
             if (to) {
-                return validContents.stream().anyMatch(c -> getInputContent().switchTo(c, superPathContainer));
+                return validContents.stream().anyMatch(c -> getInputContent().switchTo(c));
             }
-            return invalidContents.stream().anyMatch(c -> getInputContent().switchTo(c, superPathContainer));
+            return invalidContents.stream().anyMatch(c -> getInputContent().switchTo(c));
         }
 
         @Override

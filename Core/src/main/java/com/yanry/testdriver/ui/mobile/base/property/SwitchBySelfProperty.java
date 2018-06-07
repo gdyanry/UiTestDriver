@@ -14,15 +14,15 @@ import java.util.List;
  */
 public abstract class SwitchBySelfProperty<V> extends CacheProperty<V> {
 
-    protected abstract boolean doSwitch(V to);
+    protected abstract boolean dooSwitch(V to);
 
     protected abstract Graph getGraph();
 
     public Expectation getExpectation(V to) {
         return new DynamicExpectation() {
             @Override
-            protected boolean selfVerify(List<Path> superPathContainer) {
-                return getGraph().verifySuperPaths(SwitchBySelfProperty.this, getCurrentValue(), to, superPathContainer,
+            protected boolean selfVerify() {
+                return getGraph().verifySuperPaths(SwitchBySelfProperty.this, getCurrentValue(), to,
                         () -> {
                             setCacheValue(to);
                             return true;
@@ -32,9 +32,9 @@ public abstract class SwitchBySelfProperty<V> extends CacheProperty<V> {
     }
 
     @Override
-    protected boolean doSwitch(V to, List<Path> parentPaths) {
-        return getGraph().verifySuperPaths(this, getCurrentValue(), to, parentPaths, () -> {
-            if (doSwitch(to)) {
+    protected final boolean doSwitch(V to) {
+        return getGraph().verifySuperPaths(this, getCurrentValue(), to, () -> {
+            if (dooSwitch(to)) {
                 setCacheValue(to);
                 return true;
             }

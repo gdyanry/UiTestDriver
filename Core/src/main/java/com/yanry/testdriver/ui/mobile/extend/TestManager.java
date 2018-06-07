@@ -5,7 +5,7 @@ import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.event.ValueSwitchEvent;
+import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.*;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
@@ -37,7 +37,7 @@ public class TestManager extends Graph {
         propertyInstances = new HashMap<>();
         Util.createPath(this, getProcessState().getStopProcessEvent(), new DynamicExpectation() {
             @Override
-            protected boolean selfVerify(List<Path> superPathContainer) {
+            protected boolean selfVerify() {
                 windowStack.clear();
                 return true;
             }
@@ -70,18 +70,18 @@ public class TestManager extends Graph {
     public abstract class Window implements ViewContainer {
         private VisibilityState visibility;
         private ForegroundVerification foregroundVerification;
-        private ValueSwitchEvent<Visibility> createEvent;
-        private ValueSwitchEvent<Visibility> closeEvent;
-        private ValueSwitchEvent<Visibility> resumeEvent;
-        private ValueSwitchEvent<Visibility> pauseEvent;
+        private StateEvent<Visibility, VisibilityState> createEvent;
+        private StateEvent<Visibility, VisibilityState> closeEvent;
+        private StateEvent<Visibility, VisibilityState> resumeEvent;
+        private StateEvent<Visibility, VisibilityState> pauseEvent;
 
         public Window() {
             visibility = new VisibilityState();
             foregroundVerification = new ForegroundVerification();
-            createEvent = new ValueSwitchEvent<>(visibility, NotCreated, Foreground);
-            closeEvent = new ValueSwitchEvent<>(visibility, Foreground, NotCreated);
-            resumeEvent = new ValueSwitchEvent<>(visibility, Background, Foreground);
-            pauseEvent = new ValueSwitchEvent<>(visibility, Foreground, Background);
+            createEvent = new StateEvent<>(visibility, NotCreated, Foreground);
+            closeEvent = new StateEvent<>(visibility, Foreground, NotCreated);
+            resumeEvent = new StateEvent<>(visibility, Background, Foreground);
+            pauseEvent = new StateEvent<>(visibility, Foreground, Background);
         }
 
         protected abstract void addCases();
@@ -90,8 +90,8 @@ public class TestManager extends Graph {
             return Util.createPath(TestManager.this, getProcessState().getStartProcessEvent(),
                     foregroundVerification.getExpectation(timing, true).addFollowingExpectation(new DynamicExpectation() {
                         @Override
-                        protected boolean selfVerify(List<Path> superPathContainer) {
-                            return verifySuperPaths(visibility, NotCreated, Foreground, superPathContainer, () -> {
+                        protected boolean selfVerify() {
+                            return verifySuperPaths(visibility, NotCreated, Foreground, () -> {
                                 windowStack.add(Window.this);
                                 return true;
                             });
@@ -104,19 +104,19 @@ public class TestManager extends Graph {
             return createPath(inputEvent, newWindow.foregroundVerification.getExpectation
                     (timing, true).addFollowingExpectation(new DynamicExpectation() {
                 @Override
-                protected boolean selfVerify(List<Path> superPathContainer) {
+                protected boolean selfVerify() {
                     if (closeCurrent) {
-                        verifySuperPaths(visibility, Foreground, NotCreated, superPathContainer, () -> {
+                        verifySuperPaths(visibility, Foreground, NotCreated, () -> {
                             windowStack.removeLastOccurrence(this);
                             return true;
                         });
                     } else {
-                        verifySuperPaths(visibility, Foreground, Background, superPathContainer, () -> true);
+                        verifySuperPaths(visibility, Foreground, Background, () -> true);
                     }
                     if (singleInstance) {
                         windowStack.removeIf(w -> w == newWindow);
                     }
-                    verifySuperPaths(newWindow.visibility, NotCreated, Foreground, superPathContainer, () -> {
+                    verifySuperPaths(newWindow.visibility, NotCreated, Foreground, () -> {
                         windowStack.add(newWindow);
                         return true;
                     });
@@ -129,14 +129,13 @@ public class TestManager extends Graph {
             Expectation expectation = foregroundVerification.getExpectation(timing,
                     false).addFollowingExpectation(new DynamicExpectation() {
                 @Override
-                protected boolean selfVerify(List<Path> superPathContainer) {
-                    verifySuperPaths(visibility, Foreground, NotCreated, superPathContainer, () -> {
+                protected boolean selfVerify() {
+                    verifySuperPaths(visibility, Foreground, NotCreated, () -> {
                         windowStack.removeLastOccurrence(this);
                         return true;
                     });
                     if (!windowStack.isEmpty()) {
-                        verifySuperPaths(windowStack.getLast().visibility, Background, Foreground,
-                                superPathContainer, () -> true);
+                        verifySuperPaths(windowStack.getLast().visibility, Background, Foreground, () -> true);
                     }
                     return true;
                 }
@@ -159,19 +158,19 @@ public class TestManager extends Graph {
             return visibility;
         }
 
-        public ValueSwitchEvent<Visibility> getCreateEvent() {
+        public StateEvent<Visibility, VisibilityState> getCreateEvent() {
             return createEvent;
         }
 
-        public ValueSwitchEvent<Visibility> getCloseEvent() {
+        public StateEvent<Visibility, VisibilityState> getCloseEvent() {
             return closeEvent;
         }
 
-        public ValueSwitchEvent<Visibility> getResumeEvent() {
+        public StateEvent<Visibility, VisibilityState> getResumeEvent() {
             return resumeEvent;
         }
 
-        public ValueSwitchEvent<Visibility> getPauseEvent() {
+        public StateEvent<Visibility, VisibilityState> getPauseEvent() {
             return pauseEvent;
         }
 
@@ -195,31 +194,31 @@ public class TestManager extends Graph {
         public class VisibilityState extends SwitchBySelfProperty<Visibility> {
 
             @Override
-            protected boolean doSwitch(Visibility to) {
+            protected boolean dooSwitch(Visibility to) {
                 Visibility currentValue = visibility.getCurrentValue();
                 switch (to) {
                     case NotCreated:
-                        return foregroundVerification.switchTo(false, null);
+                        return foregroundVerification.switchTo(false);
                     case Foreground:
                         if (currentValue == Background) {
                             Window top;
                             //downward
                             while ((top = windowStack.getLast()) != Window.this) {
-                                if (!top.visibility.switchTo(NotCreated, null)) {
+                                if (!top.visibility.switchTo(NotCreated)) {
                                     break;
                                 }
                             }
                             // upward
                             if (top != Window.this) {
-                                return foregroundVerification.switchTo(true, null);
+                                return foregroundVerification.switchTo(true);
                             }
                             return true;
                         } else {
                             // not created
-                            return foregroundVerification.switchTo(true, null);
+                            return foregroundVerification.switchTo(true);
                         }
                     case Background:
-                        return findPathToRoll(null, p -> p.get(visibility) == Foreground, (p, v) ->
+                        return findPathToRoll(p -> p.get(visibility) == Foreground, (p, v) ->
                                 foregroundVerification != p && p.getClass() == ForegroundVerification.class &&
                                         v.equals(true));
                 }

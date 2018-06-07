@@ -14,4 +14,8 @@ subprojects {
         implementation 'com.github.gdyanry:CommonLib:-SNAPSHOT'
         testCompile group: 'junit', name: 'junit', version: '4.12'
     }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
 }
