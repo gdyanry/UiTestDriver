@@ -10,11 +10,6 @@ public abstract class DynamicExpectation extends Expectation {
     }
 
     @Override
-    protected boolean isSelfSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
-        return false;
-    }
-
-    @Override
     public boolean ifRecord() {
         return false;
     }

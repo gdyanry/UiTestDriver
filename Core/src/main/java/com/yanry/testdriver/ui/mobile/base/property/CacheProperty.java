@@ -10,6 +10,8 @@ public abstract class CacheProperty<V> extends Property<V> {
 
     protected abstract V checkValue();
 
+    protected abstract boolean doSelfSwitch(V to);
+
     public void setCacheValue(V cacheValue) {
         this.cacheValue = cacheValue;
     }
@@ -20,5 +22,15 @@ public abstract class CacheProperty<V> extends Property<V> {
             cacheValue = checkValue();
         }
         return cacheValue;
+    }
+
+    @Override
+    protected final boolean selfSwitch(V to) {
+        if (doSelfSwitch(to)) {
+            cacheValue = to;
+            return true;
+        }
+        cacheValue = null;
+        return false;
     }
 }

@@ -22,23 +22,13 @@ public abstract class Expectation {
         followingExpectations = new LinkedList<>();
     }
 
-    protected abstract boolean selfVerify();
-
-    /**
-     * @param endStatePredicate
-     * @return whether this expectation itself isSatisfied the given end state predicate, excluding its following
-     * expectations.
-     */
-    protected abstract boolean isSelfSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate);
-
     public Expectation addFollowingExpectation(Expectation expectation) {
         followingExpectations.add(expectation);
         return this;
     }
 
-    @Presentable
-    public Timing getTiming() {
-        return timing;
+    public List<Expectation> getFollowingExpectations() {
+        return followingExpectations;
     }
 
     public boolean verify() {
@@ -49,16 +39,12 @@ public abstract class Expectation {
         return false;
     }
 
-    /**
-     * @param endStatePredicate
-     * @return whether this expectation isSatisfied the given end state predicate.
-     */
-    public boolean isSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
-        if (isSelfSatisfied(endStatePredicate)) {
-            return true;
-        }
-        return followingExpectations.stream().anyMatch(e -> e.isSatisfied(endStatePredicate));
+    @Presentable
+    public Timing getTiming() {
+        return timing;
     }
+
+    protected abstract boolean selfVerify();
 
     /**
      * @return 该期望是否为用户关注（需要输出到测试结果中）的。

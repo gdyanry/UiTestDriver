@@ -1,11 +1,9 @@
 package com.yanry.testdriver.ui.mobile.base.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 
-import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
@@ -15,12 +13,6 @@ import java.util.function.Supplier;
  * Created by rongyu.yan on 5/9/2017.
  */
 public abstract class SwitchBySearchProperty<V> extends CacheProperty<V> {
-    protected abstract Graph getGraph();
-
-    @Override
-    protected boolean doSwitch(V to) {
-        return getGraph().findPathToRoll(null, (prop, toVal) -> prop == this && to.equals(toVal));
-    }
 
     protected abstract boolean isVisibleToUser();
 
@@ -42,6 +34,10 @@ public abstract class SwitchBySearchProperty<V> extends CacheProperty<V> {
             super(timing, SwitchBySearchProperty.this, valueSupplier);
         }
 
+        public boolean isSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
+            return endStatePredicate.test(SwitchBySearchProperty.this, getValue());
+        }
+
         @Override
         protected boolean doSelfVerify() {
             // this path might become transition event of other paths
@@ -60,11 +56,6 @@ public abstract class SwitchBySearchProperty<V> extends CacheProperty<V> {
         @Override
         public boolean ifRecord() {
             return isVisibleToUser();
-        }
-
-        @Override
-        protected boolean isSelfSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
-            return endStatePredicate.test(SwitchBySearchProperty.this, getValue());
         }
     }
 }
