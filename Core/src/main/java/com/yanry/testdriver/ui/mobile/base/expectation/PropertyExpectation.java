@@ -10,18 +10,18 @@ import java.util.function.Supplier;
 /** A key-value pair (aka state) expectation
  * Created by rongyu.yan on 5/10/2017.
  */
-public abstract class PropertyExpectation<V, P extends Property<V>> extends Expectation {
-    private P property;
+public abstract class PropertyExpectation<V> extends Expectation {
+    private Property<V> property;
     private V value;
     private Supplier<V> valueSupplier;
 
-    public PropertyExpectation(Timing timing, P property, V value) {
+    public PropertyExpectation(Timing timing, Property<V> property, V value) {
         super(timing);
         this.property = property;
         this.value = value;
     }
 
-    public PropertyExpectation(Timing timing, P property, Supplier<V> valueSupplier) {
+    public PropertyExpectation(Timing timing, Property<V> property, Supplier<V> valueSupplier) {
         super(timing);
         this.property = property;
         this.valueSupplier = valueSupplier;
@@ -30,7 +30,7 @@ public abstract class PropertyExpectation<V, P extends Property<V>> extends Expe
     protected abstract boolean doSelfVerify();
 
     @Presentable
-    public P getProperty() {
+    public Property<V> getProperty() {
         return property;
     }
 

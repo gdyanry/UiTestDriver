@@ -247,12 +247,10 @@ public class Graph implements Communicator, Loggable {
      * @param endStatePredicate
      * @return
      */
-    public boolean findPathToRoll(Predicate<Path> pathPredicate,
-                                  BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
+    public boolean findPathToRoll(Predicate<Path> pathPredicate, BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
         return allPaths.stream().filter(p -> {
-            if (!failedPaths.contains(p) && !rollingPaths.contains(p) && !(p.getEvent() instanceof
-                    StateEvent)) {
-                return (pathPredicate == null || pathPredicate.test(p)) && p.getExpectation().isSatisfied(endStatePredicate);
+            if (!failedPaths.contains(p) && !rollingPaths.contains(p) && p.getExpectation() instanceof SwitchBySearchProperty.SwitchablePropertyExpectation) {
+                return (pathPredicate == null || pathPredicate.test(p)) && isSatisfied(p.getExpectation(), endStatePredicate);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {
@@ -264,6 +262,16 @@ public class Graph implements Communicator, Loggable {
             log("%n>>>>transit roll: %s%n", Util.getPresentation(p));
             return roll(p);
         }).findFirst().isPresent();
+    }
+
+    private boolean isSatisfied(Expectation expectation, BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
+        if (expectation instanceof SwitchBySearchProperty.SwitchablePropertyExpectation) {
+            SwitchBySearchProperty.SwitchablePropertyExpectation exp = (SwitchBySearchProperty.SwitchablePropertyExpectation) expectation;
+            if (exp.isSatisfied(endStatePredicate)) {
+                return true;
+            }
+        }
+        return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStatePredicate));
     }
 
     @Override

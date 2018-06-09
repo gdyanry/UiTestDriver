@@ -63,7 +63,7 @@ public class ValidateEditText extends EditText {
     public class ValidityState extends Property<Boolean> {
 
         @Override
-        protected boolean doSwitch(Boolean to) {
+        protected boolean selfSwitch(Boolean to) {
             if (to) {
                 return validContents.stream().anyMatch(c -> getInputContent().switchTo(c));
             }

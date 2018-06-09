@@ -26,11 +26,6 @@ public class VerifyValueExpectation<V> extends PropertyExpectation<V, Property<V
     }
 
     @Override
-    protected boolean isSelfSatisfied(BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
-        return false;
-    }
-
-    @Override
     protected boolean doSelfVerify() {
         return getValue().equals(getProperty().getCurrentValue());
     }

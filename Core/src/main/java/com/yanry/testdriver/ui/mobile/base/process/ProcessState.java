@@ -2,7 +2,6 @@ package com.yanry.testdriver.ui.mobile.base.process;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySelfProperty;
 
 /**
  * Created by rongyu.yan on 3/9/2017.
