@@ -5,7 +5,7 @@ import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
@@ -50,7 +50,7 @@ public class Tab extends View implements ViewContainer {
         getParent().present(path);
     }
 
-    public static class CurrentTab extends SwitchBySearchProperty<Tab> {
+    public static class CurrentTab extends CacheProperty<Tab> {
         private Graph graph;
         private List<Tab> tabs;
 
@@ -60,17 +60,17 @@ public class Tab extends View implements ViewContainer {
         }
 
         @Override
-        protected Graph getGraph() {
-            return graph;
-        }
-
-        @Override
-        protected Tab checkValue() {
+        protected Tab checkValue(Graph graph) {
             return tabs.get(0);
         }
 
         @Override
-        public boolean isVisibleToUser() {
+        protected boolean doSelfSwitch(Graph graph, Tab to) {
+            return false;
+        }
+
+        @Override
+        public boolean isCheckedByUser() {
             return true;
         }
     }

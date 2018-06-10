@@ -1,15 +1,10 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
-
-import java.util.List;
-import java.util.function.BiPredicate;
 
 /**
- *  This class represents a transient expectation such as a toast or a loading dialog.
+ * This class represents a transient expectation such as a toast or a loading dialog.
  * Created by rongyu.yan on 3/9/2017.
  */
 @Presentable
@@ -19,11 +14,9 @@ public abstract class NonPropertyExpectation extends Expectation {
         super(timing);
     }
 
-    protected abstract Graph getGraph();
-
     @Override
-    protected boolean selfVerify() {
-        return getGraph().verifyExpectation(this);
+    protected final boolean selfVerify(Graph graph) {
+        return graph.verifyExpectation(this);
     }
 
     @Override

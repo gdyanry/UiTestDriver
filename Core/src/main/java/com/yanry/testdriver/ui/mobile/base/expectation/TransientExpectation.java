@@ -1,6 +1,5 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 
 /**
@@ -8,21 +7,14 @@ import com.yanry.testdriver.ui.mobile.base.Presentable;
  */
 public class TransientExpectation extends NonPropertyExpectation {
     private int duration;
-    private Graph graph;
 
-    public TransientExpectation(Timing timing, int duration, Graph graph) {
+    public TransientExpectation(Timing timing, int duration) {
         super(timing);
         this.duration = duration;
-        this.graph = graph;
     }
 
     @Presentable
     public int getDuration() {
         return duration;
-    }
-
-    @Override
-    protected Graph getGraph() {
-        return graph;
     }
 }

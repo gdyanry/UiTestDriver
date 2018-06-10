@@ -5,7 +5,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
@@ -14,8 +14,8 @@ import java.util.function.Supplier;
 
 /**
  * @author yanry
- *         <p>
- *         Jan 10, 2017
+ * <p>
+ * Jan 10, 2017
  */
 @Presentable
 public class View {
@@ -58,7 +58,7 @@ public class View {
         return selector;
     }
 
-    public class ViewVisibility extends SwitchBySearchProperty<Boolean> {
+    public class ViewVisibility extends CacheProperty<Boolean> {
 
         @Presentable
         public View getView() {
@@ -66,17 +66,17 @@ public class View {
         }
 
         @Override
-        protected Boolean checkValue() {
+        protected Boolean checkValue(Graph graph) {
             return defaultVisibility == null ? true : defaultVisibility.get();
         }
 
         @Override
-        protected Graph getGraph() {
-            return getWindow().getGraph();
+        protected boolean doSelfSwitch(Graph graph, Boolean to) {
+            return false;
         }
 
         @Override
-        protected boolean isVisibleToUser() {
+        public boolean isCheckedByUser() {
             return true;
         }
     }

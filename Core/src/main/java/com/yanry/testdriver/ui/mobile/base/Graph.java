@@ -8,9 +8,10 @@ import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.StaticPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
 import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
@@ -49,7 +50,7 @@ public class Graph implements Communicator, Loggable {
         rollingPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
-        processState = new ProcessState(this);
+        processState = new ProcessState();
     }
 
     public ProcessState getProcessState() {
@@ -140,10 +141,10 @@ public class Graph implements Communicator, Loggable {
         // make sure environment states are satisfied.
         // TODO 按状态优先级排序
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
-                equals(state.getKey().getCurrentValue())).findFirst();
+                equals(state.getKey().getCurrentValue(this))).findFirst();
         if (any.isPresent()) {
             Map.Entry<Property, Object> state = any.get();
-            if (state.getKey().switchTo(state.getValue())) {
+            if (state.getKey().switchTo(this, state.getValue())) {
                 return internalRoll(path);
             } else {
                 if (unprocessedPaths.remove(path)) {
@@ -161,10 +162,10 @@ public class Graph implements Communicator, Loggable {
         if (inputEvent instanceof StateEvent) {
             StateEvent event = (StateEvent) inputEvent;
             // roll path for this switch event.
-            if (!event.getProperty().switchTo(event.getFrom()) ||
+            if (!event.getProperty().switchTo(this, event.getFrom()) ||
                     // sibling paths of current path becomes super paths of the path where switch
                     // event takes place!
-                    !event.getProperty().switchTo(event.getTo())) {
+                    !event.getProperty().switchTo(this, event.getTo())) {
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, event));
                 }
@@ -206,7 +207,7 @@ public class Graph implements Communicator, Loggable {
     private boolean verify(Path path) {
         Expectation expectation = path.getExpectation();
         // 如果该期望（或者与其关联的期望）为属性期望，则其verify实现中必须要调用verifySupperPaths。
-        boolean isPass = expectation.verify();
+        boolean isPass = expectation.verify(this);
         if (expectation.ifRecord()) {
             records.add(new Assertion(expectation, isPass));
         }
@@ -247,9 +248,9 @@ public class Graph implements Communicator, Loggable {
      * @param endStatePredicate
      * @return
      */
-    public boolean findPathToRoll(Predicate<Path> pathPredicate, BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
+    public <V> boolean findPathToRoll(Predicate<Path> pathPredicate, BiPredicate<Property<V>, V> endStatePredicate) {
         return allPaths.stream().filter(p -> {
-            if (!failedPaths.contains(p) && !rollingPaths.contains(p) && p.getExpectation() instanceof SwitchBySearchProperty.SwitchablePropertyExpectation) {
+            if (!failedPaths.contains(p) && !rollingPaths.contains(p) && p.getExpectation() instanceof PropertyExpectation) {
                 return (pathPredicate == null || pathPredicate.test(p)) && isSatisfied(p.getExpectation(), endStatePredicate);
             }
             return false;
@@ -264,9 +265,9 @@ public class Graph implements Communicator, Loggable {
         }).findFirst().isPresent();
     }
 
-    private boolean isSatisfied(Expectation expectation, BiPredicate<SwitchBySearchProperty, Object> endStatePredicate) {
-        if (expectation instanceof SwitchBySearchProperty.SwitchablePropertyExpectation) {
-            SwitchBySearchProperty.SwitchablePropertyExpectation exp = (SwitchBySearchProperty.SwitchablePropertyExpectation) expectation;
+    private <V> boolean isSatisfied(Expectation expectation, BiPredicate<Property<V>, V> endStatePredicate) {
+        if (expectation instanceof StaticPropertyExpectation) {
+            StaticPropertyExpectation<V> exp = (StaticPropertyExpectation<V>) expectation;
             if (exp.isSatisfied(endStatePredicate)) {
                 return true;
             }

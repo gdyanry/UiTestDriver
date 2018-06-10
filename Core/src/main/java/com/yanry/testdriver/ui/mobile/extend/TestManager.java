@@ -6,9 +6,11 @@ import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
-import com.yanry.testdriver.ui.mobile.base.expectation.*;
+import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 import com.yanry.testdriver.ui.mobile.extend.action.ClickOutside;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import lib.common.util.ReflectionUtil;
@@ -33,11 +35,10 @@ public class TestManager extends Graph {
         windowStack = new LinkedList<>();
         windowInstances = new HashMap<>();
         propertyInstances = new HashMap<>();
-        Util.createPath(this, getProcessState().getStopProcessEvent(), new DynamicExpectation() {
+        Util.createPath(this, getProcessState().getStopProcessEvent(), new ActionExpectation() {
             @Override
-            protected boolean selfVerify() {
+            protected void run() {
                 windowStack.clear();
-                return true;
             }
         });
     }
@@ -61,8 +62,8 @@ public class TestManager extends Graph {
 
     /**
      * @author yanry
-     *         <p>
-     *         Jan 10, 2017
+     * <p>
+     * Jan 10, 2017
      */
     @Presentable
     public abstract class Window implements ViewContainer {
@@ -86,10 +87,10 @@ public class TestManager extends Graph {
 
         public Path showOnStartUp(Timing timing) {
             return Util.createPath(TestManager.this, getProcessState().getStartProcessEvent(),
-                    foregroundVerification.getExpectation(timing, true).addFollowingExpectation(new DynamicExpectation() {
+                    foregroundVerification.getExpectation(timing, true).addFollowingExpectation(new ActionExpectation() {
                         @Override
-                        protected boolean selfVerify() {
-                            return verifySuperPaths(visibility, NotCreated, Foreground, () -> {
+                        protected void run() {
+                            verifySuperPaths(visibility, NotCreated, Foreground, () -> {
                                 windowStack.add(Window.this);
                                 return true;
                             });
@@ -100,9 +101,9 @@ public class TestManager extends Graph {
         public Path popWindow(Window newWindow, Event inputEvent, Timing timing, boolean closeCurrent, boolean
                 singleInstance) {
             return createPath(inputEvent, newWindow.foregroundVerification.getExpectation
-                    (timing, true).addFollowingExpectation(new DynamicExpectation() {
+                    (timing, true).addFollowingExpectation(new ActionExpectation() {
                 @Override
-                protected boolean selfVerify() {
+                protected void run() {
                     if (closeCurrent) {
                         verifySuperPaths(visibility, Foreground, NotCreated, () -> {
                             windowStack.removeLastOccurrence(this);
@@ -118,16 +119,15 @@ public class TestManager extends Graph {
                         windowStack.add(newWindow);
                         return true;
                     });
-                    return true;
                 }
             }));
         }
 
         public Path close(Event inputEvent, Timing timing, Expectation... followingExpectations) {
             Expectation expectation = foregroundVerification.getExpectation(timing,
-                    false).addFollowingExpectation(new DynamicExpectation() {
+                    false).addFollowingExpectation(new ActionExpectation() {
                 @Override
-                protected boolean selfVerify() {
+                protected void run() {
                     verifySuperPaths(visibility, Foreground, NotCreated, () -> {
                         windowStack.removeLastOccurrence(this);
                         return true;
@@ -135,7 +135,6 @@ public class TestManager extends Graph {
                     if (!windowStack.isEmpty()) {
                         verifySuperPaths(windowStack.getLast().visibility, Background, Foreground, () -> true);
                     }
-                    return true;
                 }
             });
             for (Expectation followingExpectation : followingExpectations) {
@@ -189,52 +188,42 @@ public class TestManager extends Graph {
             path.addInitState(visibility, Foreground);
         }
 
-        public class VisibilityState extends SwitchBySelfProperty<Visibility> {
+        public class VisibilityState extends Property<Visibility> {
 
             @Override
-            protected boolean dooSwitch(Visibility to) {
-                Visibility currentValue = visibility.getCurrentValue();
+            protected boolean selfSwitch(Graph graph, Visibility to) {
+                Visibility currentValue = visibility.getCurrentValue(graph);
                 switch (to) {
                     case NotCreated:
-                        return foregroundVerification.switchTo(false);
+                        return foregroundVerification.switchTo(graph, false);
                     case Foreground:
                         if (currentValue == Background) {
                             Window top;
                             //downward
                             while ((top = windowStack.getLast()) != Window.this) {
-                                if (!top.visibility.switchTo(NotCreated)) {
+                                if (!top.visibility.switchTo(graph, NotCreated)) {
                                     break;
                                 }
                             }
                             // upward
                             if (top != Window.this) {
-                                return foregroundVerification.switchTo(true);
+                                return foregroundVerification.switchTo(graph, true);
                             }
                             return true;
                         } else {
                             // not created
-                            return foregroundVerification.switchTo(true);
+                            return foregroundVerification.switchTo(graph, true);
                         }
                     case Background:
                         return findPathToRoll(p -> p.get(visibility) == Foreground, (p, v) ->
-                                foregroundVerification != p && p.getClass() == ForegroundVerification.class &&
+                                !foregroundVerification.equals(p) && p.getClass() == ForegroundVerification.class &&
                                         v.equals(true));
                 }
                 return false;
             }
 
             @Override
-            protected Graph getGraph() {
-                return TestManager.this;
-            }
-
-            @Override
-            protected Visibility checkValue() {
-                return null;
-            }
-
-            @Override
-            public Visibility getCurrentValue() {
+            public Visibility getCurrentValue(Graph graph) {
                 int index = windowStack.indexOf(Window.this);
                 if (index == -1) {
                     return NotCreated;
@@ -244,31 +233,31 @@ public class TestManager extends Graph {
                     return Background;
                 }
             }
+
+            @Override
+            public boolean isCheckedByUser() {
+                return false;
+            }
         }
 
-        public class ForegroundVerification extends SwitchBySearchProperty<Boolean> {
+        public class ForegroundVerification extends Property<Boolean> {
             @Presentable
             public Window getWindow() {
                 return Window.this;
             }
 
             @Override
-            protected Boolean checkValue() {
+            protected boolean selfSwitch(Graph graph, Boolean to) {
+                return false;
+            }
+
+            @Override
+            public Boolean getCurrentValue(Graph graph) {
                 return null;
             }
 
             @Override
-            public Boolean getCurrentValue() {
-                return null;
-            }
-
-            @Override
-            protected Graph getGraph() {
-                return TestManager.this;
-            }
-
-            @Override
-            protected boolean isVisibleToUser() {
+            public boolean isCheckedByUser() {
                 return true;
             }
         }

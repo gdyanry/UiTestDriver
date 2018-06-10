@@ -2,6 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
@@ -28,7 +29,7 @@ public class EditText extends View {
         return inputContent;
     }
 
-    public class InputContent extends SwitchBySelfProperty<String> {
+    public class InputContent extends CacheProperty<String> {
 
         @Presentable
         public EditText getEditText() {
@@ -36,19 +37,19 @@ public class EditText extends View {
         }
 
         @Override
-        protected boolean dooSwitch(String to) {
-            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground) &&
-                    getGraph().performAction(new EnterText(EditText.this, to));
-        }
-
-        @Override
-        protected Graph getGraph() {
-            return getWindow().getGraph();
-        }
-
-        @Override
-        protected String checkValue() {
+        protected String checkValue(Graph graph) {
             return "";
+        }
+
+        @Override
+        protected boolean doSelfSwitch(Graph graph, String to) {
+            return getWindow().getVisibility().switchTo(graph, TestManager.Visibility.Foreground) &&
+                    graph.performAction(new EnterText(EditText.this, to));
+        }
+
+        @Override
+        public boolean isCheckedByUser() {
+            return false;
         }
     }
 }

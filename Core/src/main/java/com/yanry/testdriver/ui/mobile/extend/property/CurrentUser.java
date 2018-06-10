@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.extend.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Created by rongyu.yan on 4/18/2017.
  */
-public class CurrentUser extends SwitchBySearchProperty<String> {
+public class CurrentUser extends CacheProperty<String> {
     private Graph graph;
     private HashMap<String, String> userPasswordMap;
 
@@ -29,12 +29,7 @@ public class CurrentUser extends SwitchBySearchProperty<String> {
     }
 
     @Override
-    protected boolean isVisibleToUser() {
-        return false;
-    }
-
-    @Override
-    protected String checkValue() {
+    protected String checkValue(Graph graph) {
         Set<String> users = userPasswordMap.keySet();
         String[] options = new String[users.size() + 1];
         options[0] = "";
@@ -42,11 +37,16 @@ public class CurrentUser extends SwitchBySearchProperty<String> {
         for (String user : users) {
             options[++i] = user;
         }
-        return getGraph().checkState(new StateToCheck<>(this, options));
+        return graph.checkState(new StateToCheck<>(this, options));
     }
 
     @Override
-    protected Graph getGraph() {
-        return graph;
+    protected boolean doSelfSwitch(Graph graph, String to) {
+        return false;
+    }
+
+    @Override
+    public boolean isCheckedByUser() {
+        return false;
     }
 }

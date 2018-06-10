@@ -5,12 +5,10 @@ package com.yanry.testdriver.ui.mobile.base.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.expectation.StaticPropertyExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 
 /**
- * Property that can do transition between its values. Direct subclasses are not supposed to be used as an
- * expectation in a path, meaning that the state transition of this property is accomplished by realizing the
- * {@link #selfSwitch(Object)} method instead of searching paths from the graph.
- *
  * @author yanry
  * <p>
  * Jan 5, 2017
@@ -18,20 +16,24 @@ import com.yanry.testdriver.ui.mobile.base.Presentable;
 @Presentable
 public abstract class Property<V> {
 
-    public boolean switchTo(V to) {
-        return to.equals(getCurrentValue()) ||
+    public final boolean switchTo(Graph graph, V to) {
+        return to.equals(getCurrentValue(graph)) ||
                 // 自身的状态转化可能会触发执行别的路径
-                getGraph().verifySuperPaths(this, getCurrentValue(), to, () ->
+                graph.verifySuperPaths(this, getCurrentValue(graph), to, () ->
                         // 先搜索是否存在可用路径
-                        getGraph().findPathToRoll(null, (prop, val) -> equals(prop) && to.equals(val)) ||
+                        graph.findPathToRoll(null, (prop, val) -> equals(prop) && to.equals(val)) ||
                                 // 若无可用路径再尝试自转化
-                                selfSwitch(to))
-                        && to.equals(getCurrentValue());
+                                selfSwitch(graph, to))
+                        && to.equals(getCurrentValue(graph));
     }
 
-    protected abstract Graph getGraph();
+    public StaticPropertyExpectation<V> getExpectation(Timing timing, V value) {
+        return new StaticPropertyExpectation<>(timing, this, value);
+    }
 
-    protected abstract boolean selfSwitch(V to);
+    protected abstract boolean selfSwitch(Graph graph, V to);
 
-    public abstract V getCurrentValue();
+    public abstract V getCurrentValue(Graph graph);
+
+    public abstract boolean isCheckedByUser();
 }

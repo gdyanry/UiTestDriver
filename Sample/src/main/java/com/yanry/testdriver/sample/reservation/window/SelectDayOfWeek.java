@@ -2,7 +2,7 @@ package com.yanry.testdriver.sample.reservation.window;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
-import com.yanry.testdriver.ui.mobile.base.expectation.VerifyValueExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.DynamicPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.view.CheckBox;
@@ -34,7 +34,7 @@ public class SelectDayOfWeek extends TestManager.Window {
             checkBoxes[i] = new CheckBox(this, new ByIndex(i));
             int finalIndex = i;
             // init state
-            createPath(getCreateEvent(), new VerifyValueExpectation<Boolean>(Timing.IMMEDIATELY, checkBoxes[i]
+            createPath(getCreateEvent(), new DynamicPropertyExpectation<Boolean>(Timing.IMMEDIATELY, checkBoxes[i]
                     .getCheckState(), () -> dayOfWeekValue.getCurrentValue()[finalIndex]));
             // day of week validity on true
             createPath(clickConfirm, dayOfWeekValidity.getExpectation(Timing.IMMEDIATELY, true)).addInitState

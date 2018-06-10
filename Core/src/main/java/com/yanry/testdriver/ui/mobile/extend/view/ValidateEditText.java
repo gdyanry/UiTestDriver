@@ -1,5 +1,6 @@
 package com.yanry.testdriver.ui.mobile.extend.view;
 
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
@@ -8,7 +9,6 @@ import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -48,7 +48,7 @@ public class ValidateEditText extends EditText {
         return path;
     }
 
-    public Path setEmptyValidationCase(Event event, Expectation expectation, Property<Boolean>...preValidities) {
+    public Path setEmptyValidationCase(Event event, Expectation expectation, Property<Boolean>... preValidities) {
         return addNegativeCase("", event, expectation, preValidities);
     }
 
@@ -63,16 +63,21 @@ public class ValidateEditText extends EditText {
     public class ValidityState extends Property<Boolean> {
 
         @Override
-        protected boolean selfSwitch(Boolean to) {
+        protected boolean selfSwitch(Graph graph, Boolean to) {
             if (to) {
-                return validContents.stream().anyMatch(c -> getInputContent().switchTo(c));
+                return validContents.stream().anyMatch(c -> getInputContent().switchTo(graph, c));
             }
-            return invalidContents.stream().anyMatch(c -> getInputContent().switchTo(c));
+            return invalidContents.stream().anyMatch(c -> getInputContent().switchTo(graph, c));
         }
 
         @Override
-        public Boolean getCurrentValue() {
-            return validContents.contains(getInputContent().getCurrentValue());
+        public Boolean getCurrentValue(Graph graph) {
+            return validContents.contains(getInputContent().getCurrentValue(graph));
+        }
+
+        @Override
+        public boolean isCheckedByUser() {
+            return false;
         }
     }
 }

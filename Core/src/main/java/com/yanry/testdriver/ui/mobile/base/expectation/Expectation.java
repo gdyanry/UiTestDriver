@@ -1,12 +1,10 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
-import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.property.SwitchBySearchProperty;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiPredicate;
 
 /**
  * Expectation that has a timing and following expectations. Following expectations are verified only when this expectation passes its verification at runtime.
@@ -31,9 +29,9 @@ public abstract class Expectation {
         return followingExpectations;
     }
 
-    public boolean verify() {
-        if (selfVerify()) {
-            followingExpectations.forEach(e -> e.verify());
+    public final boolean verify(Graph graph) {
+        if (selfVerify(graph)) {
+            followingExpectations.forEach(e -> e.verify(graph));
             return true;
         }
         return false;
@@ -44,7 +42,7 @@ public abstract class Expectation {
         return timing;
     }
 
-    protected abstract boolean selfVerify();
+    protected abstract boolean selfVerify(Graph graph);
 
     /**
      * @return 该期望是否为用户关注（需要输出到测试结果中）的。

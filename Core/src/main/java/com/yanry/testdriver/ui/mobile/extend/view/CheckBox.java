@@ -2,6 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
@@ -29,7 +30,7 @@ public class CheckBox extends TextView {
         return checkState;
     }
 
-    public class CheckState extends SwitchBySelfProperty<Boolean> {
+    public class CheckState extends CacheProperty<Boolean> {
 
         @Presentable
         public CheckBox getCheckBox() {
@@ -37,19 +38,19 @@ public class CheckBox extends TextView {
         }
 
         @Override
-        protected Boolean checkValue() {
-            return getGraph().checkState(new StateToCheck<>(this, false, true));
+        protected Boolean checkValue(Graph graph) {
+            return graph.checkState(new StateToCheck<>(this, false, true));
         }
 
         @Override
-        protected boolean dooSwitch(Boolean to) {
-            return getWindow().getVisibility().switchTo(TestManager.Visibility.Foreground) &&
-                    getGraph().performAction(new Click<>(CheckBox.this));
+        protected boolean doSelfSwitch(Graph graph, Boolean to) {
+            return getWindow().getVisibility().switchTo(graph, TestManager.Visibility.Foreground) &&
+                    graph.performAction(new Click<>(CheckBox.this));
         }
 
         @Override
-        protected Graph getGraph() {
-            return getWindow().getGraph();
+        public boolean isCheckedByUser() {
+            return false;
         }
     }
 }
