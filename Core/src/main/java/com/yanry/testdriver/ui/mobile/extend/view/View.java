@@ -71,7 +71,7 @@ public class View {
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, Boolean to) {
+        protected boolean selfSwitch(Graph graph, Boolean to) {
             return false;
         }
 

@@ -74,10 +74,5 @@ public class ValidateEditText extends EditText {
         public Boolean getCurrentValue(Graph graph) {
             return validContents.contains(getInputContent().getCurrentValue(graph));
         }
-
-        @Override
-        public boolean isCheckedByUser() {
-            return false;
-        }
     }
 }

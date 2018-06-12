@@ -11,11 +11,9 @@ import java.util.Set;
  * Created by rongyu.yan on 4/18/2017.
  */
 public class CurrentUser extends CacheProperty<String> {
-    private Graph graph;
     private HashMap<String, String> userPasswordMap;
 
-    public CurrentUser(Graph graph) {
-        this.graph = graph;
+    public CurrentUser() {
         userPasswordMap = new HashMap<>();
     }
 
@@ -41,12 +39,12 @@ public class CurrentUser extends CacheProperty<String> {
     }
 
     @Override
-    protected boolean doSelfSwitch(Graph graph, String to) {
+    public boolean isCheckedByUser() {
         return false;
     }
 
     @Override
-    public boolean isCheckedByUser() {
+    protected boolean selfSwitch(Graph graph, String to) {
         return false;
     }
 }

@@ -30,15 +30,15 @@ public class ProcessState extends CacheProperty<Boolean> {
     }
 
     @Override
-    protected boolean doSelfSwitch(Graph graph, Boolean to) {
+    public boolean isCheckedByUser() {
+        return false;
+    }
+
+    @Override
+    protected boolean selfSwitch(Graph graph, Boolean to) {
         if (to) {
             return graph.performAction(new StartProcess());
         }
         return graph.performAction(new StopProcess());
-    }
-
-    @Override
-    public boolean isCheckedByUser() {
-        return false;
     }
 }

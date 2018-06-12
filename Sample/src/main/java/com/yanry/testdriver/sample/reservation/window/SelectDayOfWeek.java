@@ -35,7 +35,7 @@ public class SelectDayOfWeek extends TestManager.Window {
             int finalIndex = i;
             // init state
             createPath(getCreateEvent(), new DynamicPropertyExpectation<Boolean>(Timing.IMMEDIATELY, checkBoxes[i]
-                    .getCheckState(), () -> dayOfWeekValue.getCurrentValue()[finalIndex]));
+                    .getCheckState(), () -> dayOfWeekValue.getCurrentValue(getGraph())[finalIndex]));
             // day of week validity on true
             createPath(clickConfirm, dayOfWeekValidity.getExpectation(Timing.IMMEDIATELY, true)).addInitState
                     (checkBoxes[i].getCheckState(), true).addInitState(dayOfWeekValidity, false);
@@ -50,12 +50,12 @@ public class SelectDayOfWeek extends TestManager.Window {
         createPath(clickConfirm, dayOfWeekValue.getExpectation(Timing.IMMEDIATELY, () -> {
             for (int i = 0; i < checkBoxes.length; i++) {
                 CheckBox checkBox = checkBoxes[i];
-                dayOfWeekValue.getCurrentValue()[i] = checkBox.getCheckState().getCurrentValue();
+                dayOfWeekValue.getCurrentValue(getGraph())[i] = checkBox.getCheckState().getCurrentValue(getGraph());
             }
-            return dayOfWeekValue.getCurrentValue();
+            return dayOfWeekValue.getCurrentValue(getGraph());
         }).addFollowingExpectation(tvDayOfWeek.getText().getExpectation(Timing.IMMEDIATELY, () -> {
             StringBuilder stringBuilder = new StringBuilder();
-            boolean[] bArr = dayOfWeekValue.getCurrentValue();
+            boolean[] bArr = dayOfWeekValue.getCurrentValue(getGraph());
             if (bArr[0]) {
                 stringBuilder.append("星期一，");
             }

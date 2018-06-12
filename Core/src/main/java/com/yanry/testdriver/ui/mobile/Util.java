@@ -40,6 +40,7 @@ public class Util {
                 if (method.isAnnotationPresent(Presentable.class)) {
                     String key = StringUtil.setFirstLetterCase(method.getName().replaceFirst("^get", ""), false);
                     try {
+                        method.setAccessible(true);
                         Object value = method.invoke(obj);
                         if (value != null) {
                             jsonObject.put(key, getPresentation(value));

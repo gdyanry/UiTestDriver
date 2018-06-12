@@ -37,7 +37,7 @@ public class TextView extends View {
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, String to) {
+        protected boolean selfSwitch(Graph graph, String to) {
             return false;
         }
 

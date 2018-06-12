@@ -178,7 +178,7 @@ public class Graph implements Communicator, Loggable {
             if (performAction(event)) {
                 records.add(event);
                 siblings.addAll(allPaths.stream().filter(p -> p.getEvent() == inputEvent && p
-                        .isSatisfied()).collect(Collectors.toList()));
+                        .isSatisfied(this)).collect(Collectors.toList()));
             } else {
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, event));
@@ -227,7 +227,7 @@ public class Graph implements Communicator, Loggable {
                     if (p.getEvent() instanceof StateEvent) {
                         StateEvent switchEvent = (StateEvent) p.getEvent();
                         if (switchEvent.getProperty() == property && switchEvent.getTo().test(to)
-                                && (from == null || switchEvent.getFrom().test(from)) && p.isSatisfied()) {
+                                && (from == null || switchEvent.getFrom().test(from)) && p.isSatisfied(this)) {
                             return true;
                         }
                     }
@@ -256,7 +256,7 @@ public class Graph implements Communicator, Loggable {
             return false;
         }).sorted(Comparator.comparingInt(p -> {
             // TODO 细化排序值，寻找最短路径
-            int i = p.isSatisfied() ? 0 : 1;
+            int i = p.isSatisfied(this) ? 0 : 1;
             log("%n>>>>compare %s: %s%n", i, Util.getPresentation(p));
             return i;
         })).filter(p -> {

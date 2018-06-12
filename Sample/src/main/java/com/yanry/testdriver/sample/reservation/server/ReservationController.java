@@ -21,10 +21,10 @@ public class ReservationController extends CommunicatorController {
 
     @Override
     protected void populateGraph(TestManager manager) {
-        CurrentUser currentUser = new CurrentUser(manager);
+        CurrentUser currentUser = new CurrentUser();
         currentUser.addUserPassword("xiaoming.wang", "aaa111").addUserPassword("daming.wang", "aaa111");
         LoginState loginState = new LoginState(currentUser);
-        NetworkConnectivity connectivity = new NetworkConnectivity(manager);
+        NetworkConnectivity connectivity = new NetworkConnectivity();
         manager.registerProperties(currentUser, loginState, connectivity);
         manager.registerWindows(new Main(manager), new MenuOnMain(manager), new Login(manager), new FilterOnMain
                 (manager), new SelectDateOnMain(manager), new SpecificationOnMain(manager), new Reserve(manager), new

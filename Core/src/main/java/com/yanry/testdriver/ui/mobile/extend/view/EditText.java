@@ -42,7 +42,7 @@ public class EditText extends View {
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, String to) {
+        protected boolean selfSwitch(Graph graph, String to) {
             return getWindow().getVisibility().switchTo(graph, TestManager.Visibility.Foreground) &&
                     graph.performAction(new EnterText(EditText.this, to));
         }

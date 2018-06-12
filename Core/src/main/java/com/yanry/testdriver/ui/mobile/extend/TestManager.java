@@ -11,6 +11,7 @@ import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
+import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.action.ClickOutside;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import lib.common.util.ReflectionUtil;
@@ -233,14 +234,9 @@ public class TestManager extends Graph {
                     return Background;
                 }
             }
-
-            @Override
-            public boolean isCheckedByUser() {
-                return false;
-            }
         }
 
-        public class ForegroundVerification extends Property<Boolean> {
+        public class ForegroundVerification extends CacheProperty<Boolean> {
             @Presentable
             public Window getWindow() {
                 return Window.this;
@@ -252,8 +248,8 @@ public class TestManager extends Graph {
             }
 
             @Override
-            public Boolean getCurrentValue(Graph graph) {
-                return null;
+            protected Boolean checkValue(Graph graph) {
+                return graph.checkState(new StateToCheck<>(this, true, false));
             }
 
             @Override

@@ -12,7 +12,7 @@ public abstract class CacheProperty<V> extends Property<V> {
 
     protected abstract V checkValue(Graph graph);
 
-    protected abstract boolean doSelfSwitch(Graph graph, V to);
+    public abstract boolean isCheckedByUser();
 
     public void setCacheValue(V cacheValue) {
         this.cacheValue = cacheValue;
@@ -24,15 +24,5 @@ public abstract class CacheProperty<V> extends Property<V> {
             cacheValue = checkValue(graph);
         }
         return cacheValue;
-    }
-
-    @Override
-    protected final boolean selfSwitch(Graph graph, V to) {
-        if (doSelfSwitch(graph, to)) {
-            cacheValue = to;
-            return true;
-        }
-        cacheValue = null;
-        return false;
     }
 }

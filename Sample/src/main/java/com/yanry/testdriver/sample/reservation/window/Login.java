@@ -39,8 +39,8 @@ public class Login extends TestManager.Window {
         TextView userErrorView = new TextView(this, new ByDesc(USER_VALIDATION));
         TextView pwdErrorView = new TextView(this, new ByDesc(PWD_VALIDATION));
 
-        createPath(getCreateEvent(), etUser.getInputContent().getExpectation(""));
-        createPath(getCreateEvent(), etPwd.getInputContent().getExpectation(""));
+        createPath(getCreateEvent(), etUser.getInputContent().getExpectation(Timing.IMMEDIATELY, ""));
+        createPath(getCreateEvent(), etPwd.getInputContent().getExpectation(Timing.IMMEDIATELY, ""));
         etUser.setEmptyValidationCase(clickLogin, userErrorView.getVisibility().getExpectation(Timing
                 .IMMEDIATELY, true).addFollowingExpectation(userErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "用户名不能为空")));
@@ -63,15 +63,15 @@ public class Login extends TestManager.Window {
                 .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "密码长度不能小于6个字符")), etUser.getValidity());
         // no connection
-        createPath(clickLogin, new Toast(Timing.IMMEDIATELY, TOAST_DURATION, getGraph(),
+        createPath(clickLogin, new Toast(Timing.IMMEDIATELY, TOAST_DURATION,
                 TOAST_NO_CONNECTION)).addInitState(etUser.getValidity(), true).addInitState(etPwd.getValidity(), true)
                 .addInitState(getProperty(NetworkConnectivity.class), false);
         // login
         Timing withinTimeout = new Timing(true, REQUEST_TIMEOUT);
         loginPathHandler.initStateToInvalidPassword(() -> createPath(clickLogin, new Toast(withinTimeout, TOAST_DURATION,
-                getGraph(), "密码错误")).addInitState(getProperty(NetworkConnectivity.class), true));
+                "密码错误")).addInitState(getProperty(NetworkConnectivity.class), true));
         loginPathHandler.initStateToInvalidUser(() -> createPath(clickLogin, new Toast(withinTimeout, TOAST_DURATION,
-                getGraph(), "用户不存在")).addInitState(getProperty(NetworkConnectivity.class), true));
+                "用户不存在")).addInitState(getProperty(NetworkConnectivity.class), true));
         loginPathHandler.initStateToSuccessLogin(() -> close(clickLogin, withinTimeout).addInitState(getProperty
                 (NetworkConnectivity.class), true));
         loginPathHandler.handleCurrentUserOnSuccessLogin(withinTimeout, e -> createPath(clickLogin, e).addInitState

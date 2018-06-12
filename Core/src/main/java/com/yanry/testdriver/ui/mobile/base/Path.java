@@ -33,8 +33,8 @@ public class Path extends HashMap<Property, Object> {
         return this;
     }
 
-    public boolean isSatisfied() {
-        return entrySet().stream().allMatch(state -> state.getValue().equals(state.getKey().getCurrentValue()));
+    public boolean isSatisfied(Graph graph) {
+        return entrySet().stream().allMatch(state -> state.getValue().equals(state.getKey().getCurrentValue(graph)));
     }
 
     @Presentable

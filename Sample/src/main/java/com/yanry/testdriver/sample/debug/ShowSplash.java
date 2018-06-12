@@ -9,7 +9,7 @@ import com.yanry.testdriver.ui.mobile.base.expectation.TransientExpectation;
  */
 public class ShowSplash extends TransientExpectation {
 
-    public ShowSplash(Graph graph) {
-        super(Timing.IMMEDIATELY, TestApp.PLASH_DURATION, graph);
+    public ShowSplash() {
+        super(Timing.IMMEDIATELY, TestApp.PLASH_DURATION);
     }
 }

@@ -18,7 +18,7 @@ public class SelectDateOnMain extends TestManager.Window {
     protected void addCases() {
         ListView lvDate = new ListView(this, null);
         // 随机点击一个item返回主页
-        Click<ListViewItem, String[]> clickItem = new Click<>(lvDate.getRandomItem());
+        Click<ListViewItem, String[]> clickItem = new Click<>(lvDate.getRandomItem(getGraph()));
 //        clickItem.setPreAction(item -> {
 //            TextView dateView = new TextView(item, null);
 //            QueryableProperty month = new QueryableProperty(getGraph(), "所选月份");

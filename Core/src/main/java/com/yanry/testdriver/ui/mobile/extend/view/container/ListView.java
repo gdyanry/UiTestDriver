@@ -80,7 +80,7 @@ public class ListView extends View implements ViewContainer {
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, Integer to) {
+        protected boolean selfSwitch(Graph graph, Integer to) {
             return false;
         }
 

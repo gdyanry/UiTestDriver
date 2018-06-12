@@ -1,7 +1,6 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 
 import java.util.function.BiPredicate;
@@ -18,18 +17,17 @@ public class StaticPropertyExpectation<V> extends PropertyExpectation<V> {
         return predicate.test(getProperty(), value);
     }
 
-    @Presentable
-    public V getValue() {
-        return value;
-    }
-
-    @Override
-    protected final boolean selfVerify(Graph graph) {
-        return !getProperty().isCheckedByUser() || graph.verifyExpectation(this);
-    }
-
     @Override
     public final boolean ifRecord() {
-        return getProperty().isCheckedByUser();
+        if (getProperty() instanceof CacheProperty) {
+            CacheProperty<V> cacheProperty = (CacheProperty<V>) getProperty();
+            return cacheProperty.isCheckedByUser();
+        }
+        return false;
+    }
+
+    @Override
+    protected V getExpectedValue() {
+        return value;
     }
 }

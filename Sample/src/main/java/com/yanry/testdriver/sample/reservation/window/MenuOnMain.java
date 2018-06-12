@@ -28,7 +28,7 @@ public class MenuOnMain extends TestManager.Window {
                 true, false);
         LoginState loginState = getProperty(LoginState.class);
         createPath(getCreateEvent(), tvLogin.getText().getExpectation(Timing
-                .IMMEDIATELY, () -> loginState.getCurrentValue() ? "登录" : "退出登录"));
+                .IMMEDIATELY, () -> loginState.getCurrentValue(getGraph()) ? "登录" : "退出登录"));
         close(new Click(tvLogin), Timing.IMMEDIATELY).put(loginState, true);
         popWindow(getWindow(Login.class), new Click(tvLogin), Timing.IMMEDIATELY, false, false)
                 .put(loginState, false);

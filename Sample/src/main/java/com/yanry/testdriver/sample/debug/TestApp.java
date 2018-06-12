@@ -53,10 +53,10 @@ public class TestApp {
     }
 
     public static void defineGraph(TestManager manager) {
-        CurrentUser currentUser = new CurrentUser(manager);
+        CurrentUser currentUser = new CurrentUser();
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
-        manager.registerProperties(new NetworkState(manager), currentUser, new LoginState(currentUser));
-        Util.createPath(manager, manager.getProcessState().getStartProcessEvent(), new ShowSplash(manager));
+        manager.registerProperties(new NetworkState(), currentUser, new LoginState(currentUser));
+        Util.createPath(manager, manager.getProcessState().getStartProcessEvent(), new ShowSplash());
         manager.registerWindows(new LoginPage(manager), new MainPage(manager), new AboutPage(manager));
     }
 }

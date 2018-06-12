@@ -25,9 +25,4 @@ public class LoginState extends Property<Boolean> {
     public Boolean getCurrentValue(Graph graph) {
         return !currentUser.getCurrentValue(graph).equals("");
     }
-
-    @Override
-    public boolean isCheckedByUser() {
-        return false;
-    }
 }

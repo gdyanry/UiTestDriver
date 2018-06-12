@@ -1,6 +1,5 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 
 import java.util.function.Supplier;
@@ -17,8 +16,8 @@ public class DynamicPropertyExpectation<V> extends PropertyExpectation<V> {
     }
 
     @Override
-    protected final boolean selfVerify(Graph graph) {
-        return getProperty().getCurrentValue(graph).equals(valueSupplier.get());
+    protected V getExpectedValue() {
+        return valueSupplier.get();
     }
 
     @Override
