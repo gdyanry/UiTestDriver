@@ -28,8 +28,6 @@ public class ActionEvent<T, R> implements Event {
         this.target = target;
     }
 
-    public ActionEvent() {}
-
     public void setPreAction(Function<T, R> preAction) {
         this.preAction = preAction;
     }

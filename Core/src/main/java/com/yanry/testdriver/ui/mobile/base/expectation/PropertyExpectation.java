@@ -17,7 +17,6 @@ public abstract class PropertyExpectation<V> extends Expectation {
         this.property = property;
     }
 
-    @Presentable
     protected abstract V getExpectedValue();
 
     @Override

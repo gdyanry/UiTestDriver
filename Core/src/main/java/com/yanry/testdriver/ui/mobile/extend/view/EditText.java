@@ -14,22 +14,22 @@ import java.util.function.Supplier;
  * Created by rongyu.yan on 5/9/2017.
  */
 public class EditText extends View {
-    private InputContent inputContent;
+    private Content content;
 
     public EditText(ViewContainer parent, ViewSelector selector, Supplier<Boolean> defaultVisibility) {
         super(parent, selector, defaultVisibility);
-        inputContent = new InputContent();
+        content = new Content();
     }
 
     public EditText(ViewContainer parent, ViewSelector selector) {
         this(parent, selector, null);
     }
 
-    public InputContent getInputContent() {
-        return inputContent;
+    public Content getContent() {
+        return content;
     }
 
-    public class InputContent extends CacheProperty<String> {
+    public class Content extends CacheProperty<String> {
 
         @Presentable
         public EditText getEditText() {
@@ -42,7 +42,7 @@ public class EditText extends View {
         }
 
         @Override
-        protected boolean selfSwitch(Graph graph, String to) {
+        protected boolean doSelfSwitch(Graph graph, String to) {
             return getWindow().getVisibility().switchTo(graph, TestManager.Visibility.Foreground) &&
                     graph.performAction(new EnterText(EditText.this, to));
         }

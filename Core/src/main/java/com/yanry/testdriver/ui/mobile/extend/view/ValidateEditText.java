@@ -2,6 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
@@ -40,7 +41,7 @@ public class ValidateEditText extends EditText {
     public Path addNegativeCase(String content, Event event, Expectation expectation, Property<Boolean>...
             preValidities) {
         invalidContents.add(content);
-        Path path = getWindow().createPath(event, expectation).addInitState(getInputContent(), content);
+        Path path = getWindow().createPath(event, expectation).addInitState(getContent(), content);
         getParent().present(path);
         for (Property<Boolean> preValidity : preValidities) {
             path.addInitState(preValidity, true);
@@ -62,17 +63,22 @@ public class ValidateEditText extends EditText {
 
     public class ValidityState extends Property<Boolean> {
 
+        @Presentable
+        public EditText getEditText() {
+            return ValidateEditText.this;
+        }
+
         @Override
         protected boolean selfSwitch(Graph graph, Boolean to) {
             if (to) {
-                return validContents.stream().anyMatch(c -> getInputContent().switchTo(graph, c));
+                return validContents.stream().anyMatch(c -> getContent().switchTo(graph, c));
             }
-            return invalidContents.stream().anyMatch(c -> getInputContent().switchTo(graph, c));
+            return invalidContents.stream().anyMatch(c -> getContent().switchTo(graph, c));
         }
 
         @Override
         public Boolean getCurrentValue(Graph graph) {
-            return validContents.contains(getInputContent().getCurrentValue(graph));
+            return validContents.contains(getContent().getCurrentValue(graph));
         }
     }
 }

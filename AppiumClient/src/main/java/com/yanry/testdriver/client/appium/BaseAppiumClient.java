@@ -1,7 +1,6 @@
 package com.yanry.testdriver.client.appium;
 
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
-import com.yanry.testdriver.ui.mobile.base.process.StartProcess;
 import com.yanry.testdriver.ui.mobile.distribute.HttpClientReception;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
@@ -70,10 +69,10 @@ public abstract class BaseAppiumClient extends HttpClientReception {
                 Assert.assertNotNull(wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[contains" +
                         "(@text,'"+ instruction.getString("message") + "')]"))));
             }
-            if (type.equals(StartProcess.class.getSimpleName())) {
-                driver.launchApp();
-                return 1;
-            }
+//            if (type.equals(StartProcess.class.getSimpleName())) {
+//                driver.launchApp();
+//                return 1;
+//            }
             if (type.equals(Click.class.getSimpleName())) {
                 findElement(instruction).click();
                 return 1;

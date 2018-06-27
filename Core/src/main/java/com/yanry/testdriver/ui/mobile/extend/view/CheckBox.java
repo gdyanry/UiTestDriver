@@ -43,7 +43,7 @@ public class CheckBox extends TextView {
         }
 
         @Override
-        protected boolean selfSwitch(Graph graph, Boolean to) {
+        protected boolean doSelfSwitch(Graph graph, Boolean to) {
             return getWindow().getVisibility().switchTo(graph, TestManager.Visibility.Foreground) &&
                     graph.performAction(new Click<>(CheckBox.this));
         }

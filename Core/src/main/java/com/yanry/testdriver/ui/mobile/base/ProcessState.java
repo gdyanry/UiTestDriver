@@ -1,18 +1,20 @@
-package com.yanry.testdriver.sample.reservation.property;
+package com.yanry.testdriver.ui.mobile.base;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
-import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.base.event.SwitchStateAction;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 
 /**
- * Created by rongyu.yan on 5/18/2017.
+ * Created by rongyu.yan on 3/9/2017.
  */
-public class NetworkConnectivity extends CacheProperty<Boolean> {
+public class ProcessState extends CacheProperty<Boolean> {
+
+    public ProcessState() {
+    }
 
     @Override
     protected Boolean checkValue(Graph graph) {
-        return graph.checkState(new StateToCheck<>(this, false, true));
+        return false;
     }
 
     @Override

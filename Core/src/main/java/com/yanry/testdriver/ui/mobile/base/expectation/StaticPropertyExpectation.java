@@ -1,5 +1,6 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
+import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 
@@ -26,8 +27,9 @@ public class StaticPropertyExpectation<V> extends PropertyExpectation<V> {
         return false;
     }
 
+    @Presentable
     @Override
-    protected V getExpectedValue() {
+    public V getExpectedValue() {
         return value;
     }
 }

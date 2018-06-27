@@ -65,7 +65,7 @@ public class Tab extends View implements ViewContainer {
         }
 
         @Override
-        protected boolean selfSwitch(Graph graph, Tab to) {
+        protected boolean doSelfSwitch(Graph graph, Tab to) {
             return false;
         }
 

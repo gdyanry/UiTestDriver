@@ -33,8 +33,8 @@ public class LoginPage extends TestManager.Window {
         ValidateEditText etUser = new ValidateEditText(this, new ByDesc(DESC_USER));
         ValidateEditText etPwd = new ValidateEditText(this, new ByDesc(DESC_PWD));
         // 页面打开时输入框内容为空
-        createPath(getCreateEvent(), etUser.getInputContent().getExpectation(Timing.IMMEDIATELY, ""));
-        createPath(getCreateEvent(), etPwd.getInputContent().getExpectation(Timing.IMMEDIATELY, ""));
+        createPath(getCreateEvent(), etUser.getContent().getExpectation(Timing.IMMEDIATELY, ""));
+        createPath(getCreateEvent(), etPwd.getContent().getExpectation(Timing.IMMEDIATELY, ""));
 
         Click clickLogin = new Click(new View(this, new ByText("登录")));
         // 添加输入框用例

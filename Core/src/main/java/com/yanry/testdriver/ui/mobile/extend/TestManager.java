@@ -36,7 +36,7 @@ public class TestManager extends Graph {
         windowStack = new LinkedList<>();
         windowInstances = new HashMap<>();
         propertyInstances = new HashMap<>();
-        Util.createPath(this, getProcessState().getStopProcessEvent(), new ActionExpectation() {
+        Util.createPath(this, getProcessState().getStateEvent(true, false), new ActionExpectation() {
             @Override
             protected void run() {
                 windowStack.clear();
@@ -70,10 +70,10 @@ public class TestManager extends Graph {
     public abstract class Window implements ViewContainer {
         private VisibilityState visibility;
         private ForegroundVerification foregroundVerification;
-        private StateEvent<Visibility, VisibilityState> createEvent;
-        private StateEvent<Visibility, VisibilityState> closeEvent;
-        private StateEvent<Visibility, VisibilityState> resumeEvent;
-        private StateEvent<Visibility, VisibilityState> pauseEvent;
+        private StateEvent<Visibility> createEvent;
+        private StateEvent<Visibility> closeEvent;
+        private StateEvent<Visibility> resumeEvent;
+        private StateEvent<Visibility> pauseEvent;
 
         public Window() {
             visibility = new VisibilityState();
@@ -87,7 +87,7 @@ public class TestManager extends Graph {
         protected abstract void addCases();
 
         public Path showOnStartUp(Timing timing) {
-            return Util.createPath(TestManager.this, getProcessState().getStartProcessEvent(),
+            return Util.createPath(TestManager.this, getProcessState().getStateEvent(false, true),
                     foregroundVerification.getExpectation(timing, true).addFollowingExpectation(new ActionExpectation() {
                         @Override
                         protected void run() {
@@ -156,19 +156,19 @@ public class TestManager extends Graph {
             return visibility;
         }
 
-        public StateEvent<Visibility, VisibilityState> getCreateEvent() {
+        public StateEvent<Visibility> getCreateEvent() {
             return createEvent;
         }
 
-        public StateEvent<Visibility, VisibilityState> getCloseEvent() {
+        public StateEvent<Visibility> getCloseEvent() {
             return closeEvent;
         }
 
-        public StateEvent<Visibility, VisibilityState> getResumeEvent() {
+        public StateEvent<Visibility> getResumeEvent() {
             return resumeEvent;
         }
 
-        public StateEvent<Visibility, VisibilityState> getPauseEvent() {
+        public StateEvent<Visibility> getPauseEvent() {
             return pauseEvent;
         }
 
@@ -190,6 +190,11 @@ public class TestManager extends Graph {
         }
 
         public class VisibilityState extends Property<Visibility> {
+
+            @Presentable
+            public Window getWindow() {
+                return Window.this;
+            }
 
             @Override
             protected boolean selfSwitch(Graph graph, Visibility to) {
@@ -243,7 +248,7 @@ public class TestManager extends Graph {
             }
 
             @Override
-            protected boolean selfSwitch(Graph graph, Boolean to) {
+            protected boolean doSelfSwitch(Graph graph, Boolean to) {
                 return false;
             }
 

@@ -5,6 +5,7 @@ package com.yanry.testdriver.ui.mobile.base.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.DynamicPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.StaticPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
@@ -26,6 +27,10 @@ public abstract class Property<V> {
                         // 若无可用路径再尝试自转化
                         selfSwitch(graph, to))
                         && to.equals(getCurrentValue(graph));
+    }
+
+    public StateEvent<V> getStateEvent(V from, V to) {
+        return new StateEvent<>(this, from, to);
     }
 
     public StaticPropertyExpectation<V> getExpectation(Timing timing, V value) {

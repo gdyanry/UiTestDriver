@@ -143,7 +143,7 @@ public class PeriodicReserve extends TestManager.Window {
         }
 
         @Override
-        protected boolean selfSwitch(Graph graph, Boolean to) {
+        protected boolean doSelfSwitch(Graph graph, Boolean to) {
             return false;
         }
     }
@@ -161,7 +161,7 @@ public class PeriodicReserve extends TestManager.Window {
         }
 
         @Override
-        protected boolean selfSwitch(Graph graph, boolean[] to) {
+        protected boolean doSelfSwitch(Graph graph, boolean[] to) {
             return false;
         }
     }

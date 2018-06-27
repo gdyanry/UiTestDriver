@@ -6,11 +6,11 @@ package com.yanry.testdriver.ui.mobile.base;
 import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
+import com.yanry.testdriver.ui.mobile.base.event.StateChangeCallback;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.StaticPropertyExpectation;
-import com.yanry.testdriver.ui.mobile.base.process.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
@@ -114,7 +114,7 @@ public class Graph implements Communicator, Loggable {
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             rollingPaths.clear();
             Path path = unprocessedPaths.stream().findAny().get();
-            log("%n>>>>roll: %s%n", Util.getPresentation(path));
+            log("traverse: %s", Util.getPresentation(path));
             roll(path);
         }
         List<Object> result = new ArrayList<>(records);
@@ -144,9 +144,11 @@ public class Graph implements Communicator, Loggable {
                 equals(state.getKey().getCurrentValue(this))).findFirst();
         if (any.isPresent()) {
             Map.Entry<Property, Object> state = any.get();
+            log("switch init state: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
             if (state.getKey().switchTo(this, state.getValue())) {
                 return internalRoll(path);
             } else {
+                log("switch init state fail: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, state.getKey()));
                 }
@@ -162,10 +164,12 @@ public class Graph implements Communicator, Loggable {
         if (inputEvent instanceof StateEvent) {
             StateEvent event = (StateEvent) inputEvent;
             // roll path for this switch event.
+            log("switch state event: %s", Util.getPresentation(event));
             if (!event.getProperty().switchTo(this, event.getFrom()) ||
                     // sibling paths of current path becomes super paths of the path where switch
                     // event takes place!
                     !event.getProperty().switchTo(this, event.getTo())) {
+                log("switch state event fail: %s", Util.getPresentation(event));
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, event));
                 }
@@ -180,11 +184,15 @@ public class Graph implements Communicator, Loggable {
                 siblings.addAll(allPaths.stream().filter(p -> p.getEvent() == inputEvent && p
                         .isSatisfied(this)).collect(Collectors.toList()));
             } else {
+                log("perform action fail: %s", Util.getPresentation(event));
                 if (unprocessedPaths.remove(path)) {
                     records.add(new MissedPath(path, event));
                 }
                 return false;
             }
+        } else if (inputEvent instanceof StateChangeCallback) {
+            // 状态变化回调事件只能被动触发，即成为其他路径的父路径
+            return false;
         } else {
             if (unprocessedPaths.remove(path)) {
                 records.add(new MissedPath(path, inputEvent));
@@ -196,8 +204,10 @@ public class Graph implements Communicator, Loggable {
         siblings.add(path);
         siblings.stream().distinct().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             if (p == path) {
+                log("verify path: %s", Util.getPresentation(p));
                 result[0] = verify(p);
             } else {
+                log("verify sibling path: %s", Util.getPresentation(p));
                 verify(p);
             }
         });
@@ -226,6 +236,12 @@ public class Graph implements Communicator, Loggable {
                 if (!rollingPaths.contains(p)) {
                     if (p.getEvent() instanceof StateEvent) {
                         StateEvent switchEvent = (StateEvent) p.getEvent();
+                        if (switchEvent.getProperty() == property && switchEvent.getTo().equals(to)
+                                && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied(this)) {
+                            return true;
+                        }
+                    } else if (p.getEvent() instanceof StateChangeCallback) {
+                        StateChangeCallback switchEvent = (StateChangeCallback) p.getEvent();
                         if (switchEvent.getProperty() == property && switchEvent.getTo().test(to)
                                 && (from == null || switchEvent.getFrom().test(from)) && p.isSatisfied(this)) {
                             return true;
@@ -234,6 +250,7 @@ public class Graph implements Communicator, Loggable {
                 }
                 return false;
             }).forEach(path -> {
+                log("verify super path: %s", Util.getPresentation(path));
                 verify(path);
             });
             return true;
@@ -257,10 +274,10 @@ public class Graph implements Communicator, Loggable {
         }).sorted(Comparator.comparingInt(p -> {
             // TODO 细化排序值，寻找最短路径
             int i = p.isSatisfied(this) ? 0 : 1;
-            log("%n>>>>compare %s: %s%n", i, Util.getPresentation(p));
+            log("compare value: %s - %s", i, Util.getPresentation(p));
             return i;
         })).filter(p -> {
-            log("%n>>>>transit roll: %s%n", Util.getPresentation(p));
+            log("try to roll: %s", Util.getPresentation(p));
             return roll(p);
         }).findFirst().isPresent();
     }

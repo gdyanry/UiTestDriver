@@ -22,7 +22,7 @@ public class TestApp {
     public static final int PLASH_DURATION = 3000;
 
     public static void main(String[] args) {
-        TestManager manager = new TestManager(false);
+        TestManager manager = new TestManager(true);
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         manager.registerCommunicator(communicator);
         defineGraph(manager);
@@ -56,7 +56,7 @@ public class TestApp {
         CurrentUser currentUser = new CurrentUser();
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
         manager.registerProperties(new NetworkState(), currentUser, new LoginState(currentUser));
-        Util.createPath(manager, manager.getProcessState().getStartProcessEvent(), new ShowSplash());
+        Util.createPath(manager, manager.getProcessState().getStateEvent(false, true), new ShowSplash());
         manager.registerWindows(new LoginPage(manager), new MainPage(manager), new AboutPage(manager));
     }
 }

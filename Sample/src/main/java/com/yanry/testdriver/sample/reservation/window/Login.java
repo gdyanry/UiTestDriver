@@ -1,14 +1,13 @@
 package com.yanry.testdriver.sample.reservation.window;
 
 import com.yanry.testdriver.sample.reservation.property.NetworkConnectivity;
-import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
+import com.yanry.testdriver.ui.mobile.base.event.StateChangeCallback;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.extend.LoginPathHandler;
 import com.yanry.testdriver.ui.mobile.extend.TestManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
-import com.yanry.testdriver.ui.mobile.extend.view.EditText;
 import com.yanry.testdriver.ui.mobile.extend.view.TextView;
 import com.yanry.testdriver.ui.mobile.extend.view.ValidateEditText;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
@@ -39,8 +38,8 @@ public class Login extends TestManager.Window {
         TextView userErrorView = new TextView(this, new ByDesc(USER_VALIDATION));
         TextView pwdErrorView = new TextView(this, new ByDesc(PWD_VALIDATION));
 
-        createPath(getCreateEvent(), etUser.getInputContent().getExpectation(Timing.IMMEDIATELY, ""));
-        createPath(getCreateEvent(), etPwd.getInputContent().getExpectation(Timing.IMMEDIATELY, ""));
+        createPath(getCreateEvent(), etUser.getContent().getExpectation(Timing.IMMEDIATELY, ""));
+        createPath(getCreateEvent(), etPwd.getContent().getExpectation(Timing.IMMEDIATELY, ""));
         etUser.setEmptyValidationCase(clickLogin, userErrorView.getVisibility().getExpectation(Timing
                 .IMMEDIATELY, true).addFollowingExpectation(userErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "用户名不能为空")));
@@ -48,10 +47,10 @@ public class Login extends TestManager.Window {
                 .IMMEDIATELY, true).addFollowingExpectation(pwdErrorView.getText().getExpectation
                 (Timing.IMMEDIATELY, "密码不能为空")), etUser.getValidity());
         // 输入内容时隐藏错误提示视图
-        createPath(new StateEvent<String, EditText.InputContent>(etUser.getInputContent(), v -> true, v -> true), userErrorView
+        createPath(new StateChangeCallback<>(etUser.getContent(), v -> true, v -> true), userErrorView
                 .getVisibility().getExpectation(Timing.IMMEDIATELY, false)).addInitState(userErrorView
                 .getVisibility(), true);
-        createPath(new StateEvent<String, EditText.InputContent>(etPwd.getInputContent(), v -> true, v -> true), pwdErrorView
+        createPath(new StateChangeCallback<>(etPwd.getContent(), v -> true, v -> true), pwdErrorView
                 .getVisibility().getExpectation(Timing.IMMEDIATELY, false)).addInitState(pwdErrorView
                 .getVisibility(), true);
         etUser.addPositiveCases("xiaoxiaoming");
