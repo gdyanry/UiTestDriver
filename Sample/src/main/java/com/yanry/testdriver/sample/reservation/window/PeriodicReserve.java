@@ -5,7 +5,7 @@ import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
 import com.yanry.testdriver.ui.mobile.extend.view.TextView;
@@ -16,7 +16,7 @@ import com.yanry.testdriver.ui.mobile.extend.view.selector.ByDesc;
 /**
  * Created by rongyu.yan on 5/12/2017.
  */
-public class PeriodicReserve extends TestManager.Window {
+public class PeriodicReserve extends WindowManager.Window {
     public static String DESC_IC_QUIT;
     public static String DESC_ET_TOPIC;
     public static String DESC_V_SUBMIT;
@@ -40,7 +40,7 @@ public class PeriodicReserve extends TestManager.Window {
     private DayOfWeekValue dayOfWeekValue;
     private DayOfWeekValidity dayOfWeekValidity;
 
-    public PeriodicReserve(TestManager manager) {
+    public PeriodicReserve(WindowManager manager) {
         manager.super();
     }
 
@@ -100,27 +100,27 @@ public class PeriodicReserve extends TestManager.Window {
                 "会议主题不可为空"));
         etTopic.addPositiveCases(String.format("test topic<%tR>", System.currentTimeMillis()));
 
-        popWindow(getWindow(SelectRoom.class), new Click<>(new View(this, new ByDesc(DESC_ITEM_ROOM))), Timing
+        popWindow(new SelectRoom(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_ROOM))), Timing
                 .IMMEDIATELY, false, false);
         createPath(getCreateEvent(), roomValidity.getExpectation(Timing.IMMEDIATELY, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议室"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, false);
 
-        popWindow(getWindow(SelectTime.class), new Click<>(new View(this, new ByDesc(DESC_ITEM_START_TIME))), Timing
+        popWindow(new SelectStartTime(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_START_TIME))), Timing
                 .IMMEDIATELY, false, false);
         createPath(getCreateEvent(), startTimeValidity.getExpectation(Timing.IMMEDIATELY, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议开始时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, false);
 
-        popWindow(getWindow(SelectEndTime.class), new Click<>(new View(this, new ByDesc(DESC_ITEM_END_TIME))),
+        popWindow(new SelectEndTime(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_END_TIME))),
                 Timing.IMMEDIATELY, false, false);
         createPath(getCreateEvent(), endTimeValidity.getExpectation(Timing.IMMEDIATELY, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议结束时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, true).addInitState(endTimeValidity, false);
 
-        popWindow(getWindow(SelectDayOfWeek.class), new Click<>(new View(this, new ByDesc(DESC_ITEM_DAY_OF_WEEK))),
+        popWindow(new SelectDayOfWeek(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_DAY_OF_WEEK))),
                 Timing.IMMEDIATELY, false, false);
         createPath(getCreateEvent(), dayOfWeekValidity.getExpectation(Timing.IMMEDIATELY, false));
         createPath(getCreateEvent(), dayOfWeekValue.getExpectation(Timing.IMMEDIATELY, new boolean[]{false, false,

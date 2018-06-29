@@ -6,7 +6,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
@@ -35,9 +35,9 @@ public class View {
         this(parent, selector, null);
     }
 
-    public TestManager.Window getWindow() {
-        if (parent instanceof TestManager.Window) {
-            return (TestManager.Window) parent;
+    public WindowManager.Window getWindow() {
+        if (parent instanceof WindowManager.Window) {
+            return (WindowManager.Window) parent;
         } else if (parent instanceof View) {
             return ((View) parent).getWindow();
         }

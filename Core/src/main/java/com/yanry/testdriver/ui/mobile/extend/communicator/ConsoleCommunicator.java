@@ -27,7 +27,7 @@ public class ConsoleCommunicator extends SerializedCommunicator {
         return getInput(repeat, "check", stateToCheck, () -> {
             for (int i = 0; i < stateToCheck.getOptions().length; i++) {
                 V v = stateToCheck.getOptions()[i];
-                System.out.printf("%s - %s%n", i, v);
+                System.out.printf("%s - %s%n", i, Util.getPresentation(v));
             }
         });
     }

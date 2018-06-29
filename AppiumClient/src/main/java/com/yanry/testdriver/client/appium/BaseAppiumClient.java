@@ -5,7 +5,7 @@ import com.yanry.testdriver.ui.mobile.distribute.HttpClientReception;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
 import lib.common.model.json.JSONArray;
@@ -52,7 +52,7 @@ public abstract class BaseAppiumClient extends HttpClientReception {
                 JSONObject property = instruction.getJSONObject("property");
                 boolean isWithin = timing.getBoolean("isWithin");
                 int second = timing.getInt("second");
-                if (property.getString(".").equals(TestManager.Window.VisibilityState.class.getSimpleName())) {
+                if (property.getString(".").equals(WindowManager.Window.VisibilityState.class.getSimpleName())) {
                     return isWindowPresent(property.getJSONObject("window").getString("tag"), isWithin, second) ? 1 : 0;
                 }
                 return checkState(property, instruction.getJSONArray("options"), isWithin, second);

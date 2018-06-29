@@ -4,7 +4,7 @@ import com.yanry.testdriver.sample.reservation.property.NetworkConnectivity;
 import com.yanry.testdriver.ui.mobile.base.event.StateChangeCallback;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.extend.LoginPathHandler;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
@@ -19,13 +19,13 @@ import static com.yanry.testdriver.sample.reservation.server.Config.*;
 /**
  * Created by rongyu.yan on 5/12/2017.
  */
-public class Login extends TestManager.Window {
+public class Login extends WindowManager.Window {
     public static String ET_USER;
     public static String ET_PWD;
     public static String USER_VALIDATION;
     public static String PWD_VALIDATION;
 
-    public Login(TestManager manager) {
+    public Login(WindowManager manager) {
         manager.super();
     }
 

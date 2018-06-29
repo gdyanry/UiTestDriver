@@ -4,7 +4,7 @@ import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
@@ -44,7 +44,7 @@ public class CheckBox extends TextView {
 
         @Override
         protected boolean doSelfSwitch(Graph graph, Boolean to) {
-            return getWindow().getVisibility().switchTo(graph, TestManager.Visibility.Foreground) &&
+            return getWindow().getVisibility().switchTo(graph, WindowManager.Visibility.Foreground) &&
                     graph.performAction(new Click<>(CheckBox.this));
         }
 

@@ -4,7 +4,7 @@ import com.yanry.testdriver.sample.debug.NetworkState;
 import com.yanry.testdriver.sample.debug.TestApp;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.extend.LoginPathHandler;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.expectation.RequestDialog;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
@@ -18,11 +18,11 @@ import com.yanry.testdriver.ui.mobile.extend.view.selector.ByText;
 /**
  * Created by rongyu.yan on 5/8/2017.
  */
-public class LoginPage extends TestManager.Window {
+public class LoginPage extends WindowManager.Window {
     public static String DESC_USER;
     public static String DESC_PWD;
 
-    public LoginPage(TestManager manager) {
+    public LoginPage(WindowManager manager) {
         manager.super();
     }
 
@@ -71,7 +71,7 @@ public class LoginPage extends TestManager.Window {
         loginPathHandler.handleCurrentUserOnSuccessLogin(withinTimeout, e -> createPath(
                 clickLogin, e).addInitState(networkState, NetworkState.Network.Normal));
         // pop main page
-        loginPathHandler.initStateToSuccessLogin(() -> popWindow(getWindow(MainPage.class), clickLogin,
+        loginPathHandler.initStateToSuccessLogin(() -> popWindow(new MainPage(getManager()), clickLogin,
                 withinTimeout, true, true).addInitState(networkState, NetworkState
                 .Network.Normal));
         // business error

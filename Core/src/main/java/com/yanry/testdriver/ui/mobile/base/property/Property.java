@@ -20,12 +20,12 @@ import java.util.function.Supplier;
 @Presentable
 public abstract class Property<V> {
 
-    public final boolean switchTo(Graph graph, V to) {
+    public final boolean switchTo(Graph graph, V to, boolean verifySuperPaths) {
         return to.equals(getCurrentValue(graph)) ||
                 // 先搜索是否存在可用路径
-                (graph.findPathToRoll(null, (prop, val) -> equals(prop) && to.equals(val)) ||
+                (graph.findPathToRoll(null, (prop, val) -> equals(prop) && to.equals(val), verifySuperPaths) ||
                         // 若无可用路径再尝试自转化
-                        selfSwitch(graph, to))
+                        verifySuperPaths ? graph.verifySuperPaths(this, getCurrentValue(graph), to, () -> selfSwitch(graph, to)) : selfSwitch(graph, to))
                         && to.equals(getCurrentValue(graph));
     }
 

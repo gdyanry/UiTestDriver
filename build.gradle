@@ -11,8 +11,7 @@ subprojects {
     }
 
     dependencies {
-        implementation 'com.github.gdyanry:CommonLib:-SNAPSHOT'
-        testCompile group: 'junit', name: 'junit', version: '4.12'
+        implementation 'com.github.gdyanry:CommonLib:v0.0.3'
     }
 
     tasks.withType(JavaCompile) {

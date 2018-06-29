@@ -3,7 +3,7 @@ package com.yanry.testdriver.sample.reservation.server;
 import com.yanry.testdriver.sample.reservation.property.NetworkConnectivity;
 import com.yanry.testdriver.sample.reservation.window.*;
 import com.yanry.testdriver.server.spring.CommunicatorController;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
 import com.yanry.testdriver.ui.mobile.extend.property.LoginState;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,15 +20,11 @@ public class ReservationController extends CommunicatorController {
     }
 
     @Override
-    protected void populateGraph(TestManager manager) {
+    protected void populateGraph(WindowManager manager) {
         CurrentUser currentUser = new CurrentUser();
         currentUser.addUserPassword("xiaoming.wang", "aaa111").addUserPassword("daming.wang", "aaa111");
         LoginState loginState = new LoginState(currentUser);
         NetworkConnectivity connectivity = new NetworkConnectivity();
         manager.registerProperties(currentUser, loginState, connectivity);
-        manager.registerWindows(new Main(manager), new MenuOnMain(manager), new Login(manager), new FilterOnMain
-                (manager), new SelectDateOnMain(manager), new SpecificationOnMain(manager), new Reserve(manager), new
-                PeriodicReserve(manager), new SelectRoom(manager), new MyReservation(manager), new SelectStartTime
-                (manager), new SelectEndTime(manager));
     }
 }

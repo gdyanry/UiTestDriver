@@ -1,14 +1,14 @@
 package com.yanry.testdriver.sample.reservation.window;
 
 import com.yanry.testdriver.sample.reservation.window.PeriodicReserve.Validity;
-import com.yanry.testdriver.ui.mobile.extend.TestManager;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.view.TextView;
 
 /**
  * Created by rongyu.yan on 5/19/2017.
  */
 public class SelectStartTime extends SelectTime {
-    public SelectStartTime(TestManager manager) {
+    public SelectStartTime(WindowManager manager) {
         super(manager);
     }
 
