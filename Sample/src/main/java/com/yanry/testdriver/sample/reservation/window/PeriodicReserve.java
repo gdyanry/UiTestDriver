@@ -102,28 +102,28 @@ public class PeriodicReserve extends WindowManager.Window {
 
         popWindow(new SelectRoom(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_ROOM))), Timing
                 .IMMEDIATELY, false, false);
-        createPath(getCreateEvent(), roomValidity.getExpectation(Timing.IMMEDIATELY, false));
+        createPath(getCreateEvent(), roomValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议室"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, false);
 
         popWindow(new SelectStartTime(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_START_TIME))), Timing
                 .IMMEDIATELY, false, false);
-        createPath(getCreateEvent(), startTimeValidity.getExpectation(Timing.IMMEDIATELY, false));
+        createPath(getCreateEvent(), startTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议开始时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, false);
 
         popWindow(new SelectEndTime(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_END_TIME))),
                 Timing.IMMEDIATELY, false, false);
-        createPath(getCreateEvent(), endTimeValidity.getExpectation(Timing.IMMEDIATELY, false));
+        createPath(getCreateEvent(), endTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议结束时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, true).addInitState(endTimeValidity, false);
 
         popWindow(new SelectDayOfWeek(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_DAY_OF_WEEK))),
                 Timing.IMMEDIATELY, false, false);
-        createPath(getCreateEvent(), dayOfWeekValidity.getExpectation(Timing.IMMEDIATELY, false));
-        createPath(getCreateEvent(), dayOfWeekValue.getExpectation(Timing.IMMEDIATELY, new boolean[]{false, false,
+        createPath(getCreateEvent(), dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
+        createPath(getCreateEvent(), dayOfWeekValue.getStaticExpectation(Timing.IMMEDIATELY, false, new boolean[]{false, false,
                 false, false, false, false, false}));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择星期"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
@@ -134,11 +134,6 @@ public class PeriodicReserve extends WindowManager.Window {
 
         @Override
         protected Boolean checkValue(Graph graph) {
-            return false;
-        }
-
-        @Override
-        public boolean isCheckedByUser() {
             return false;
         }
 
@@ -156,11 +151,6 @@ public class PeriodicReserve extends WindowManager.Window {
         }
 
         @Override
-        public boolean isCheckedByUser() {
-            return false;
-        }
-
-        @Override
         protected boolean doSelfSwitch(Graph graph, boolean[] to) {
             return false;
         }
@@ -171,6 +161,11 @@ public class PeriodicReserve extends WindowManager.Window {
 
         public DayOfWeekValidity(DayOfWeekValue value) {
             this.value = value;
+        }
+
+        @Override
+        public void handleExpectation(Boolean expectedValue, boolean needCheck) {
+
         }
 
         @Override

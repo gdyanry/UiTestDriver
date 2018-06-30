@@ -39,11 +39,6 @@ public class CurrentUser extends CacheProperty<String> {
     }
 
     @Override
-    public boolean isCheckedByUser() {
-        return false;
-    }
-
-    @Override
     protected boolean doSelfSwitch(Graph graph, String to) {
         return false;
     }

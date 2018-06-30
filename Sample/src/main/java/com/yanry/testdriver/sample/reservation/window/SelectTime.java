@@ -29,7 +29,7 @@ public abstract class SelectTime extends WindowManager.Window {
         Click<ListViewItem, String> click = new Click<>(listView.getRandomItem(getManager()));
         click.setPreAction(item -> new TextView(item, null).getText().getCurrentValue(getManager()));
         PeriodicReserve periodicReserve = new PeriodicReserve(getManager());
-        close(click, Timing.IMMEDIATELY, getTextView(periodicReserve).getText().getExpectation(Timing.IMMEDIATELY, getExpectedText(click.getPreActionResult()))
-                .addFollowingExpectation(getValidity(periodicReserve).getExpectation(Timing.IMMEDIATELY, true)));
+        close(click, Timing.IMMEDIATELY, getTextView(periodicReserve).getText().getStaticExpectation(Timing.IMMEDIATELY, true, getExpectedText(click.getPreActionResult()))
+                .addFollowingExpectation(getValidity(periodicReserve).getStaticExpectation(Timing.IMMEDIATELY, false, true)));
     }
 }

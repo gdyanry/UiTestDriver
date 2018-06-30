@@ -14,11 +14,16 @@ public class LoginState extends Property<Boolean> {
     }
 
     @Override
+    public void handleExpectation(Boolean expectedValue, boolean needCheck) {
+
+    }
+
+    @Override
     protected boolean selfSwitch(Graph graph, Boolean to) {
         if (to) {
-            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(graph, u));
+            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(graph, u, true));
         }
-        return currentUser.switchTo(graph, "");
+        return currentUser.switchTo(graph, "", true);
     }
 
     @Override

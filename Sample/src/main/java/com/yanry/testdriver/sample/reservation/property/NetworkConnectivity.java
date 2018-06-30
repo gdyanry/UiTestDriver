@@ -16,11 +16,6 @@ public class NetworkConnectivity extends CacheProperty<Boolean> {
     }
 
     @Override
-    public boolean isCheckedByUser() {
-        return false;
-    }
-
-    @Override
     protected boolean doSelfSwitch(Graph graph, Boolean to) {
         return graph.performAction(new SwitchStateAction(this, to));
     }

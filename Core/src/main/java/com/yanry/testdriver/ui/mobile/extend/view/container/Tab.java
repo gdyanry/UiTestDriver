@@ -27,8 +27,7 @@ public class Tab extends View implements ViewContainer {
     }
 
     public Path show(Event event) {
-        Path path = getWindow().createPath(event, currentTab.getExpectation(Timing
-                .IMMEDIATELY, this));
+        Path path = getWindow().createPath(event, currentTab.getStaticExpectation(Timing.IMMEDIATELY, true, this));
         present(path);
         return path;
     }
@@ -67,11 +66,6 @@ public class Tab extends View implements ViewContainer {
         @Override
         protected boolean doSelfSwitch(Graph graph, Tab to) {
             return false;
-        }
-
-        @Override
-        public boolean isCheckedByUser() {
-            return true;
         }
     }
 }

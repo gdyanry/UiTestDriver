@@ -19,7 +19,6 @@ import lib.common.util.ConsoleUtil;
 
 import java.util.*;
 import java.util.function.BiPredicate;
-import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -49,8 +48,8 @@ public class Graph implements Communicator, Loggable {
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
         processState = new ProcessState();
-        addPath(new Path(new SwitchStateAction<>(processState, true), processState.getExpectation(Timing.IMMEDIATELY, true)));
-        addPath(new Path(new SwitchStateAction<>(processState, false), processState.getExpectation(Timing.IMMEDIATELY, false)));
+        addPath(new Path(new SwitchStateAction<>(processState, true), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)));
+        addPath(new Path(new SwitchStateAction<>(processState, false), processState.getStaticExpectation(Timing.IMMEDIATELY, false, false)));
     }
 
     public ProcessState getProcessState() {
@@ -81,7 +80,7 @@ public class Graph implements Communicator, Loggable {
                             Property property = transitionEvent.getProperty();
                             p.remove(property);
                         }
-                        return p.getExpectation().ifRecord();
+                        return p.getExpectation().isNeedCheck();
                     }).collect(Collectors.toList());
                 }
             }
@@ -130,6 +129,10 @@ public class Graph implements Communicator, Loggable {
     }
 
     private boolean roll(Path path, boolean verifySuperPaths) {
+        // 状态变化回调事件只能被动触发，即成为其他路径的父路径
+        if (path.getEvent() instanceof StateChangeCallback) {
+            return false;
+        }
         // to avoid infinite loop
         if (!rollingPaths.add(path)) {
             return false;
@@ -149,30 +152,21 @@ public class Graph implements Communicator, Loggable {
                 return internalRoll(path, verifySuperPaths);
             } else {
                 log("switch init state fail: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
-                if (unprocessedPaths.remove(path)) {
-                    records.add(new MissedPath(path, state.getKey()));
-                }
-                // TODO failedPaths.add
-                return false;
+                return fail(path, state.getKey());
             }
         }
         // all environment states are satisfied by now.
         // trigger event
         Event inputEvent = path.getEvent();
-        // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-        List<Path> siblings = new LinkedList<>();
         if (inputEvent instanceof StateEvent) {
             StateEvent event = (StateEvent) inputEvent;
             // roll path for this switch event.
             log("switch state event: %s", Util.getPresentation(event));
             if (!event.getProperty().switchTo(this, event.getFrom(), true) ||
                     // sibling paths of current path becomes super paths of the path where switch event takes place!
-                    !event.getProperty().switchTo(this, event.getTo(), true)) {
+                    !event.getProperty().switchTo(this, event.getTo(), false)) {
                 log("switch state event fail: %s", Util.getPresentation(event));
-                if (unprocessedPaths.remove(path)) {
-                    records.add(new MissedPath(path, event));
-                }
-                return false;
+                return fail(path, event);
             }
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
@@ -180,47 +174,57 @@ public class Graph implements Communicator, Loggable {
             // this is where the action event is performed!
             if (performAction(event)) {
                 records.add(event);
-                siblings.addAll(allPaths.stream().filter(p -> p.getEvent() == inputEvent && p
-                        .isSatisfied(this)).collect(Collectors.toList()));
             } else {
                 log("perform action fail: %s", Util.getPresentation(event));
-                if (unprocessedPaths.remove(path)) {
-                    records.add(new MissedPath(path, event));
-                }
-                return false;
+                return fail(path, event);
             }
-        } else if (inputEvent instanceof StateChangeCallback) {
-            // 状态变化回调事件只能被动触发，即成为其他路径的父路径
-            return false;
         } else {
-            if (unprocessedPaths.remove(path)) {
-                records.add(new MissedPath(path, inputEvent));
-            }
-            return false;
+            log("unprocessed event: %s", Util.getPresentation(inputEvent));
+            return fail(path, inputEvent);
         }
+        // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
+        List<Path> siblings = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p
+                .isSatisfied(this)).collect(Collectors.toList());
         // collect paths that share the same environment states and event
         final boolean[] result = new boolean[1];
-        siblings.add(path);
-        siblings.stream().distinct().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
+        siblings.stream().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             if (p == path) {
                 log("verify path: %s", Util.getPresentation(p));
-                result[0] = verify(p);
+                result[0] = verify(p, verifySuperPaths);
             } else {
                 log("verify sibling path: %s", Util.getPresentation(p));
-                verify(p);
+                verify(p, true);
             }
         });
         return result[0];
     }
 
-    private boolean verify(Path path) {
+    private boolean fail(Path path, Object cause) {
+        if (unprocessedPaths.remove(path)) {
+            records.add(new MissedPath(path, cause));
+        }
+        failedPaths.add(path);
+        rollingPaths.remove(path);
+        return false;
+    }
+
+    private boolean verify(Path path, boolean verifySuperPaths) {
         Expectation expectation = path.getExpectation();
-        // 如果该期望（或者与其关联的期望）为属性期望，则其verify实现中必须要调用verifySupperPaths。
+        Object fromValue = null;
+        if (expectation instanceof PropertyExpectation) {
+            Property property = ((PropertyExpectation) expectation).getProperty();
+            fromValue = property.getCurrentValue(this);
+        }
         boolean isPass = expectation.verify(this);
-        if (expectation.ifRecord()) {
+        if (expectation.isNeedCheck()) {
             records.add(new Assertion(expectation, isPass));
         }
-        if (!isPass) {
+        if (isPass) {
+            if (expectation instanceof PropertyExpectation && verifySuperPaths) {
+                PropertyExpectation propertyExpectation = (PropertyExpectation) expectation;
+                verifySuperPaths(propertyExpectation.getProperty(), fromValue, propertyExpectation.getExpectedValue());
+            }
+        } else {
             failedPaths.add(path);
         }
         unprocessedPaths.remove(path);
@@ -228,33 +232,28 @@ public class Graph implements Communicator, Loggable {
         return isPass;
     }
 
-    public <V> boolean verifySuperPaths(Property<V> property, V from, V to, BooleanSupplier switchAction) {
-        // this is where the switch action actually takes place!
-        if (switchAction == null || switchAction.getAsBoolean()) {
-            allPaths.stream().filter(p -> {
-                if (!rollingPaths.contains(p)) {
-                    if (p.getEvent() instanceof StateEvent) {
-                        StateEvent switchEvent = (StateEvent) p.getEvent();
-                        if (switchEvent.getProperty() == property && switchEvent.getTo().equals(to)
-                                && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied(this)) {
-                            return true;
-                        }
-                    } else if (p.getEvent() instanceof StateChangeCallback) {
-                        StateChangeCallback switchEvent = (StateChangeCallback) p.getEvent();
-                        if (switchEvent.getProperty() == property && switchEvent.getTo().test(to)
-                                && (from == null || switchEvent.getFrom().test(from)) && p.isSatisfied(this)) {
-                            return true;
-                        }
+    public <V> void verifySuperPaths(Property<V> property, V from, V to) {
+        allPaths.stream().filter(p -> {
+            if (!rollingPaths.contains(p)) {
+                if (p.getEvent() instanceof StateEvent) {
+                    StateEvent switchEvent = (StateEvent) p.getEvent();
+                    if (switchEvent.getProperty().equals(property) && switchEvent.getTo().equals(to)
+                            && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied(this)) {
+                        return true;
+                    }
+                } else if (p.getEvent() instanceof StateChangeCallback) {
+                    StateChangeCallback switchEvent = (StateChangeCallback) p.getEvent();
+                    if (switchEvent.getProperty().equals(property) && switchEvent.getTo().test(to)
+                            && (from == null || switchEvent.getFrom().test(from)) && p.isSatisfied(this)) {
+                        return true;
                     }
                 }
-                return false;
-            }).forEach(path -> {
-                log("verify super path: %s", Util.getPresentation(path));
-                verify(path);
-            });
-            return true;
-        }
-        return false;
+            }
+            return false;
+        }).forEach(path -> {
+            log("verify super path: %s", Util.getPresentation(path));
+            verify(path, true);
+        });
     }
 
     /**

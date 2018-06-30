@@ -11,16 +11,11 @@ import com.yanry.testdriver.ui.mobile.base.Presentable;
 public abstract class NonPropertyExpectation extends Expectation {
 
     public NonPropertyExpectation(Timing timing) {
-        super(timing);
+        super(timing, true);
     }
 
     @Override
     protected final boolean selfVerify(Graph graph) {
         return graph.verifyExpectation(this);
-    }
-
-    @Override
-    public boolean ifRecord() {
-        return true;
     }
 }

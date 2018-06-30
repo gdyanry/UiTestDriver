@@ -74,10 +74,5 @@ public class View {
         protected boolean doSelfSwitch(Graph graph, Boolean to) {
             return false;
         }
-
-        @Override
-        public boolean isCheckedByUser() {
-            return true;
-        }
     }
 }

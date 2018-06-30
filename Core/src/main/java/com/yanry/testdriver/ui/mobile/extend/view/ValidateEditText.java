@@ -69,11 +69,16 @@ public class ValidateEditText extends EditText {
         }
 
         @Override
+        public void handleExpectation(Boolean expectedValue, boolean needCheck) {
+
+        }
+
+        @Override
         protected boolean selfSwitch(Graph graph, Boolean to) {
             if (to) {
-                return validContents.stream().anyMatch(c -> getContent().switchTo(graph, c));
+                return validContents.stream().anyMatch(c -> getContent().switchTo(graph, c, true));
             }
-            return invalidContents.stream().anyMatch(c -> getContent().switchTo(graph, c));
+            return invalidContents.stream().anyMatch(c -> getContent().switchTo(graph, c, true));
         }
 
         @Override

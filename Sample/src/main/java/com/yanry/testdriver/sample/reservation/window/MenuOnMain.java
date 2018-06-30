@@ -22,16 +22,12 @@ public class MenuOnMain extends WindowManager.Window {
 
     @Override
     protected void addCases() {
-        popWindow(new PeriodicReserve(getManager()), new Click(new View(this, new ByText("周期预定"))), Timing.IMMEDIATELY,
-                true, false);
-        popWindow(new MyReservation(getManager()), new Click(new View(this, new ByText("我的预订"))), Timing.IMMEDIATELY,
-                true, false);
+        popWindow(new PeriodicReserve(getManager()), new Click(new View(this, new ByText("周期预定"))), Timing.IMMEDIATELY,true, false);
+        popWindow(new MyReservation(getManager()), new Click(new View(this, new ByText("我的预订"))), Timing.IMMEDIATELY,true, false);
         LoginState loginState = getProperty(LoginState.class);
-        createPath(getCreateEvent(), tvLogin.getText().getExpectation(Timing
-                .IMMEDIATELY, () -> loginState.getCurrentValue(getManager()) ? "登录" : "退出登录"));
+        createPath(getCreateEvent(), tvLogin.getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> loginState.getCurrentValue(getManager()) ? "登录" : "退出登录"));
         close(new Click(tvLogin), Timing.IMMEDIATELY).put(loginState, true);
-        popWindow(new Login(getManager()), new Click(tvLogin), Timing.IMMEDIATELY, false, false)
-                .put(loginState, false);
+        popWindow(new Login(getManager()), new Click(tvLogin), Timing.IMMEDIATELY, false, false).put(loginState, false);
         closeOnTouchOutside();
     }
 }

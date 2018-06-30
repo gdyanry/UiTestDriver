@@ -44,13 +44,8 @@ public class CheckBox extends TextView {
 
         @Override
         protected boolean doSelfSwitch(Graph graph, Boolean to) {
-            return getWindow().getVisibility().switchTo(graph, WindowManager.Visibility.Foreground) &&
+            return getWindow().getVisibility().switchTo(graph, WindowManager.Visibility.Foreground, true) &&
                     graph.performAction(new Click<>(CheckBox.this));
-        }
-
-        @Override
-        public boolean isCheckedByUser() {
-            return false;
         }
     }
 }

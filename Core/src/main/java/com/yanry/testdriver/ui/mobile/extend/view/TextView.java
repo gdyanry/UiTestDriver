@@ -40,10 +40,5 @@ public class TextView extends View {
         protected boolean doSelfSwitch(Graph graph, String to) {
             return false;
         }
-
-        @Override
-        public boolean isCheckedByUser() {
-            return true;
-        }
     }
 }

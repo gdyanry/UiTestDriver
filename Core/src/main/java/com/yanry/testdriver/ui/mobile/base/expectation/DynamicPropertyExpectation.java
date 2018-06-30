@@ -10,18 +10,13 @@ import java.util.function.Supplier;
 public class DynamicPropertyExpectation<V> extends PropertyExpectation<V> {
     private Supplier<V> valueSupplier;
 
-    public DynamicPropertyExpectation(Timing timing, Property<V> property, Supplier<V> valueSupplier) {
-        super(timing, property);
+    public DynamicPropertyExpectation(Timing timing, boolean needCheck, Property<V> property, Supplier<V> valueSupplier) {
+        super(timing, needCheck, property);
         this.valueSupplier = valueSupplier;
     }
 
     @Override
-    protected V getExpectedValue() {
+    public V getExpectedValue() {
         return valueSupplier.get();
-    }
-
-    @Override
-    public final boolean ifRecord() {
-        return true;
     }
 }

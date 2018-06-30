@@ -9,22 +9,13 @@ import java.util.function.BiPredicate;
 public class StaticPropertyExpectation<V> extends PropertyExpectation<V> {
     private V value;
 
-    public StaticPropertyExpectation(Timing timing, Property<V> property, V value) {
-        super(timing, property);
+    public StaticPropertyExpectation(Timing timing, boolean needCheck, Property<V> property, V value) {
+        super(timing, needCheck, property);
         this.value = value;
     }
 
     public boolean isSatisfied(BiPredicate<Property<V>, V> predicate) {
         return predicate.test(getProperty(), value);
-    }
-
-    @Override
-    public final boolean ifRecord() {
-        if (getProperty() instanceof CacheProperty) {
-            CacheProperty<V> cacheProperty = (CacheProperty<V>) getProperty();
-            return cacheProperty.isCheckedByUser();
-        }
-        return false;
     }
 
     @Presentable

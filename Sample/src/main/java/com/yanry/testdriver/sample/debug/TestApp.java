@@ -35,7 +35,7 @@ public class TestApp {
         for (Object record : records) {
             if (record instanceof Assertion) {
                 Assertion assertion = (Assertion) record;
-                if (assertion.getExpectation().ifRecord()) {
+                if (assertion.getExpectation().isNeedCheck()) {
                     if (assertion.isPass()) {
                         passCount++;
                     } else {

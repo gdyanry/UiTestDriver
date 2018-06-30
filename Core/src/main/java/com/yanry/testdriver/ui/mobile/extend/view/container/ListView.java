@@ -3,7 +3,6 @@ package com.yanry.testdriver.ui.mobile.extend.view.container;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
-import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
@@ -31,17 +30,11 @@ public class ListView extends View implements ViewContainer {
     }
 
     public void refresh(Event event) {
-        getWindow().createPath(event, new ActionExpectation() {
-            @Override
-            protected void run() {
-                size.setCacheValue(null);
-            }
-        });
+        getWindow().createPath(event, size.getStaticExpectation(Timing.IMMEDIATELY, false, null));
     }
 
     public void verifySize(int expectedSize, Function<Expectation, Path> verifySizePath) {
-        String strSize = String.valueOf(expectedSize);
-        verifySizePath.apply(size.getExpectation(Timing.IMMEDIATELY, expectedSize));
+        verifySizePath.apply(size.getStaticExpectation(Timing.IMMEDIATELY, true, expectedSize));
     }
 
     public Supplier<ListViewItem> getRandomItem(Graph graph) {
@@ -82,11 +75,6 @@ public class ListView extends View implements ViewContainer {
         @Override
         protected boolean doSelfSwitch(Graph graph, Integer to) {
             return false;
-        }
-
-        @Override
-        public boolean isCheckedByUser() {
-            return true;
         }
     }
 }

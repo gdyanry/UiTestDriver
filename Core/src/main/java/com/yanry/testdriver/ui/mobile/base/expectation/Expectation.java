@@ -14,9 +14,11 @@ import java.util.List;
 public abstract class Expectation {
     private Timing timing;
     private List<Expectation> followingExpectations;
+    private boolean needCheck;
 
-    public Expectation(Timing timing) {
+    public Expectation(Timing timing, boolean needCheck) {
         this.timing = timing;
+        this.needCheck = needCheck;
         followingExpectations = new LinkedList<>();
     }
 
@@ -47,5 +49,7 @@ public abstract class Expectation {
     /**
      * @return 该期望是否为用户关注（需要输出到测试结果中）的。
      */
-    public abstract boolean ifRecord();
+    public final boolean isNeedCheck() {
+        return needCheck;
+    }
 }

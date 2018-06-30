@@ -29,7 +29,7 @@ public class LoginPathHandler {
 
     public void handleCurrentUserOnSuccessLogin(Timing timing, Function<PropertyExpectation, Path> getSuccessLoginPath) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> getSuccessLoginPath.apply(currentUser
-                .getExpectation(timing, e.getKey())).addInitState(etUser.getContent(), e.getKey())
+                .getStaticExpectation(timing, false, e.getKey())).addInitState(etUser.getContent(), e.getKey())
                 .addInitState(etPwd.getContent(), e.getValue()));
     }
 

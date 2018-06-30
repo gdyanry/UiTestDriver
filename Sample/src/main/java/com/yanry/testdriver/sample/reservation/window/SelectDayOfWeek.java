@@ -34,26 +34,25 @@ public class SelectDayOfWeek extends WindowManager.Window {
             checkBoxes[i] = new CheckBox(this, new ByIndex(i));
             int finalIndex = i;
             // init state
-            createPath(getCreateEvent(), new DynamicPropertyExpectation<Boolean>(Timing.IMMEDIATELY, checkBoxes[i]
-                    .getCheckState(), () -> dayOfWeekValue.getCurrentValue(getManager())[finalIndex]));
+            createPath(getCreateEvent(), checkBoxes[i].getCheckState().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> dayOfWeekValue.getCurrentValue(getManager())[finalIndex]));
             // day of week validity on true
-            createPath(clickConfirm, dayOfWeekValidity.getExpectation(Timing.IMMEDIATELY, true)).addInitState
+            createPath(clickConfirm, dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addInitState
                     (checkBoxes[i].getCheckState(), true).addInitState(dayOfWeekValidity, false);
         }
         // day of week validity on false
-        Path path = createPath(clickConfirm, dayOfWeekValidity.getExpectation(Timing.IMMEDIATELY, false));
+        Path path = createPath(clickConfirm, dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, true, false));
         for (CheckBox checkBox : checkBoxes) {
             path.addInitState(checkBox.getCheckState(), false);
         }
         // day of week value
         TextView tvDayOfWeek = fromWindow.getTvDayOfWeek();
-        createPath(clickConfirm, dayOfWeekValue.getExpectation(Timing.IMMEDIATELY, () -> {
+        createPath(clickConfirm, dayOfWeekValue.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> {
             for (int i = 0; i < checkBoxes.length; i++) {
                 CheckBox checkBox = checkBoxes[i];
                 dayOfWeekValue.getCurrentValue(getManager())[i] = checkBox.getCheckState().getCurrentValue(getManager());
             }
             return dayOfWeekValue.getCurrentValue(getManager());
-        }).addFollowingExpectation(tvDayOfWeek.getText().getExpectation(Timing.IMMEDIATELY, () -> {
+        }).addFollowingExpectation(tvDayOfWeek.getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> {
             StringBuilder stringBuilder = new StringBuilder();
             boolean[] bArr = dayOfWeekValue.getCurrentValue(getManager());
             if (bArr[0]) {

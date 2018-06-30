@@ -1,7 +1,5 @@
 package com.yanry.testdriver.ui.mobile.base;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
-import com.yanry.testdriver.ui.mobile.base.event.SwitchStateAction;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 
 /**
@@ -14,11 +12,6 @@ public class ProcessState extends CacheProperty<Boolean> {
 
     @Override
     protected Boolean checkValue(Graph graph) {
-        return false;
-    }
-
-    @Override
-    public boolean isCheckedByUser() {
         return false;
     }
 
