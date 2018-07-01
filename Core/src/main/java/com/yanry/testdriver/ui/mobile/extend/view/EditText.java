@@ -3,6 +3,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
@@ -45,6 +46,12 @@ public class EditText extends View {
         protected boolean doSelfSwitch(Graph graph, String to) {
             return getWindow().getVisibility().switchTo(graph, WindowManager.Visibility.Foreground, true) &&
                     graph.performAction(new EnterText(EditText.this, to));
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<String> property) {
+            Content content = (Content) property;
+            return EditText.this.equals(content.getEditText());
         }
     }
 }

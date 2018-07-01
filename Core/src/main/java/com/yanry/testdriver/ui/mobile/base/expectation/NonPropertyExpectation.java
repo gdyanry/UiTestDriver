@@ -1,6 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
+import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 
 /**
@@ -17,5 +18,10 @@ public abstract class NonPropertyExpectation extends Expectation {
     @Override
     protected final boolean selfVerify(Graph graph) {
         return graph.verifyExpectation(this);
+    }
+
+    @Override
+    protected int getMatchDegree(Graph graph, Path path) {
+        return 0;
     }
 }

@@ -2,6 +2,7 @@ package com.yanry.testdriver.sample.reservation.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.base.event.SwitchStateAction;
 
@@ -18,5 +19,10 @@ public class NetworkConnectivity extends CacheProperty<Boolean> {
     @Override
     protected boolean doSelfSwitch(Graph graph, Boolean to) {
         return graph.performAction(new SwitchStateAction(this, to));
+    }
+
+    @Override
+    protected boolean equalsWithSameClass(Property<Boolean> property) {
+        return true;
     }
 }

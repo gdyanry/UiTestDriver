@@ -23,7 +23,7 @@ public abstract class Property<V> {
     public final boolean switchTo(Graph graph, V to, boolean verifySuperPaths) {
         return to.equals(getCurrentValue(graph)) ||
                 // 先搜索是否存在可用路径
-                (graph.findPathToRoll(null, (prop, val) -> equals(prop) && to.equals(val), verifySuperPaths) ||
+                (graph.findPathToRoll((prop, val) -> equals(prop) && to.equals(val), verifySuperPaths) ||
                         // 若无可用路径再尝试自转化
                         verifySuperPaths(graph, to, verifySuperPaths))
                         && to.equals(getCurrentValue(graph));
@@ -50,10 +50,22 @@ public abstract class Property<V> {
         return new DynamicPropertyExpectation<>(timing, needCheck, this, valueSupplier);
     }
 
-    public abstract void handleExpectation(V expectedValue, boolean needCheck);
+    @Override
+    public final boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || !obj.getClass().equals(getClass())) {
+            return false;
+        }
+        return equalsWithSameClass((Property<V>) obj);
+    }
 
-    protected abstract boolean selfSwitch(Graph graph, V to);
+    public abstract void handleExpectation(V expectedValue, boolean needCheck);
 
     public abstract V getCurrentValue(Graph graph);
 
+    protected abstract boolean selfSwitch(Graph graph, V to);
+
+    protected abstract boolean equalsWithSameClass(Property<V> property);
 }

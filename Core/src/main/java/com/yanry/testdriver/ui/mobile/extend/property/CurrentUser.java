@@ -2,6 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend.property;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 
 import java.util.HashMap;
@@ -41,5 +42,10 @@ public class CurrentUser extends CacheProperty<String> {
     @Override
     protected boolean doSelfSwitch(Graph graph, String to) {
         return false;
+    }
+
+    @Override
+    protected boolean equalsWithSameClass(Property<String> property) {
+        return true;
     }
 }

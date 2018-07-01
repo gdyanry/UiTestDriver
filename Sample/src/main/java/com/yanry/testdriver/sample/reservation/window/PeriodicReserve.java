@@ -141,6 +141,11 @@ public class PeriodicReserve extends WindowManager.Window {
         protected boolean doSelfSwitch(Graph graph, Boolean to) {
             return false;
         }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<Boolean> property) {
+            return false;
+        }
     }
 
     public class DayOfWeekValue extends CacheProperty<boolean[]> {
@@ -152,6 +157,11 @@ public class PeriodicReserve extends WindowManager.Window {
 
         @Override
         protected boolean doSelfSwitch(Graph graph, boolean[] to) {
+            return false;
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<boolean[]> property) {
             return false;
         }
     }
@@ -170,6 +180,11 @@ public class PeriodicReserve extends WindowManager.Window {
 
         @Override
         protected boolean selfSwitch(Graph graph, Boolean to) {
+            return false;
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<Boolean> property) {
             return false;
         }
 

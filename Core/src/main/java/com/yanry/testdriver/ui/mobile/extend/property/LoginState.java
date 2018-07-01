@@ -27,6 +27,11 @@ public class LoginState extends Property<Boolean> {
     }
 
     @Override
+    protected boolean equalsWithSameClass(Property<Boolean> property) {
+        return true;
+    }
+
+    @Override
     public Boolean getCurrentValue(Graph graph) {
         return !currentUser.getCurrentValue(graph).equals("");
     }

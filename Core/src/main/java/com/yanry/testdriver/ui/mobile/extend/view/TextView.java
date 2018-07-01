@@ -3,6 +3,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
@@ -31,6 +32,11 @@ public class TextView extends View {
     @Presentable
     public class TextValue extends CacheProperty<String> {
 
+        @Presentable
+        public TextView getTextView() {
+            return TextView.this;
+        }
+
         @Override
         protected String checkValue(Graph graph) {
             return graph.checkState(new StateToCheck<>(this));
@@ -39,6 +45,12 @@ public class TextView extends View {
         @Override
         protected boolean doSelfSwitch(Graph graph, String to) {
             return false;
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<String> property) {
+            TextValue textValue = (TextValue) property;
+            return TextView.this.equals(textValue.getTextView());
         }
     }
 }

@@ -6,6 +6,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
@@ -73,6 +74,12 @@ public class View {
         @Override
         protected boolean doSelfSwitch(Graph graph, Boolean to) {
             return false;
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<Boolean> property) {
+            ViewVisibility visibility = (ViewVisibility) property;
+            return visibility.getView().equals(getView());
         }
     }
 }

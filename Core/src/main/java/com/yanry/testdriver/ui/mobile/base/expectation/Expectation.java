@@ -1,6 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
+import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 
 import java.util.LinkedList;
@@ -31,12 +32,27 @@ public abstract class Expectation {
         return followingExpectations;
     }
 
+    public final int getTotalMatchDegree(Graph graph, Path path) {
+        int degree = getMatchDegree(graph, path);
+        for (Expectation expectation : followingExpectations) {
+            degree += expectation.getTotalMatchDegree(graph, path);
+        }
+        return degree;
+    }
+
     public final boolean verify(Graph graph) {
         if (selfVerify(graph)) {
             followingExpectations.forEach(e -> e.verify(graph));
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return 该期望是否为用户关注（需要输出到测试结果中）的。
+     */
+    public final boolean isNeedCheck() {
+        return needCheck;
     }
 
     @Presentable
@@ -46,10 +62,6 @@ public abstract class Expectation {
 
     protected abstract boolean selfVerify(Graph graph);
 
-    /**
-     * @return 该期望是否为用户关注（需要输出到测试结果中）的。
-     */
-    public final boolean isNeedCheck() {
-        return needCheck;
-    }
+    protected abstract int getMatchDegree(Graph graph, Path path);
+
 }

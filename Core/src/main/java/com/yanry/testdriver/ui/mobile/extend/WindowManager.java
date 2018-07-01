@@ -17,6 +17,7 @@ import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static com.yanry.testdriver.ui.mobile.extend.WindowManager.Visibility.*;
 
@@ -31,10 +32,11 @@ public class WindowManager extends Graph {
 
     public WindowManager(boolean debug) {
         super(debug);
-        windowInstances = new HashMap<>();
+        windowInstances = new LinkedHashMap<>();
         propertyInstances = new HashMap<>();
         currentWindow = new CurrentWindow();
         noWindow = new NoWindow();
+        currentWindow.handleExpectation(noWindow, false);
         Util.createPath(this, getProcessState().getStateEvent(true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow));
     }
 
@@ -69,11 +71,13 @@ public class WindowManager extends Graph {
         public Window() {
             previousWindow = new PreviousWindow();
             visibility = new VisibilityState();
+            visibility.handleExpectation(NotCreated, false);
             createEvent = new StateEvent<>(visibility, NotCreated, Foreground);
             closeEvent = new StateEvent<>(visibility, Foreground, NotCreated);
             resumeEvent = new StateEvent<>(visibility, Background, Foreground);
             pauseEvent = new StateEvent<>(visibility, Foreground, Background);
-            if (windowInstances.put(getClass(), this) == null) {
+            if (!windowInstances.containsKey(getClass())) {
+                windowInstances.put(getClass(), this);
                 ReflectionUtil.initStaticStringFields(getClass());
                 addCases();
             }
@@ -172,6 +176,9 @@ public class WindowManager extends Graph {
         }
 
         private class PreviousWindow extends CacheProperty<Window> {
+            private Window getWindow() {
+                return Window.this;
+            }
 
             @Override
             protected Window checkValue(Graph graph) {
@@ -181,6 +188,12 @@ public class WindowManager extends Graph {
             @Override
             protected boolean doSelfSwitch(Graph graph, Window to) {
                 return false;
+            }
+
+            @Override
+            protected boolean equalsWithSameClass(Property<Window> property) {
+                PreviousWindow previousWindow = (PreviousWindow) property;
+                return getWindow().equals(previousWindow.getWindow());
             }
         }
 
@@ -199,6 +212,12 @@ public class WindowManager extends Graph {
             @Override
             protected boolean selfSwitch(Graph graph, Visibility to) {
                 return false;
+            }
+
+            @Override
+            protected boolean equalsWithSameClass(Property<Visibility> property) {
+                VisibilityState visibilityState = (VisibilityState) property;
+                return getWindow().equals(visibilityState.getWindow());
             }
 
             @Override
@@ -240,6 +259,11 @@ public class WindowManager extends Graph {
         @Override
         protected boolean doSelfSwitch(Graph graph, Window to) {
             return false;
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<Window> property) {
+            return true;
         }
     }
 

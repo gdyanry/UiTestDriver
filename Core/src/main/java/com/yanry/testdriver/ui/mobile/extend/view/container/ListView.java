@@ -2,10 +2,12 @@ package com.yanry.testdriver.ui.mobile.extend.view.container;
 
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ByIndex;
@@ -67,6 +69,11 @@ public class ListView extends View implements ViewContainer {
 
     public class ListViewSize extends CacheProperty<Integer> {
 
+        @Presentable
+        public ListView getListView() {
+            return ListView.this;
+        }
+
         @Override
         protected Integer checkValue(Graph graph) {
             return graph.checkState(new StateToCheck<>(this));
@@ -75,6 +82,12 @@ public class ListView extends View implements ViewContainer {
         @Override
         protected boolean doSelfSwitch(Graph graph, Integer to) {
             return false;
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<Integer> property) {
+            ListViewSize size = (ListViewSize) property;
+            return ListView.this.equals(size.getListView());
         }
     }
 }

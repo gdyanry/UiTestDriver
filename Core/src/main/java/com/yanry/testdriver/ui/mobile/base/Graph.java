@@ -4,11 +4,13 @@
 package com.yanry.testdriver.ui.mobile.base;
 
 import com.yanry.testdriver.ui.mobile.Util;
-import com.yanry.testdriver.ui.mobile.base.event.*;
+import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
+import com.yanry.testdriver.ui.mobile.base.event.Event;
+import com.yanry.testdriver.ui.mobile.base.event.StateChangeCallback;
+import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.StaticPropertyExpectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
@@ -19,7 +21,6 @@ import lib.common.util.ConsoleUtil;
 
 import java.util.*;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -48,8 +49,6 @@ public class Graph implements Communicator, Loggable {
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
         processState = new ProcessState();
-        addPath(new Path(new SwitchStateAction<>(processState, true), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)));
-        addPath(new Path(new SwitchStateAction<>(processState, false), processState.getStaticExpectation(Timing.IMMEDIATELY, false, false)));
     }
 
     public ProcessState getProcessState() {
@@ -142,10 +141,19 @@ public class Graph implements Communicator, Loggable {
 
     private boolean internalRoll(Path path, boolean verifySuperPaths) {
         // make sure environment states are satisfied.
-        // TODO 按状态优先级排序
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue(this))).findFirst();
         if (any.isPresent()) {
+            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p))
+                    .sorted(Comparator.comparingInt(p -> Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(this, path) + p.getUnsatisfiedDegree(this))).findFirst();
+            if (first.isPresent()) {
+                int matchDegree = first.get().getExpectation().getTotalMatchDegree(this, path);
+                if (matchDegree > 0) {
+                    log("roll path to init state(%s, %s): %s", matchDegree, first.get().getUnsatisfiedDegree(this), Util.getPresentation(first.get()));
+                    roll(first.get(), true);
+                    return internalRoll(path, verifySuperPaths);
+                }
+            }
             Map.Entry<Property, Object> state = any.get();
             log("switch init state: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
             if (state.getKey().switchTo(this, state.getValue(), true)) {
@@ -183,8 +191,7 @@ public class Graph implements Communicator, Loggable {
             return fail(path, inputEvent);
         }
         // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-        List<Path> siblings = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p
-                .isSatisfied(this)).collect(Collectors.toList());
+        List<Path> siblings = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(this) == 0).collect(Collectors.toList());
         // collect paths that share the same environment states and event
         final boolean[] result = new boolean[1];
         siblings.stream().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
@@ -238,13 +245,13 @@ public class Graph implements Communicator, Loggable {
                 if (p.getEvent() instanceof StateEvent) {
                     StateEvent switchEvent = (StateEvent) p.getEvent();
                     if (switchEvent.getProperty().equals(property) && switchEvent.getTo().equals(to)
-                            && (from == null || switchEvent.getFrom().equals(from)) && p.isSatisfied(this)) {
+                            && (from == null || switchEvent.getFrom().equals(from)) && p.getUnsatisfiedDegree(this) == 0) {
                         return true;
                     }
                 } else if (p.getEvent() instanceof StateChangeCallback) {
                     StateChangeCallback switchEvent = (StateChangeCallback) p.getEvent();
                     if (switchEvent.getProperty().equals(property) && switchEvent.getTo().test(to)
-                            && (from == null || switchEvent.getFrom().test(from)) && p.isSatisfied(this)) {
+                            && (from == null || switchEvent.getFrom().test(from)) && p.getUnsatisfiedDegree(this) == 0) {
                         return true;
                     }
                 }
@@ -259,21 +266,20 @@ public class Graph implements Communicator, Loggable {
     /**
      * try paths that satisfy the given predicates until one successfully rolled.
      *
-     * @param pathPredicate
      * @param endStatePredicate
      * @return
      */
-    public <V> boolean findPathToRoll(Predicate<Path> pathPredicate, BiPredicate<Property<V>, V> endStatePredicate, boolean verifySuperPaths) {
+    public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate, boolean verifySuperPaths) {
         return allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p) && !rollingPaths.contains(p) && p.getExpectation() instanceof PropertyExpectation) {
-                return (pathPredicate == null || pathPredicate.test(p)) && isSatisfied(p.getExpectation(), endStatePredicate);
+                return isSatisfied(p.getExpectation(), endStatePredicate);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {
             // TODO 细化排序值，寻找最短路径
-            int i = p.isSatisfied(this) ? 0 : 1;
-            log("compare value: %s - %s", i, Util.getPresentation(p));
-            return i;
+            int unsatisfiedDegree = p.getUnsatisfiedDegree(this);
+            log("compare value: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
+            return unsatisfiedDegree;
         })).filter(p -> {
             log("try to roll: %s", Util.getPresentation(p));
             return roll(p, verifySuperPaths);
@@ -290,8 +296,23 @@ public class Graph implements Communicator, Loggable {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStatePredicate));
     }
 
+    private void logCollection(String tag, Collection collection) {
+        log(String.format("%s>>>>", tag));
+        for (Object item : collection) {
+            log(String.format("    %s", Util.getPresentation(item)));
+        }
+    }
+
+    private void logStatus() {
+        logCollection("rolling", rollingPaths);
+        logCollection("failed", failedPaths);
+        logCollection("record", records);
+        log("unprocessed>>>>%s", unprocessedPaths.size());
+    }
+
     @Override
     public <V> V checkState(StateToCheck<V> stateToCheck) {
+        logStatus();
         for (Communicator communicator : communicators) {
             V value = communicator.checkState(stateToCheck);
             if (value != null) {
@@ -303,6 +324,7 @@ public class Graph implements Communicator, Loggable {
 
     @Override
     public boolean performAction(ActionEvent actionEvent) {
+        logStatus();
         for (Communicator communicator : communicators) {
             if (communicator.performAction(actionEvent)) {
                 return true;
@@ -313,6 +335,7 @@ public class Graph implements Communicator, Loggable {
 
     @Override
     public Boolean verifyExpectation(Expectation expectation) {
+        logStatus();
         for (Communicator communicator : communicators) {
             Boolean result = communicator.verifyExpectation(expectation);
             if (result != null) {

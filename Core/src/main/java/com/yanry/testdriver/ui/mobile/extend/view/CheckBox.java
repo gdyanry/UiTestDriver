@@ -3,6 +3,7 @@ package com.yanry.testdriver.ui.mobile.extend.view;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
@@ -46,6 +47,12 @@ public class CheckBox extends TextView {
         protected boolean doSelfSwitch(Graph graph, Boolean to) {
             return getWindow().getVisibility().switchTo(graph, WindowManager.Visibility.Foreground, true) &&
                     graph.performAction(new Click<>(CheckBox.this));
+        }
+
+        @Override
+        protected boolean equalsWithSameClass(Property<Boolean> property) {
+            CheckState checkState = (CheckState) property;
+            return CheckBox.this.equals(checkState.getCheckBox());
         }
     }
 }
