@@ -1,7 +1,7 @@
 package com.yanry.testdriver.ui.mobile.extend;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.AbstractStaticPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
 import com.yanry.testdriver.ui.mobile.extend.view.ValidateEditText;
@@ -27,7 +27,7 @@ public class LoginPathHandler {
         });
     }
 
-    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<PropertyExpectation, Path> getSuccessLoginPath) {
+    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<AbstractStaticPropertyExpectation, Path> getSuccessLoginPath) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> getSuccessLoginPath.apply(currentUser
                 .getStaticExpectation(timing, false, e.getKey())).addInitState(etUser.getContent(), e.getKey())
                 .addInitState(etPwd.getContent(), e.getValue()));

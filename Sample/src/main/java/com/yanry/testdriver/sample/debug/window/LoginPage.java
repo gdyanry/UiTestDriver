@@ -28,8 +28,7 @@ public class LoginPage extends WindowManager.Window {
 
     @Override
     protected void addCases() {
-        showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).put(getProperty(LoginState.class),
-                false);
+        showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).put(getProperty(LoginState.class), false);
         ValidateEditText etUser = new ValidateEditText(this, new ByDesc(DESC_USER));
         ValidateEditText etPwd = new ValidateEditText(this, new ByDesc(DESC_PWD));
         // 页面打开时输入框内容为空

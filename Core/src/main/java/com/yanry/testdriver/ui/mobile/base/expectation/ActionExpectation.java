@@ -9,11 +9,11 @@ public abstract class ActionExpectation extends Expectation {
         super(Timing.IMMEDIATELY, false);
     }
 
-    protected abstract void run();
+    protected abstract void run(Graph graph);
 
     @Override
     protected final boolean selfVerify(Graph graph) {
-        run();
+        run(graph);
         return true;
     }
 

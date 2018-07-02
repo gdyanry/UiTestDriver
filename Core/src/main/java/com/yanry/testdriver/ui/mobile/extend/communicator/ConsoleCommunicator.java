@@ -3,6 +3,7 @@ package com.yanry.testdriver.ui.mobile.extend.communicator;
 import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import lib.common.util.ConsoleUtil;
 
@@ -15,21 +16,28 @@ public class ConsoleCommunicator extends SerializedCommunicator {
         if (repeat == 0) {
             return ConsoleUtil.readLine(prompt);
         } else {
-            System.out.println("---------------请输入正确的数字--------------");
-            showHint.run();
-            System.out.println("---------------------------------------------");
+            if (showHint != null) {
+                System.out.println("---------------请输入正确的数字--------------");
+                showHint.run();
+                System.out.println("---------------------------------------------");
+            }
             return ConsoleUtil.readLine(prompt);
         }
     }
 
     @Override
     protected <V> String checkState(int repeat, StateToCheck<V> stateToCheck) {
-        return getInput(repeat, "check", stateToCheck, () -> {
+        return getInput(repeat, "select", stateToCheck, () -> {
             for (int i = 0; i < stateToCheck.getOptions().length; i++) {
                 V v = stateToCheck.getOptions()[i];
                 System.out.printf("%s - %s%n", i, Util.getPresentation(v));
             }
         });
+    }
+
+    @Override
+    public String fetchValue(Property<String> property) {
+        return getInput(0, "check", property, null);
     }
 
     @Override

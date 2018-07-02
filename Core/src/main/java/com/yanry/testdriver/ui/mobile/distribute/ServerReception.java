@@ -5,6 +5,7 @@ import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.communicator.SerializedCommunicator;
 import lib.common.model.json.JSONArray;
@@ -141,5 +142,10 @@ public class ServerReception extends SerializedCommunicator {
     @Override
     protected String verifyExpectation(int repeat, Expectation expectation) {
         return carryOut(repeat, expectation);
+    }
+
+    @Override
+    public String fetchValue(Property<String> property) {
+        return carryOut(0, property);
     }
 }

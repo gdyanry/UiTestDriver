@@ -39,7 +39,10 @@ public class EditText extends View {
 
         @Override
         protected String checkValue(Graph graph) {
-            return "";
+            if (getWindow().getManager().getCurrentWindow().getCurrentValue(graph).equals(getWindow())) {
+                return graph.fetchValue(this);
+            }
+            return null;
         }
 
         @Override

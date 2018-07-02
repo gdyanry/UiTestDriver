@@ -7,7 +7,7 @@ import com.yanry.testdriver.ui.mobile.base.property.Property;
  * Created by rongyu.yan on 5/17/2017.
  */
 @Presentable
-public class StateEvent<V> implements Event {
+public class StateEvent<V> implements Event<V> {
     private Property<V> property;
     private V from;
     private V to;
@@ -31,5 +31,22 @@ public class StateEvent<V> implements Event {
     @Presentable
     public V getTo() {
         return to;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null || !obj.getClass().equals(getClass())) {
+            return false;
+        }
+        StateEvent event = (StateEvent) obj;
+        return property.equals(event.getProperty()) && from.equals(event.getFrom()) && to.equals(event.getTo());
+    }
+
+    @Override
+    public boolean matches(Property<V> property, V fromValue, V toValue) {
+        return this.property.equals(property) && this.to.equals(toValue) && (from == null || this.from.equals(fromValue));
     }
 }

@@ -2,6 +2,7 @@ package com.yanry.testdriver.ui.mobile.base.runtime;
 
 import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 
 /**
  * Created by rongyu.yan on 3/2/2017.
@@ -13,6 +14,8 @@ public interface Communicator {
      * @return 返回null表示无法确定状态值。
      */
     <V> V checkState(StateToCheck<V> stateToCheck);
+
+    String fetchValue(Property<String> property);
 
     /**
      *

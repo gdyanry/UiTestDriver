@@ -6,8 +6,8 @@ package com.yanry.testdriver.ui.mobile.base.property;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
-import com.yanry.testdriver.ui.mobile.base.expectation.DynamicPropertyExpectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.StaticPropertyExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.SDPropertyExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.SSPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 
 import java.util.function.Supplier;
@@ -42,12 +42,12 @@ public abstract class Property<V> {
         return new StateEvent<>(this, from, to);
     }
 
-    public StaticPropertyExpectation<V> getStaticExpectation(Timing timing, boolean needCheck, V value) {
-        return new StaticPropertyExpectation<>(timing, needCheck, this, value);
+    public SSPropertyExpectation<V> getStaticExpectation(Timing timing, boolean needCheck, V value) {
+        return new SSPropertyExpectation<>(timing, needCheck, this, value);
     }
 
-    public DynamicPropertyExpectation<V> getDynamicExpectation(Timing timing, boolean needCheck, Supplier<V> valueSupplier) {
-        return new DynamicPropertyExpectation<>(timing, needCheck, this, valueSupplier);
+    public SDPropertyExpectation<V> getDynamicExpectation(Timing timing, boolean needCheck, Supplier<V> valueSupplier) {
+        return new SDPropertyExpectation<>(timing, needCheck, this, valueSupplier);
     }
 
     @Override

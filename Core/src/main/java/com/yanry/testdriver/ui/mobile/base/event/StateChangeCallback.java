@@ -6,7 +6,7 @@ import com.yanry.testdriver.ui.mobile.base.property.Property;
 import java.util.function.Predicate;
 
 @Presentable
-public class StateChangeCallback<V> implements Event {
+public class StateChangeCallback<V> implements Event<V> {
     private Property<V> property;
     private Predicate<V> from;
     private Predicate<V> to;
@@ -28,5 +28,10 @@ public class StateChangeCallback<V> implements Event {
 
     public Predicate<V> getTo() {
         return to;
+    }
+
+    @Override
+    public boolean matches(Property<V> property, V fromValue, V toValue) {
+        return this.property.equals(property) && to.test(toValue) && (from == null || from.test(fromValue));
     }
 }

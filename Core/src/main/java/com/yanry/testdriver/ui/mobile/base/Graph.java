@@ -8,9 +8,8 @@ import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.event.StateChangeCallback;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
-import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
-import com.yanry.testdriver.ui.mobile.base.expectation.StaticPropertyExpectation;
+import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
@@ -79,12 +78,16 @@ public class Graph implements Communicator, Loggable {
                             Property property = transitionEvent.getProperty();
                             p.remove(property);
                         }
-                        return p.getExpectation().isNeedCheck();
+                        return needCheck(p.getExpectation());
                     }).collect(Collectors.toList());
                 }
             }
         }
         return optionalPaths;
+    }
+
+    private boolean needCheck(Expectation expectation) {
+        return expectation.isNeedCheck() || expectation.getFollowingExpectations().parallelStream().anyMatch(exp -> needCheck(exp));
     }
 
     /**
@@ -180,9 +183,7 @@ public class Graph implements Communicator, Loggable {
             ActionEvent event = (ActionEvent) inputEvent;
             event.processPreAction();
             // this is where the action event is performed!
-            if (performAction(event)) {
-                records.add(event);
-            } else {
+            if (!performAction(event)) {
                 log("perform action fail: %s", Util.getPresentation(event));
                 return fail(path, event);
             }
@@ -219,7 +220,8 @@ public class Graph implements Communicator, Loggable {
         Expectation expectation = path.getExpectation();
         Object fromValue = null;
         if (expectation instanceof PropertyExpectation) {
-            Property property = ((PropertyExpectation) expectation).getProperty();
+            // 记录验证前的属性值
+            Property property = ((PropertyExpectation<?>) expectation).getProperty();
             fromValue = property.getCurrentValue(this);
         }
         boolean isPass = expectation.verify(this);
@@ -240,27 +242,11 @@ public class Graph implements Communicator, Loggable {
     }
 
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
-        allPaths.stream().filter(p -> {
-            if (!rollingPaths.contains(p)) {
-                if (p.getEvent() instanceof StateEvent) {
-                    StateEvent switchEvent = (StateEvent) p.getEvent();
-                    if (switchEvent.getProperty().equals(property) && switchEvent.getTo().equals(to)
-                            && (from == null || switchEvent.getFrom().equals(from)) && p.getUnsatisfiedDegree(this) == 0) {
-                        return true;
-                    }
-                } else if (p.getEvent() instanceof StateChangeCallback) {
-                    StateChangeCallback switchEvent = (StateChangeCallback) p.getEvent();
-                    if (switchEvent.getProperty().equals(property) && switchEvent.getTo().test(to)
-                            && (from == null || switchEvent.getFrom().test(from)) && p.getUnsatisfiedDegree(this) == 0) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }).forEach(path -> {
-            log("verify super path: %s", Util.getPresentation(path));
-            verify(path, true);
-        });
+        allPaths.stream().filter(p -> !rollingPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(this) == 0)
+                .forEach(path -> {
+                    log("verify super path: %s", Util.getPresentation(path));
+                    verify(path, true);
+                });
     }
 
     /**
@@ -271,12 +257,11 @@ public class Graph implements Communicator, Loggable {
      */
     public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate, boolean verifySuperPaths) {
         return allPaths.stream().filter(p -> {
-            if (!failedPaths.contains(p) && !rollingPaths.contains(p) && p.getExpectation() instanceof PropertyExpectation) {
+            if (!failedPaths.contains(p) && !rollingPaths.contains(p)) {
                 return isSatisfied(p.getExpectation(), endStatePredicate);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {
-            // TODO 细化排序值，寻找最短路径
             int unsatisfiedDegree = p.getUnsatisfiedDegree(this);
             log("compare value: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
             return unsatisfiedDegree;
@@ -287,8 +272,8 @@ public class Graph implements Communicator, Loggable {
     }
 
     private <V> boolean isSatisfied(Expectation expectation, BiPredicate<Property<V>, V> endStatePredicate) {
-        if (expectation instanceof StaticPropertyExpectation) {
-            StaticPropertyExpectation<V> exp = (StaticPropertyExpectation<V>) expectation;
+        if (expectation instanceof PropertyExpectation) {
+            PropertyExpectation<V> exp = (PropertyExpectation<V>) expectation;
             if (exp.isSatisfied(endStatePredicate)) {
                 return true;
             }
@@ -323,8 +308,21 @@ public class Graph implements Communicator, Loggable {
     }
 
     @Override
+    public String fetchValue(Property<String> property) {
+        logStatus();
+        for (Communicator communicator : communicators) {
+            String value = communicator.fetchValue(property);
+            if (value != null) {
+                return value;
+            }
+        }
+        return "";
+    }
+
+    @Override
     public boolean performAction(ActionEvent actionEvent) {
         logStatus();
+        records.add(actionEvent);
         for (Communicator communicator : communicators) {
             if (communicator.performAction(actionEvent)) {
                 return true;

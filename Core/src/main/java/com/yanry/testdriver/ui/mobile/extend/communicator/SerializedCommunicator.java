@@ -2,6 +2,7 @@ package com.yanry.testdriver.ui.mobile.extend.communicator;
 
 import com.yanry.testdriver.ui.mobile.base.event.ActionEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 
