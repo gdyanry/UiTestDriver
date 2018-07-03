@@ -28,6 +28,7 @@ public abstract class Expectation {
         return this;
     }
 
+    @Presentable
     public List<Expectation> getFollowingExpectations() {
         return followingExpectations;
     }
@@ -40,9 +41,9 @@ public abstract class Expectation {
         return degree;
     }
 
-    public final boolean verify(Graph graph) {
-        if (selfVerify(graph)) {
-            followingExpectations.forEach(e -> e.verify(graph));
+    public final boolean verify(Graph graph, boolean verifySuperPaths) {
+        if (selfVerify(graph, verifySuperPaths)) {
+            followingExpectations.forEach(e -> e.verify(graph, true));
             return true;
         }
         return false;
@@ -60,7 +61,7 @@ public abstract class Expectation {
         return timing;
     }
 
-    protected abstract boolean selfVerify(Graph graph);
+    protected abstract boolean selfVerify(Graph graph, boolean verifySuperPaths);
 
     protected abstract int getMatchDegree(Graph graph, Path path);
 

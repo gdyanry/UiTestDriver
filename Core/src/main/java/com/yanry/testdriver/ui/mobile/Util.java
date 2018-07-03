@@ -12,6 +12,7 @@ import lib.common.util.StringUtil;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,6 +31,13 @@ public class Util {
             int len = Array.getLength(obj);
             for (int i = 0; i < len; i++) {
                 jsonArray.put(getPresentation(Array.get(obj, i)));
+            }
+            return jsonArray;
+        } else if (obj instanceof List) {
+            JSONArray jsonArray = new JSONArray();
+            List list = (List) obj;
+            for (Object item : list) {
+                jsonArray.put(getPresentation(item));
             }
             return jsonArray;
         }

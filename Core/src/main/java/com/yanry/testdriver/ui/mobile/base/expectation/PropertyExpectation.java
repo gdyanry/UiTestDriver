@@ -25,11 +25,18 @@ public abstract class PropertyExpectation<V> extends Expectation {
     public abstract V getExpectedValue();
 
     @Override
-    protected final boolean selfVerify(Graph graph) {
+    protected final boolean selfVerify(Graph graph, boolean verifySuperPaths) {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
+        V oldValue = property.getCurrentValue(graph);
         property.handleExpectation(expectedValue, isNeedCheck());
-        return expectedValue.equals(property.getCurrentValue(graph));
+        if (expectedValue.equals(property.getCurrentValue(graph))) {
+            if (verifySuperPaths) {
+                graph.verifySuperPaths(property, oldValue, expectedValue);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

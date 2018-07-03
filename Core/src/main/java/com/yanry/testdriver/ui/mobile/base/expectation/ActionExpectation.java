@@ -12,7 +12,7 @@ public abstract class ActionExpectation extends Expectation {
     protected abstract void run(Graph graph);
 
     @Override
-    protected final boolean selfVerify(Graph graph) {
+    protected final boolean selfVerify(Graph graph, boolean verifySuperPaths) {
         run(graph);
         return true;
     }
