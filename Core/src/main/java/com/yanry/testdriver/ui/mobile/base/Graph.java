@@ -194,11 +194,11 @@ public class Graph implements Communicator, Loggable {
             log("unprocessed event: %s", Util.getPresentation(inputEvent));
             return fail(path, inputEvent);
         }
-        // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-        List<Path> siblings = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(this) == 0).collect(Collectors.toList());
         // collect paths that share the same environment states and event
         final boolean[] result = new boolean[1];
-        siblings.stream().sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
+        // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
+        allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(this) == 0)
+                .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             if (p == path) {
                 log("verify path(%s): %s", verifySuperPaths, Util.getPresentation(p));
                 result[0] = verify(p, verifySuperPaths);
