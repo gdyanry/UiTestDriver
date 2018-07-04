@@ -11,14 +11,18 @@ import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
  */
 public class NetworkState extends CacheProperty<NetworkState.Network> {
 
-    @Override
-    protected Network checkValue(Graph graph) {
-        return graph.checkState(new StateToCheck<>(this, Network.values()));
+    public NetworkState(Graph graph) {
+        super(graph);
     }
 
     @Override
-    protected boolean doSelfSwitch(Graph graph, Network to) {
-        return graph.performAction(new SwitchStateAction<>(this, to));
+    protected Network checkValue() {
+        return getGraph().checkState(new StateToCheck<>(this, Network.values()));
+    }
+
+    @Override
+    protected boolean doSelfSwitch(Network to) {
+        return getGraph().performAction(new SwitchStateAction<>(this, to));
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 
@@ -33,17 +32,17 @@ public abstract class Expectation {
         return followingExpectations;
     }
 
-    public final int getTotalMatchDegree(Graph graph, Path path) {
-        int degree = getMatchDegree(graph, path);
+    public final int getTotalMatchDegree(Path path) {
+        int degree = getMatchDegree(path);
         for (Expectation expectation : followingExpectations) {
-            degree += expectation.getTotalMatchDegree(graph, path);
+            degree += expectation.getTotalMatchDegree(path);
         }
         return degree;
     }
 
-    public final boolean verify(Graph graph, boolean verifySuperPaths) {
-        if (selfVerify(graph, verifySuperPaths)) {
-            followingExpectations.forEach(e -> e.verify(graph, true));
+    public final boolean verify(boolean verifySuperPaths) {
+        if (selfVerify(verifySuperPaths)) {
+            followingExpectations.forEach(e -> e.verify(true));
             return true;
         }
         return false;
@@ -61,8 +60,8 @@ public abstract class Expectation {
         return timing;
     }
 
-    protected abstract boolean selfVerify(Graph graph, boolean verifySuperPaths);
+    protected abstract boolean selfVerify(boolean verifySuperPaths);
 
-    protected abstract int getMatchDegree(Graph graph, Path path);
+    protected abstract int getMatchDegree(Path path);
 
 }

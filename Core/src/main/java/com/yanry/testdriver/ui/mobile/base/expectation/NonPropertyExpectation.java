@@ -10,18 +10,24 @@ import com.yanry.testdriver.ui.mobile.base.Presentable;
  */
 @Presentable
 public abstract class NonPropertyExpectation extends Expectation {
+    private Graph graph;
+
+    public NonPropertyExpectation(Timing timing, boolean needCheck, Graph graph) {
+        super(timing, needCheck);
+        this.graph = graph;
+    }
 
     public NonPropertyExpectation(Timing timing) {
         super(timing, true);
     }
 
     @Override
-    protected final boolean selfVerify(Graph graph, boolean verifySuperPaths) {
+    protected final boolean selfVerify(boolean verifySuperPaths) {
         return graph.verifyExpectation(this);
     }
 
     @Override
-    protected int getMatchDegree(Graph graph, Path path) {
+    protected int getMatchDegree(Path path) {
         return 0;
     }
 }

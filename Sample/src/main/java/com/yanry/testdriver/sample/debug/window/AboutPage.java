@@ -16,6 +16,6 @@ public class AboutPage extends WindowManager.Window {
 
     @Override
     protected void addCases() {
-        close(new Click<>(new View(this, new ByText("关闭"))), Timing.IMMEDIATELY);
+        close(new Click<>(new View(getManager(), this, new ByText("关闭"))), Timing.IMMEDIATELY);
     }
 }

@@ -1,5 +1,6 @@
 package com.yanry.testdriver.ui.mobile.extend.view.container;
 
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.extend.view.View;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
@@ -9,8 +10,8 @@ import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
  */
 public class ListViewItem extends View implements ViewContainer {
 
-    public ListViewItem(ListView parent, ViewSelector selector) {
-        super(parent, selector);
+    public ListViewItem(Graph graph, ViewContainer parent, ViewSelector selector) {
+        super(graph, parent, selector);
     }
 
     @Override

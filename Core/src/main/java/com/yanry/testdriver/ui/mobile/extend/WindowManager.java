@@ -4,6 +4,7 @@ import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
+import com.yanry.testdriver.ui.mobile.base.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
@@ -36,10 +37,10 @@ public class WindowManager extends Graph {
         super(debug);
         windowInstances = new LinkedList<>();
         propertyInstances = new HashMap<>();
-        currentWindow = new CurrentWindow();
+        currentWindow = new CurrentWindow(this);
         noWindow = new NoWindow();
         currentWindow.handleExpectation(noWindow, false);
-        Util.createPath(this, getProcessState().getStateEvent(true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow));
+        Util.createPath(this, new ProcessState(this).getStateEvent(true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow));
     }
 
     public void registerProperties(Property... properties) {
@@ -71,9 +72,9 @@ public class WindowManager extends Graph {
         private PreviousWindow previousWindow;
 
         public Window() {
-            previousWindow = new PreviousWindow();
+            previousWindow = new PreviousWindow(WindowManager.this);
             previousWindow.handleExpectation(noWindow, false);
-            visibility = new VisibilityState();
+            visibility = new VisibilityState(WindowManager.this);
             visibility.handleExpectation(NotCreated, false);
             createEvent = new StateEvent<>(visibility, NotCreated, Foreground);
             closeEvent = new StateEvent<>(visibility, Foreground, NotCreated);
@@ -84,7 +85,7 @@ public class WindowManager extends Graph {
                 ReflectionUtil.initStaticStringFields(getClass());
                 addCases();
                 if (!getClass().equals(NoWindow.class)) {
-                    Util.createPath(WindowManager.this, getProcessState().getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, NotCreated));
+                    Util.createPath(WindowManager.this, new ProcessState(WindowManager.this).getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, NotCreated));
                 }
             }
         }
@@ -92,7 +93,7 @@ public class WindowManager extends Graph {
         protected abstract void addCases();
 
         public Path showOnStartUp(Timing timing) {
-            return Util.createPath(WindowManager.this, getProcessState().getStateEvent(false, true),
+            return Util.createPath(WindowManager.this, new ProcessState(WindowManager.this).getStateEvent(false, true),
                     currentWindow.getStaticExpectation(timing, true, this)
                             .addFollowingExpectation(previousWindow.getStaticExpectation(timing, false, noWindow))
                             .addFollowingExpectation(visibility.getStaticExpectation(timing, false, Foreground)));
@@ -101,19 +102,19 @@ public class WindowManager extends Graph {
         public Path popWindow(Window newWindow, Event inputEvent, Timing timing, boolean closeCurrent, boolean singleInstance) {
             return createPath(inputEvent, currentWindow.getStaticExpectation(timing, true, newWindow).addFollowingExpectation(new ActionExpectation() {
                 @Override
-                protected void run(Graph graph) {
+                protected void run() {
                     if (singleInstance) {
-                        handleSingleInstance(newWindow.previousWindow.getCurrentValue(getManager()), newWindow);
+                        handleSingleInstance(newWindow.previousWindow.getCurrentValue(), newWindow);
                     }
                 }
 
                 private void handleSingleInstance(Window queriedWindow, Window kickWindow) {
                     if (queriedWindow != null && !queriedWindow.equals(noWindow) && queriedWindow.previousWindow != null) {
-                        Window previous = queriedWindow.previousWindow.getCurrentValue(getManager());
+                        Window previous = queriedWindow.previousWindow.getCurrentValue();
                         if (previous.equals(noWindow)) {
                             return;
                         } else if (previous.equals(kickWindow)) {
-                            queriedWindow.previousWindow.handleExpectation(previous.previousWindow.getCurrentValue(getManager()), false);
+                            queriedWindow.previousWindow.handleExpectation(previous.previousWindow.getCurrentValue(), false);
                         } else {
                             handleSingleInstance(previous, kickWindow);
                         }
@@ -121,13 +122,13 @@ public class WindowManager extends Graph {
                 }
             }).addFollowingExpectation(visibility.getStaticExpectation(timing, false, closeCurrent ? NotCreated : Background))
                     .addFollowingExpectation(newWindow.visibility.getStaticExpectation(timing, false, Foreground))
-                    .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(timing, false, () -> closeCurrent ? previousWindow.getCurrentValue(getManager()) : this)));
+                    .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(timing, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this)));
         }
 
         public Path close(Event inputEvent, Timing timing, Expectation... followingExpectations) {
-            Expectation expectation = currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue(getManager()))
+            Expectation expectation = currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
                     .addFollowingExpectation(visibility.getStaticExpectation(timing, false, NotCreated))
-                    .addFollowingExpectation(new DDPropertyExpectation<>(Timing.IMMEDIATELY, false, () -> previousWindow.getCurrentValue(getManager()).visibility, () -> Foreground));
+                    .addFollowingExpectation(new DDPropertyExpectation<>(Timing.IMMEDIATELY, false, () -> previousWindow.getCurrentValue().visibility, () -> Foreground));
             for (Expectation followingExpectation : followingExpectations) {
                 expectation.addFollowingExpectation(followingExpectation);
             }
@@ -181,17 +182,21 @@ public class WindowManager extends Graph {
         }
 
         private class PreviousWindow extends CacheProperty<Window> {
+            public PreviousWindow(Graph graph) {
+                super(graph);
+            }
+
             private Window getWindow() {
                 return Window.this;
             }
 
             @Override
-            protected Window checkValue(Graph graph) {
+            protected Window checkValue() {
                 return noWindow;
             }
 
             @Override
-            protected boolean doSelfSwitch(Graph graph, Window to) {
+            protected boolean doSelfSwitch(Window to) {
                 return false;
             }
 
@@ -204,6 +209,10 @@ public class WindowManager extends Graph {
 
         public class VisibilityState extends Property<Visibility> {
 
+            public VisibilityState(Graph graph) {
+                super(graph);
+            }
+
             @Presentable
             public Window getWindow() {
                 return Window.this;
@@ -215,7 +224,7 @@ public class WindowManager extends Graph {
             }
 
             @Override
-            protected boolean selfSwitch(Graph graph, Visibility to) {
+            protected boolean selfSwitch(Visibility to) {
                 return false;
             }
 
@@ -226,24 +235,24 @@ public class WindowManager extends Graph {
             }
 
             @Override
-            public Visibility getCurrentValue(Graph graph) {
-                if (currentWindow.getCurrentValue(graph).equals(Window.this)) {
+            public Visibility getCurrentValue() {
+                if (currentWindow.getCurrentValue().equals(Window.this)) {
                     return Foreground;
-                } else if (checkExist(previousWindow, graph)) {
+                } else if (checkExist(previousWindow)) {
                     return Background;
                 } else {
                     return NotCreated;
                 }
             }
 
-            private boolean checkExist(PreviousWindow previousWindow, Graph graph) {
-                Window window = previousWindow.getCurrentValue(graph);
+            private boolean checkExist(PreviousWindow previousWindow) {
+                Window window = previousWindow.getCurrentValue();
                 if (window.equals(Window.this)) {
                     return true;
                 } else if (window.equals(noWindow)) {
                     return false;
                 } else {
-                    return checkExist(window.previousWindow, graph);
+                    return checkExist(window.previousWindow);
                 }
             }
         }
@@ -251,18 +260,22 @@ public class WindowManager extends Graph {
 
     public class CurrentWindow extends CacheProperty<Window> {
 
+        public CurrentWindow(Graph graph) {
+            super(graph);
+        }
+
         @Override
-        protected Window checkValue(Graph graph) {
+        protected Window checkValue() {
             Window[] options = new Window[windowInstances.size()];
             int i = 0;
             for (Window window : windowInstances) {
                 options[i++] = window;
             }
-            return graph.checkState(new StateToCheck<>(this, options));
+            return getGraph().checkState(new StateToCheck<>(this, options));
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, Window to) {
+        protected boolean doSelfSwitch(Window to) {
             return false;
         }
 

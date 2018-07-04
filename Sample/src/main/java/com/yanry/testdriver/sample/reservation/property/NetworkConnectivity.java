@@ -11,14 +11,18 @@ import com.yanry.testdriver.ui.mobile.base.event.SwitchStateAction;
  */
 public class NetworkConnectivity extends CacheProperty<Boolean> {
 
-    @Override
-    protected Boolean checkValue(Graph graph) {
-        return graph.checkState(new StateToCheck<>(this, false, true));
+    public NetworkConnectivity(Graph graph) {
+        super(graph);
     }
 
     @Override
-    protected boolean doSelfSwitch(Graph graph, Boolean to) {
-        return graph.performAction(new SwitchStateAction(this, to));
+    protected Boolean checkValue() {
+        return getGraph().checkState(new StateToCheck<>(this, false, true));
+    }
+
+    @Override
+    protected boolean doSelfSwitch(Boolean to) {
+        return getGraph().performAction(new SwitchStateAction(this, to));
     }
 
     @Override

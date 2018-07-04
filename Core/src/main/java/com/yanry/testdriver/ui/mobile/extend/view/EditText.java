@@ -9,21 +9,15 @@ import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
-import java.util.function.Supplier;
-
 /**
  * Created by rongyu.yan on 5/9/2017.
  */
 public class EditText extends View {
     private Content content;
 
-    public EditText(ViewContainer parent, ViewSelector selector, Supplier<Boolean> defaultVisibility) {
-        super(parent, selector, defaultVisibility);
-        content = new Content();
-    }
-
-    public EditText(ViewContainer parent, ViewSelector selector) {
-        this(parent, selector, null);
+    public EditText(Graph graph, ViewContainer parent, ViewSelector selector) {
+        super(graph, parent, selector);
+        content = new Content(graph);
     }
 
     public Content getContent() {
@@ -32,23 +26,27 @@ public class EditText extends View {
 
     public class Content extends CacheProperty<String> {
 
+        public Content(Graph graph) {
+            super(graph);
+        }
+
         @Presentable
         public EditText getEditText() {
             return EditText.this;
         }
 
         @Override
-        protected String checkValue(Graph graph) {
-            if (getWindow().getManager().getCurrentWindow().getCurrentValue(graph).equals(getWindow())) {
-                return graph.fetchValue(this);
+        protected String checkValue() {
+            if (getWindow().getManager().getCurrentWindow().getCurrentValue().equals(getWindow())) {
+                return getGraph().fetchValue(this);
             }
             return null;
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, String to) {
-            return getWindow().getVisibility().switchTo(graph, WindowManager.Visibility.Foreground, true) &&
-                    graph.performAction(new EnterText(EditText.this, to));
+        protected boolean doSelfSwitch(String to) {
+            return getWindow().getVisibility().switchTo(WindowManager.Visibility.Foreground, true) &&
+                    getGraph().performAction(new EnterText(EditText.this, to));
         }
 
         @Override

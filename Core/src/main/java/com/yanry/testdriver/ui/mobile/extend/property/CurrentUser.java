@@ -14,7 +14,8 @@ import java.util.Set;
 public class CurrentUser extends CacheProperty<String> {
     private HashMap<String, String> userPasswordMap;
 
-    public CurrentUser() {
+    public CurrentUser(Graph graph) {
+        super(graph);
         userPasswordMap = new HashMap<>();
     }
 
@@ -28,7 +29,7 @@ public class CurrentUser extends CacheProperty<String> {
     }
 
     @Override
-    protected String checkValue(Graph graph) {
+    protected String checkValue() {
         Set<String> users = userPasswordMap.keySet();
         String[] options = new String[users.size() + 1];
         options[0] = "";
@@ -36,11 +37,11 @@ public class CurrentUser extends CacheProperty<String> {
         for (String user : users) {
             options[++i] = user;
         }
-        return graph.checkState(new StateToCheck<>(this, options));
+        return getGraph().checkState(new StateToCheck<>(this, options));
     }
 
     @Override
-    protected boolean doSelfSwitch(Graph graph, String to) {
+    protected boolean doSelfSwitch(String to) {
         return false;
     }
 

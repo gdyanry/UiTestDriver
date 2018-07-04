@@ -19,19 +19,28 @@ import java.util.function.Supplier;
  */
 @Presentable
 public abstract class Property<V> {
+    private Graph graph;
 
-    public final boolean switchTo(Graph graph, V to, boolean verifySuperPaths) {
-        return to.equals(getCurrentValue(graph)) ||
+    public Property(Graph graph) {
+        this.graph = graph;
+    }
+
+    public Graph getGraph() {
+        return graph;
+    }
+
+    public final boolean switchTo(V to, boolean verifySuperPaths) {
+        return to.equals(getCurrentValue()) ||
                 // 先搜索是否存在可用路径
                 (graph.findPathToRoll((prop, val) -> equals(prop) && to.equals(val), verifySuperPaths) ||
                         // 若无可用路径再尝试自转化
-                        verifySuperPaths(graph, to, verifySuperPaths))
-                        && to.equals(getCurrentValue(graph));
+                        verifySuperPaths(to, verifySuperPaths))
+                        && to.equals(getCurrentValue());
     }
 
-    private boolean verifySuperPaths(Graph graph, V to, boolean verifySuperPaths) {
-        V currentValue = getCurrentValue(graph);
-        boolean selfSwitch = selfSwitch(graph, to);
+    private boolean verifySuperPaths(V to, boolean verifySuperPaths) {
+        V currentValue = getCurrentValue();
+        boolean selfSwitch = selfSwitch(to);
         if (selfSwitch && verifySuperPaths) {
             graph.verifySuperPaths(this, currentValue, to);
         }
@@ -58,14 +67,15 @@ public abstract class Property<V> {
         if (obj == null || !obj.getClass().equals(getClass())) {
             return false;
         }
-        return equalsWithSameClass((Property<V>) obj);
+        Property<V> property = (Property<V>) obj;
+        return property.graph.equals(graph) && equalsWithSameClass(property);
     }
 
     public abstract void handleExpectation(V expectedValue, boolean needCheck);
 
-    public abstract V getCurrentValue(Graph graph);
+    public abstract V getCurrentValue();
 
-    protected abstract boolean selfSwitch(Graph graph, V to);
+    protected abstract boolean selfSwitch(V to);
 
     protected abstract boolean equalsWithSameClass(Property<V> property);
 }

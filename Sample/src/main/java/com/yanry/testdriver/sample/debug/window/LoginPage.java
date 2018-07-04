@@ -29,13 +29,13 @@ public class LoginPage extends WindowManager.Window {
     @Override
     protected void addCases() {
         showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).put(getProperty(LoginState.class), false);
-        ValidateEditText etUser = new ValidateEditText(this, new ByDesc(DESC_USER));
-        ValidateEditText etPwd = new ValidateEditText(this, new ByDesc(DESC_PWD));
+        ValidateEditText etUser = new ValidateEditText(getManager(), this, new ByDesc(DESC_USER));
+        ValidateEditText etPwd = new ValidateEditText(getManager(), this, new ByDesc(DESC_PWD));
         // 页面打开时输入框内容为空
         createPath(getCreateEvent(), etUser.getContent().getStaticExpectation(Timing.IMMEDIATELY, true, ""));
         createPath(getCreateEvent(), etPwd.getContent().getStaticExpectation(Timing.IMMEDIATELY, true, ""));
 
-        Click clickLogin = new Click(new View(this, new ByText("登录")));
+        Click clickLogin = new Click(new View(getManager(), this, new ByText("登录")));
         // 添加输入框用例
         etUser.setEmptyValidationCase(clickLogin, new Toast(Timing.IMMEDIATELY, TestApp.TOAST_DURATION,
                 "用户名不能为空"));

@@ -10,6 +10,7 @@ import com.yanry.testdriver.ui.mobile.base.event.StateChangeCallback;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
@@ -36,8 +37,8 @@ public class Graph implements Communicator, Loggable {
     private boolean isTraversing;
     private Set<Path> rollingPaths;
     private List<Communicator> communicators;
-    private ProcessState processState;
     private List<Path> optionalPaths;
+    private Map<CacheProperty, Object> cacheProperties;
 
     public Graph(boolean debug) {
         this.debug = debug;
@@ -47,15 +48,19 @@ public class Graph implements Communicator, Loggable {
         rollingPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
-        processState = new ProcessState();
-    }
-
-    public ProcessState getProcessState() {
-        return processState;
+        cacheProperties = new HashMap<>();
     }
 
     public void addPath(Path path) {
         allPaths.add(path);
+    }
+
+    public <V> V getCacheValue(CacheProperty<V> property) {
+        return (V) cacheProperties.get(property);
+    }
+
+    public <V> void setCacheValue(CacheProperty<V> property, V value) {
+        cacheProperties.put(property, value);
     }
 
     public void registerCommunicator(Communicator communicator) {
@@ -148,7 +153,7 @@ public class Graph implements Communicator, Loggable {
     private boolean internalRoll(Path path, boolean verifySuperPaths) {
         // make sure environment states are satisfied.
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
-                equals(state.getKey().getCurrentValue(this))).findFirst();
+                equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
             Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(this, path) > 0)
                     .sorted(Comparator.comparingInt(p -> {
@@ -162,7 +167,7 @@ public class Graph implements Communicator, Loggable {
             }
             Map.Entry<Property, Object> state = any.get();
             log("switch init state: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
-            if (state.getKey().switchTo(this, state.getValue(), true)) {
+            if (state.getKey().switchTo(state.getValue(), true)) {
                 return internalRoll(path, verifySuperPaths);
             } else {
                 log("switch init state fail: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
@@ -176,9 +181,9 @@ public class Graph implements Communicator, Loggable {
             StateEvent event = (StateEvent) inputEvent;
             // roll path for this switch event.
             log("switch state event: %s", Util.getPresentation(event));
-            if (!event.getProperty().switchTo(this, event.getFrom(), true) ||
+            if (!event.getProperty().switchTo(event.getFrom(), true) ||
                     // sibling paths of current path becomes super paths of the path where switch event takes place!
-                    !event.getProperty().switchTo(this, event.getTo(), false)) {
+                    !event.getProperty().switchTo(event.getTo(), false)) {
                 log("switch state event fail: %s", Util.getPresentation(event));
                 return fail(path, event);
             }

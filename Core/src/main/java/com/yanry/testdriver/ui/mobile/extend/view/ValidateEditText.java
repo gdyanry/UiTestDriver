@@ -11,7 +11,6 @@ import com.yanry.testdriver.ui.mobile.extend.view.selector.ViewSelector;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * Created by rongyu.yan on 5/11/2017.
@@ -21,15 +20,11 @@ public class ValidateEditText extends EditText {
     private Set<String> validContents;
     private Set<String> invalidContents;
 
-    public ValidateEditText(ViewContainer parent, ViewSelector selector, Supplier<Boolean> defaultVisibility) {
-        super(parent, selector, defaultVisibility);
-        validity = new ValidityState();
+    public ValidateEditText(Graph graph, ViewContainer parent, ViewSelector selector) {
+        super(graph, parent, selector);
+        validity = new ValidityState(graph);
         validContents = new HashSet<>();
         invalidContents = new HashSet<>();
-    }
-
-    public ValidateEditText(ViewContainer parent, ViewSelector selector) {
-        this(parent, selector, null);
     }
 
     public void addPositiveCases(String... contents) {
@@ -63,6 +58,10 @@ public class ValidateEditText extends EditText {
 
     public class ValidityState extends Property<Boolean> {
 
+        public ValidityState(Graph graph) {
+            super(graph);
+        }
+
         @Presentable
         public EditText getEditText() {
             return ValidateEditText.this;
@@ -74,11 +73,11 @@ public class ValidateEditText extends EditText {
         }
 
         @Override
-        protected boolean selfSwitch(Graph graph, Boolean to) {
+        protected boolean selfSwitch(Boolean to) {
             if (to) {
-                return validContents.stream().anyMatch(c -> getContent().switchTo(graph, c, true));
+                return validContents.stream().anyMatch(c -> getContent().switchTo(c, true));
             }
-            return invalidContents.stream().anyMatch(c -> getContent().switchTo(graph, c, true));
+            return invalidContents.stream().anyMatch(c -> getContent().switchTo(c, true));
         }
 
         @Override
@@ -88,8 +87,8 @@ public class ValidateEditText extends EditText {
         }
 
         @Override
-        public Boolean getCurrentValue(Graph graph) {
-            return validContents.contains(getContent().getCurrentValue(graph));
+        public Boolean getCurrentValue() {
+            return validContents.contains(getContent().getCurrentValue());
         }
     }
 }

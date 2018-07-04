@@ -1,6 +1,5 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
-import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 
@@ -25,14 +24,14 @@ public abstract class PropertyExpectation<V> extends Expectation {
     public abstract V getExpectedValue();
 
     @Override
-    protected final boolean selfVerify(Graph graph, boolean verifySuperPaths) {
+    protected final boolean selfVerify(boolean verifySuperPaths) {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
-        V oldValue = property.getCurrentValue(graph);
+        V oldValue = property.getCurrentValue();
         property.handleExpectation(expectedValue, isNeedCheck());
-        if (expectedValue.equals(property.getCurrentValue(graph))) {
+        if (expectedValue.equals(property.getCurrentValue())) {
             if (verifySuperPaths) {
-                graph.verifySuperPaths(property, oldValue, expectedValue);
+                property.getGraph().verifySuperPaths(property, oldValue, expectedValue);
             }
             return true;
         }
@@ -40,9 +39,9 @@ public abstract class PropertyExpectation<V> extends Expectation {
     }
 
     @Override
-    protected final int getMatchDegree(Graph graph, Path path) {
+    protected final int getMatchDegree(Path path) {
         Property<V> property = getProperty();
         Object value = path.get(property);
-        return value != null && !value.equals(property.getCurrentValue(graph)) && value.equals(getExpectedValue()) ? 100 : 0;
+        return value != null && !value.equals(property.getCurrentValue()) && value.equals(getExpectedValue()) ? 100 : 0;
     }
 }

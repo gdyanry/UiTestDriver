@@ -9,17 +9,18 @@ import com.yanry.testdriver.ui.mobile.base.property.Property;
  */
 public class ProcessState extends CacheProperty<Boolean> {
 
-    public ProcessState() {
+    public ProcessState(Graph graph) {
+        super(graph);
     }
 
     @Override
-    protected Boolean checkValue(Graph graph) {
+    protected Boolean checkValue() {
         return false;
     }
 
     @Override
-    protected boolean doSelfSwitch(Graph graph, Boolean to) {
-        return graph.performAction(new SwitchStateAction(this, to));
+    protected boolean doSelfSwitch(Boolean to) {
+        return getGraph().performAction(new SwitchStateAction(this, to));
     }
 
     @Override

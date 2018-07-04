@@ -16,13 +16,9 @@ import java.util.function.Supplier;
 public class TextView extends View {
     private TextValue text;
 
-    public TextView(ViewContainer parent, ViewSelector selector, Supplier<Boolean> defaultVisibility) {
-        super(parent, selector, defaultVisibility);
-        text = new TextValue();
-    }
-
-    public TextView(ViewContainer parent, ViewSelector selector) {
-        this(parent, selector, null);
+    public TextView(Graph graph, ViewContainer parent, ViewSelector selector) {
+        super(graph, parent, selector);
+        text = new TextValue(graph);
     }
 
     public TextValue getText() {
@@ -32,18 +28,22 @@ public class TextView extends View {
     @Presentable
     public class TextValue extends CacheProperty<String> {
 
+        public TextValue(Graph graph) {
+            super(graph);
+        }
+
         @Presentable
         public TextView getTextView() {
             return TextView.this;
         }
 
         @Override
-        protected String checkValue(Graph graph) {
-            return graph.checkState(new StateToCheck<>(this));
+        protected String checkValue() {
+            return getGraph().checkState(new StateToCheck<>(this));
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, String to) {
+        protected boolean doSelfSwitch(String to) {
             return false;
         }
 

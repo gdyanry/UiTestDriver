@@ -9,16 +9,16 @@ public abstract class ActionExpectation extends Expectation {
         super(Timing.IMMEDIATELY, false);
     }
 
-    protected abstract void run(Graph graph);
+    protected abstract void run();
 
     @Override
-    protected final boolean selfVerify(Graph graph, boolean verifySuperPaths) {
-        run(graph);
+    protected final boolean selfVerify(boolean verifySuperPaths) {
+        run();
         return true;
     }
 
     @Override
-    protected int getMatchDegree(Graph graph, Path path) {
+    protected int getMatchDegree(Path path) {
         return 0;
     }
 }

@@ -25,9 +25,9 @@ import java.util.function.Supplier;
 public class ListView extends View implements ViewContainer {
     private ListViewSize size;
 
-    public ListView(ViewContainer parent, ViewSelector selector) {
-        super(parent, selector);
-        size = new ListViewSize();
+    public ListView(Graph graph, ViewContainer parent, ViewSelector selector) {
+        super(graph, parent, selector);
+        size = new ListViewSize(graph);
         refresh(getWindow().getCreateEvent());
     }
 
@@ -39,21 +39,21 @@ public class ListView extends View implements ViewContainer {
         verifySizePath.apply(size.getStaticExpectation(Timing.IMMEDIATELY, true, expectedSize));
     }
 
-    public Supplier<ListViewItem> getRandomItem(Graph graph) {
+    public Supplier<ListViewItem> getRandomItem() {
         return () -> {
-            int iSize = size.getCurrentValue(graph);
+            int iSize = size.getCurrentValue();
             if (iSize > 0) {
-                return new ListViewItem(this, new ByIndex(Singletons.get(Random.class).nextInt(iSize)));
+                return new ListViewItem(getGraph(), this, new ByIndex(Singletons.get(Random.class).nextInt(iSize)));
             }
             return null;
         };
     }
 
-    public Supplier<ListViewItem> getItem(Graph graph, Predicate<ListViewItem> predicate) {
+    public Supplier<ListViewItem> getItem(Predicate<ListViewItem> predicate) {
         return () -> {
-            int iSize = size.getCurrentValue(graph);
+            int iSize = size.getCurrentValue();
             for (int i = 0; i < iSize; i++) {
-                ListViewItem item = new ListViewItem(this, new ByIndex(i));
+                ListViewItem item = new ListViewItem(getGraph(), this, new ByIndex(i));
                 if (predicate.test(item)) {
                     return item;
                 }
@@ -69,18 +69,22 @@ public class ListView extends View implements ViewContainer {
 
     public class ListViewSize extends CacheProperty<Integer> {
 
+        public ListViewSize(Graph graph) {
+            super(graph);
+        }
+
         @Presentable
         public ListView getListView() {
             return ListView.this;
         }
 
         @Override
-        protected Integer checkValue(Graph graph) {
-            return graph.checkState(new StateToCheck<>(this));
+        protected Integer checkValue() {
+            return getGraph().checkState(new StateToCheck<>(this));
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, Integer to) {
+        protected boolean doSelfSwitch(Integer to) {
             return false;
         }
 

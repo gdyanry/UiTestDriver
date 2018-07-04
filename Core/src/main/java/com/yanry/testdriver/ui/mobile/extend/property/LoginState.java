@@ -9,7 +9,8 @@ import com.yanry.testdriver.ui.mobile.base.property.Property;
 public class LoginState extends Property<Boolean> {
     private CurrentUser currentUser;
 
-    public LoginState(CurrentUser currentUser) {
+    public LoginState(Graph graph, CurrentUser currentUser) {
+        super(graph);
         this.currentUser = currentUser;
     }
 
@@ -19,11 +20,11 @@ public class LoginState extends Property<Boolean> {
     }
 
     @Override
-    protected boolean selfSwitch(Graph graph, Boolean to) {
+    protected boolean selfSwitch(Boolean to) {
         if (to) {
-            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(graph, u, true));
+            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(u, true));
         }
-        return currentUser.switchTo(graph, "", true);
+        return currentUser.switchTo("", true);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class LoginState extends Property<Boolean> {
     }
 
     @Override
-    public Boolean getCurrentValue(Graph graph) {
-        return !currentUser.getCurrentValue(graph).equals("");
+    public Boolean getCurrentValue() {
+        return !currentUser.getCurrentValue().equals("");
     }
 }

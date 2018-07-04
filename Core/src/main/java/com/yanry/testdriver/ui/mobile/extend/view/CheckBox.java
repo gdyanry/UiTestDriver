@@ -18,13 +18,9 @@ import java.util.function.Supplier;
 public class CheckBox extends TextView {
     private CheckState checkState;
 
-    public CheckBox(ViewContainer parent, ViewSelector selector, Supplier<Boolean> defaultVisibility) {
-        super(parent, selector, defaultVisibility);
-        checkState = new CheckState();
-    }
-
-    public CheckBox(ViewContainer parent, ViewSelector selector) {
-        this(parent, selector, null);
+    public CheckBox(Graph graph, ViewContainer parent, ViewSelector selector) {
+        super(graph, parent, selector);
+        checkState = new CheckState(graph);
     }
 
     public CheckState getCheckState() {
@@ -33,20 +29,24 @@ public class CheckBox extends TextView {
 
     public class CheckState extends CacheProperty<Boolean> {
 
+        public CheckState(Graph graph) {
+            super(graph);
+        }
+
         @Presentable
         public CheckBox getCheckBox() {
             return CheckBox.this;
         }
 
         @Override
-        protected Boolean checkValue(Graph graph) {
-            return graph.checkState(new StateToCheck<>(this, false, true));
+        protected Boolean checkValue() {
+            return getGraph().checkState(new StateToCheck<>(this, false, true));
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, Boolean to) {
-            return getWindow().getVisibility().switchTo(graph, WindowManager.Visibility.Foreground, true) &&
-                    graph.performAction(new Click<>(CheckBox.this));
+        protected boolean doSelfSwitch(Boolean to) {
+            return getWindow().getVisibility().switchTo(WindowManager.Visibility.Foreground, true) &&
+                    getGraph().performAction(new Click<>(CheckBox.this));
         }
 
         @Override

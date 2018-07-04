@@ -3,6 +3,7 @@ package com.yanry.testdriver.sample.debug;
 import com.yanry.testdriver.sample.debug.window.LoginPage;
 import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
 import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
 import com.yanry.testdriver.ui.mobile.extend.WindowManager;
@@ -63,10 +64,10 @@ public class TestApp {
     }
 
     public static void defineGraph(WindowManager manager) {
-        CurrentUser currentUser = new CurrentUser();
+        CurrentUser currentUser = new CurrentUser(manager);
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
-        manager.registerProperties(new NetworkState(), currentUser, new LoginState(currentUser));
-        Util.createPath(manager, manager.getProcessState().getStateEvent(false, true), new ShowSplash());
+        manager.registerProperties(new NetworkState(manager), currentUser, new LoginState(manager, currentUser));
+        Util.createPath(manager, new ProcessState(manager).getStateEvent(false, true), new ShowSplash());
         new LoginPage(manager);
     }
 }
