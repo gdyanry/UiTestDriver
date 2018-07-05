@@ -67,7 +67,7 @@ public class TestApp {
         CurrentUser currentUser = new CurrentUser(manager);
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
         manager.registerProperties(new NetworkState(manager), currentUser, new LoginState(manager, currentUser));
-        Util.createPath(manager, new ProcessState(manager).getStateEvent(false, true), new ShowSplash());
+        Util.createPath(manager, new ProcessState(manager).getStateEvent(false, true), new ShowSplash(manager));
         new LoginPage(manager);
     }
 }

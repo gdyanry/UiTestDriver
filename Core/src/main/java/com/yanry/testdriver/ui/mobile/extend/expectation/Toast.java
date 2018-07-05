@@ -11,8 +11,8 @@ import com.yanry.testdriver.ui.mobile.base.expectation.TransientExpectation;
 public class Toast extends TransientExpectation {
     private String message;
 
-    public Toast(Timing timing, int duration, String message) {
-        super(timing, duration);
+    public Toast(Timing timing, Graph graph, int duration, String message) {
+        super(timing, graph, duration);
         this.message = message;
     }
 

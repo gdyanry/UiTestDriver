@@ -58,14 +58,14 @@ public class Login extends WindowManager.Window {
         etPwd.addNegativeCase("123", clickLogin, pwdErrorView.getVisibility().getStaticExpectation(Timing.IMMEDIATELY, true, true)
                 .addFollowingExpectation(pwdErrorView.getText().getStaticExpectation(Timing.IMMEDIATELY, true, "密码长度不能小于6个字符")), etUser.getValidity());
         // no connection
-        createPath(clickLogin, new Toast(Timing.IMMEDIATELY, TOAST_DURATION,
+        createPath(clickLogin, new Toast(Timing.IMMEDIATELY, getManager(), TOAST_DURATION,
                 TOAST_NO_CONNECTION)).addInitState(etUser.getValidity(), true).addInitState(etPwd.getValidity(), true)
                 .addInitState(getProperty(NetworkConnectivity.class), false);
         // login
         Timing withinTimeout = new Timing(true, REQUEST_TIMEOUT);
-        loginPathHandler.initStateToInvalidPassword(() -> createPath(clickLogin, new Toast(withinTimeout, TOAST_DURATION,
+        loginPathHandler.initStateToInvalidPassword(() -> createPath(clickLogin, new Toast(withinTimeout, getManager(), TOAST_DURATION,
                 "密码错误")).addInitState(getProperty(NetworkConnectivity.class), true));
-        loginPathHandler.initStateToInvalidUser(() -> createPath(clickLogin, new Toast(withinTimeout, TOAST_DURATION,
+        loginPathHandler.initStateToInvalidUser(() -> createPath(clickLogin, new Toast(withinTimeout, getManager(), TOAST_DURATION,
                 "用户不存在")).addInitState(getProperty(NetworkConnectivity.class), true));
         loginPathHandler.initStateToSuccessLogin(() -> close(clickLogin, withinTimeout).addInitState(getProperty
                 (NetworkConnectivity.class), true));

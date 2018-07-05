@@ -12,13 +12,9 @@ import com.yanry.testdriver.ui.mobile.base.Presentable;
 public abstract class NonPropertyExpectation extends Expectation {
     private Graph graph;
 
-    public NonPropertyExpectation(Timing timing, boolean needCheck, Graph graph) {
-        super(timing, needCheck);
-        this.graph = graph;
-    }
-
-    public NonPropertyExpectation(Timing timing) {
+    public NonPropertyExpectation(Timing timing, Graph graph) {
         super(timing, true);
+        this.graph = graph;
     }
 
     @Override

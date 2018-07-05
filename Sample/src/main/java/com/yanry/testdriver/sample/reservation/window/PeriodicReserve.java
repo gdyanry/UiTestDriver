@@ -96,27 +96,27 @@ public class PeriodicReserve extends WindowManager.Window {
 
         close(new Click<>(new View(getManager(), this, new ByDesc(DESC_IC_QUIT))), Timing.IMMEDIATELY);
 
-        etTopic.setEmptyValidationCase(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION,
+        etTopic.setEmptyValidationCase(clickSubmit, new Toast(Timing.IMMEDIATELY, getManager(), Config.TOAST_DURATION,
                 "会议主题不可为空"));
         etTopic.addPositiveCases(String.format("test topic<%tR>", System.currentTimeMillis()));
 
         popWindow(new SelectRoom(getManager()), new Click<>(new View(getManager(), this, new ByDesc(DESC_ITEM_ROOM))), Timing
                 .IMMEDIATELY, false, false);
         createPath(getCreateEvent(), roomValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
-        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议室"))
+        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, getManager(), Config.TOAST_DURATION, "必须选择会议室"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, false);
 
         popWindow(new SelectStartTime(getManager()), new Click<>(new View(getManager(), this, new ByDesc(DESC_ITEM_START_TIME))), Timing
                 .IMMEDIATELY, false, false);
         createPath(getCreateEvent(), startTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
-        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议开始时间"))
+        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, getManager(), Config.TOAST_DURATION, "必须选择会议开始时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, false);
 
         popWindow(new SelectEndTime(getManager()), new Click<>(new View(getManager(), this, new ByDesc(DESC_ITEM_END_TIME))),
                 Timing.IMMEDIATELY, false, false);
         createPath(getCreateEvent(), endTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
-        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议结束时间"))
+        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, getManager(), Config.TOAST_DURATION, "必须选择会议结束时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, true).addInitState(endTimeValidity, false);
 
@@ -125,7 +125,7 @@ public class PeriodicReserve extends WindowManager.Window {
         createPath(getCreateEvent(), dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(getCreateEvent(), dayOfWeekValue.getStaticExpectation(Timing.IMMEDIATELY, false, new boolean[]{false, false,
                 false, false, false, false, false}));
-        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择星期"))
+        createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, getManager(), Config.TOAST_DURATION, "必须选择星期"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, true).addInitState(endTimeValidity, true).addInitState(dayOfWeekValidity, false);
     }
