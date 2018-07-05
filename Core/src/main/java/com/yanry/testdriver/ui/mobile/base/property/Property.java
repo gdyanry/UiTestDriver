@@ -73,7 +73,7 @@ public abstract class Property<V> {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return Objects.hash(graph, getClass());
     }
 

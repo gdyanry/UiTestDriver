@@ -21,6 +21,7 @@ import lib.common.util.ReflectionUtil;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import static com.yanry.testdriver.ui.mobile.extend.WindowManager.Visibility.*;
 
@@ -179,12 +180,17 @@ public class WindowManager extends Graph {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public final boolean equals(Object obj) {
             if (obj != null && obj.getClass().equals(getClass())) {
                 Window window = (Window) obj;
                 return window.getManager().equals(getManager());
             }
             return false;
+        }
+
+        @Override
+        public final int hashCode() {
+            return Objects.hash(WindowManager.this, getClass());
         }
 
         public class PreviousWindow extends CacheProperty<Window> {
