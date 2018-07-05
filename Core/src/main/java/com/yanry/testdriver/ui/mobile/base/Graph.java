@@ -236,7 +236,9 @@ public class Graph implements Communicator, Loggable {
         if (unprocessedPaths.remove(path)) {
             records.add(new MissedPath(path, cause));
         }
-        failedPaths.add(path);
+        if (!shouldInterrupt()) {
+            failedPaths.add(path);
+        }
         return false;
     }
 
