@@ -1,7 +1,6 @@
 package com.yanry.testdriver.sample.reservation.server;
 
 import com.yanry.testdriver.sample.reservation.property.NetworkConnectivity;
-import com.yanry.testdriver.sample.reservation.window.*;
 import com.yanry.testdriver.server.spring.CommunicatorController;
 import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
@@ -21,10 +20,10 @@ public class ReservationController extends CommunicatorController {
 
     @Override
     protected void populateGraph(WindowManager manager) {
-        CurrentUser currentUser = new CurrentUser();
+        CurrentUser currentUser = new CurrentUser(manager);
         currentUser.addUserPassword("xiaoming.wang", "aaa111").addUserPassword("daming.wang", "aaa111");
-        LoginState loginState = new LoginState(currentUser);
-        NetworkConnectivity connectivity = new NetworkConnectivity();
+        LoginState loginState = new LoginState(manager, currentUser);
+        NetworkConnectivity connectivity = new NetworkConnectivity(manager);
         manager.registerProperties(currentUser, loginState, connectivity);
     }
 }

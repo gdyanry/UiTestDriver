@@ -35,7 +35,7 @@ public class Graph implements Communicator, Loggable {
     private Set<Path> failedPaths;
     private List<Object> records;
     private boolean isTraversing;
-    private Set<Path> rollingPaths;
+    private LinkedList<Path> rollingPaths;
     private List<Communicator> communicators;
     private List<Path> optionalPaths;
     private Map<CacheProperty, Object> cacheProperties;
@@ -45,7 +45,7 @@ public class Graph implements Communicator, Loggable {
         allPaths = new LinkedList<>();
         records = new LinkedList<>();
         failedPaths = new HashSet<>();
-        rollingPaths = new HashSet<>();
+        rollingPaths = new LinkedList<>();
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
         cacheProperties = new HashMap<>();
@@ -76,16 +76,7 @@ public class Graph implements Communicator, Loggable {
         if (optionalPaths == null) {
             synchronized (this) {
                 if (optionalPaths == null) {
-                    optionalPaths = allPaths.parallelStream().filter(p -> {
-                        if (p.getEvent() instanceof StateEvent) {
-                            StateEvent transitionEvent = (StateEvent) p.getEvent();
-                            Property property = transitionEvent.getProperty();
-                            if (transitionEvent.getFrom() != null) {
-                                p.addInitState(property, transitionEvent.getFrom());
-                            }
-                        }
-                        return needCheck(p.getExpectation());
-                    }).collect(Collectors.toList());
+                    optionalPaths = allPaths.parallelStream().filter(p -> needCheck(p.getExpectation())).collect(Collectors.toList());
                 }
             }
         }
@@ -155,7 +146,8 @@ public class Graph implements Communicator, Loggable {
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
-            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
+            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) &&
+                    p.getExpectation().getTotalMatchDegree(path) > 0)
                     .sorted(Comparator.comparingInt(p -> {
                         log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(this), Util.getPresentation(p));
                         return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) + p.getUnsatisfiedDegree(this);

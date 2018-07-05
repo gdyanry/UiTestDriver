@@ -34,7 +34,7 @@ public class Path extends HashMap<Property, Object> {
     }
 
     public int getUnsatisfiedDegree(Graph graph) {
-        return entrySet().stream().filter(state -> !state.getValue().equals(state.getKey().getCurrentValue(graph))).mapToInt(state -> 1).sum();
+        return entrySet().stream().filter(state -> !state.getValue().equals(state.getKey().getCurrentValue())).mapToInt(state -> 1).sum();
     }
 
     @Presentable

@@ -10,6 +10,7 @@ import com.yanry.testdriver.ui.mobile.base.expectation.SDPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.SSPropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.Timing;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -69,6 +70,11 @@ public abstract class Property<V> {
         }
         Property<V> property = (Property<V>) obj;
         return property.graph.equals(graph) && equalsWithSameClass(property);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(graph, getClass());
     }
 
     public abstract void handleExpectation(V expectedValue, boolean needCheck);
