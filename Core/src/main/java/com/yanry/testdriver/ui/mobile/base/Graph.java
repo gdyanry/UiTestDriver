@@ -39,6 +39,7 @@ public class Graph implements Communicator, Loggable {
     private List<Communicator> communicators;
     private List<Path> optionalPaths;
     private Map<CacheProperty, Object> cacheProperties;
+    private boolean actionDone;
 
     public Graph(boolean debug) {
         this.debug = debug;
@@ -144,6 +145,12 @@ public class Graph implements Communicator, Loggable {
     }
 
     private boolean internalRoll(Path path, boolean verifySuperPaths) {
+        if (rollingPaths.size() == 1) {
+            actionDone = false;
+        } else if (actionDone) {
+            // TODO 这里返回true还是false好呢？
+            return true;
+        }
         // make sure environment states are satisfied.
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
@@ -175,10 +182,17 @@ public class Graph implements Communicator, Loggable {
             StateEvent event = (StateEvent) inputEvent;
             // roll path for this switch event.
             log("switch state event: %s", Util.getPresentation(event));
-            if (!event.getProperty().switchTo(event.getFrom(), true) ||
-                    // sibling paths of current path becomes super paths of the path where switch event takes place!
-                    !event.getProperty().switchTo(event.getTo(), false)) {
-                log("switch state event fail: %s", Util.getPresentation(event));
+            Property property = event.getProperty();
+            if (!property.getCurrentValue().equals(event.getFrom())) {
+                if (property.switchTo(event.getFrom(), true)) {
+                    return internalRoll(path, verifySuperPaths);
+                } else {
+                    log("switch from state event fail: %s", Util.getPresentation(event));
+                    return fail(path, event);
+                }
+            }
+            if (!property.switchTo(event.getTo(), false)) {
+                log("switch to state event fail: %s", Util.getPresentation(event));
                 return fail(path, event);
             }
         } else if (inputEvent instanceof ActionEvent) {
@@ -207,6 +221,15 @@ public class Graph implements Communicator, Loggable {
             }
         });
         return result[0];
+    }
+
+    /**
+     * 指示程序避免进一步加深执行深度，处理好应有的状态变换后尽快返回，并从头执行栈底的路径。
+     *
+     * @return
+     */
+    private boolean shouldInterrupt() {
+        return actionDone && rollingPaths.size() > 1;
     }
 
     private boolean fail(Path path, Object cause) {
@@ -256,7 +279,7 @@ public class Graph implements Communicator, Loggable {
             return unsatisfiedDegree;
         })).filter(p -> {
             log("try to roll: %s", Util.getPresentation(p));
-            return roll(p, verifySuperPaths);
+            return !shouldInterrupt() && roll(p, verifySuperPaths);
         }).findFirst().isPresent();
     }
 
@@ -313,6 +336,7 @@ public class Graph implements Communicator, Loggable {
         records.add(actionEvent);
         for (Communicator communicator : communicators) {
             if (communicator.performAction(actionEvent)) {
+                actionDone = true;
                 return true;
             }
         }
