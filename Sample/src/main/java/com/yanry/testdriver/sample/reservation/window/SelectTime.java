@@ -25,9 +25,9 @@ public abstract class SelectTime extends WindowManager.Window {
     @Override
     protected void addCases() {
         closeOnTouchOutside();
-        ListView listView = new ListView(this, null);
-        Click<ListViewItem, String> click = new Click<>(listView.getRandomItem(getManager()));
-        click.setPreAction(item -> new TextView(item, null).getText().getCurrentValue(getManager()));
+        ListView listView = new ListView(getManager(), this, null);
+        Click<ListViewItem, String> click = new Click<>(listView.getRandomItem());
+        click.setPreAction(item -> new TextView(getManager(), item, null).getText().getCurrentValue());
         PeriodicReserve periodicReserve = new PeriodicReserve(getManager());
         close(click, Timing.IMMEDIATELY, getTextView(periodicReserve).getText().getStaticExpectation(Timing.IMMEDIATELY, true, getExpectedText(click.getPreActionResult()))
                 .addFollowingExpectation(getValidity(periodicReserve).getStaticExpectation(Timing.IMMEDIATELY, false, true)));

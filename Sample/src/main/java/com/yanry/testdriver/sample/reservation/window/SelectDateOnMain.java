@@ -16,9 +16,9 @@ public class SelectDateOnMain extends WindowManager.Window {
 
     @Override
     protected void addCases() {
-        ListView lvDate = new ListView(this, null);
+        ListView lvDate = new ListView(getManager(), this, null);
         // 随机点击一个item返回主页
-        Click<ListViewItem, String[]> clickItem = new Click<>(lvDate.getRandomItem(getManager()));
+        Click<ListViewItem, String[]> clickItem = new Click<>(lvDate.getRandomItem());
 //        clickItem.setPreAction(item -> {
 //            TextView dateView = new TextView(item, null);
 //            QueryableProperty month = new QueryableProperty(getManager(), "所选月份");

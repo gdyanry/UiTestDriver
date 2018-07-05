@@ -82,45 +82,45 @@ public class PeriodicReserve extends WindowManager.Window {
 
     @Override
     protected void addCases() {
-        ValidateEditText etTopic = new ValidateEditText(this, new ByDesc(DESC_ET_TOPIC));
-        Click clickSubmit = new Click(new View(this, new ByDesc(DESC_V_SUBMIT)));
-        tvRoom = new TextView(this, new ByDesc(TV_ROOM));
-        roomValidity = new Validity();
-        tvStartTime = new TextView(this, new ByDesc(TV_START_TIME));
-        startTimeValidity = new Validity();
-        endTimeValidity = new Validity();
-        tvEndTime = new TextView(this, new ByDesc(TV_END_TIME));
-        dayOfWeekValue = new DayOfWeekValue();
-        dayOfWeekValidity = new DayOfWeekValidity(dayOfWeekValue);
-        tvDayOfWeek = new TextView(this, new ByDesc(TV_DAY_OF_WEEK));
+        ValidateEditText etTopic = new ValidateEditText(getManager(), this, new ByDesc(DESC_ET_TOPIC));
+        Click clickSubmit = new Click(new View(getManager(), this, new ByDesc(DESC_V_SUBMIT)));
+        tvRoom = new TextView(getManager(), this, new ByDesc(TV_ROOM));
+        roomValidity = new Validity(getManager());
+        tvStartTime = new TextView(getManager(), this, new ByDesc(TV_START_TIME));
+        startTimeValidity = new Validity(getManager());
+        endTimeValidity = new Validity(getManager());
+        tvEndTime = new TextView(getManager(), this, new ByDesc(TV_END_TIME));
+        dayOfWeekValue = new DayOfWeekValue(getManager());
+        dayOfWeekValidity = new DayOfWeekValidity(getManager(), dayOfWeekValue);
+        tvDayOfWeek = new TextView(getManager(), this, new ByDesc(TV_DAY_OF_WEEK));
 
-        close(new Click<>(new View(this, new ByDesc(DESC_IC_QUIT))), Timing.IMMEDIATELY);
+        close(new Click<>(new View(getManager(), this, new ByDesc(DESC_IC_QUIT))), Timing.IMMEDIATELY);
 
         etTopic.setEmptyValidationCase(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION,
                 "会议主题不可为空"));
         etTopic.addPositiveCases(String.format("test topic<%tR>", System.currentTimeMillis()));
 
-        popWindow(new SelectRoom(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_ROOM))), Timing
+        popWindow(new SelectRoom(getManager()), new Click<>(new View(getManager(), this, new ByDesc(DESC_ITEM_ROOM))), Timing
                 .IMMEDIATELY, false, false);
         createPath(getCreateEvent(), roomValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议室"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, false);
 
-        popWindow(new SelectStartTime(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_START_TIME))), Timing
+        popWindow(new SelectStartTime(getManager()), new Click<>(new View(getManager(), this, new ByDesc(DESC_ITEM_START_TIME))), Timing
                 .IMMEDIATELY, false, false);
         createPath(getCreateEvent(), startTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议开始时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, false);
 
-        popWindow(new SelectEndTime(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_END_TIME))),
+        popWindow(new SelectEndTime(getManager()), new Click<>(new View(getManager(), this, new ByDesc(DESC_ITEM_END_TIME))),
                 Timing.IMMEDIATELY, false, false);
         createPath(getCreateEvent(), endTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, Config.TOAST_DURATION, "必须选择会议结束时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, true).addInitState(endTimeValidity, false);
 
-        popWindow(new SelectDayOfWeek(getManager()), new Click<>(new View(this, new ByDesc(DESC_ITEM_DAY_OF_WEEK))),
+        popWindow(new SelectDayOfWeek(getManager()), new Click<>(new View(getManager(), this, new ByDesc(DESC_ITEM_DAY_OF_WEEK))),
                 Timing.IMMEDIATELY, false, false);
         createPath(getCreateEvent(), dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(getCreateEvent(), dayOfWeekValue.getStaticExpectation(Timing.IMMEDIATELY, false, new boolean[]{false, false,
@@ -132,13 +132,17 @@ public class PeriodicReserve extends WindowManager.Window {
 
     public class Validity extends CacheProperty<Boolean> {
 
+        public Validity(Graph graph) {
+            super(graph);
+        }
+
         @Override
-        protected Boolean checkValue(Graph graph) {
+        protected Boolean checkValue() {
             return false;
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, Boolean to) {
+        protected boolean doSelfSwitch(Boolean to) {
             return false;
         }
 
@@ -150,13 +154,17 @@ public class PeriodicReserve extends WindowManager.Window {
 
     public class DayOfWeekValue extends CacheProperty<boolean[]> {
 
+        public DayOfWeekValue(Graph graph) {
+            super(graph);
+        }
+
         @Override
-        protected boolean[] checkValue(Graph graph) {
+        protected boolean[] checkValue() {
             return new boolean[]{false, false, false, false, false, false, false};
         }
 
         @Override
-        protected boolean doSelfSwitch(Graph graph, boolean[] to) {
+        protected boolean doSelfSwitch(boolean[] to) {
             return false;
         }
 
@@ -169,8 +177,13 @@ public class PeriodicReserve extends WindowManager.Window {
     public class DayOfWeekValidity extends Property<Boolean> {
         private DayOfWeekValue value;
 
-        public DayOfWeekValidity(DayOfWeekValue value) {
+        public DayOfWeekValidity(Graph graph, DayOfWeekValue value) {
+            super(graph);
             this.value = value;
+        }
+
+        public DayOfWeekValidity(Graph graph) {
+            super(graph);
         }
 
         @Override
@@ -179,7 +192,7 @@ public class PeriodicReserve extends WindowManager.Window {
         }
 
         @Override
-        protected boolean selfSwitch(Graph graph, Boolean to) {
+        protected boolean selfSwitch(Boolean to) {
             return false;
         }
 
@@ -189,8 +202,8 @@ public class PeriodicReserve extends WindowManager.Window {
         }
 
         @Override
-        public Boolean getCurrentValue(Graph graph) {
-            boolean[] booleans = value.getCurrentValue(graph);
+        public Boolean getCurrentValue() {
+            boolean[] booleans = value.getCurrentValue();
             for (boolean b : booleans) {
                 if (b) {
                     return true;

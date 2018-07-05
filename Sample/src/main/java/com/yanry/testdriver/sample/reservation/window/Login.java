@@ -31,12 +31,12 @@ public class Login extends WindowManager.Window {
 
     @Override
     protected void addCases() {
-        ValidateEditText etUser = new ValidateEditText(this, new ByDesc(ET_USER));
-        ValidateEditText etPwd = new ValidateEditText(this, new ByDesc(ET_PWD));
+        ValidateEditText etUser = new ValidateEditText(getManager(), this, new ByDesc(ET_USER));
+        ValidateEditText etPwd = new ValidateEditText(getManager(), this, new ByDesc(ET_PWD));
         LoginPathHandler loginPathHandler = new LoginPathHandler(getProperty(CurrentUser.class), etUser, etPwd);
-        Click clickLogin = new Click(new View(this, new ByText("登录")));
-        TextView userErrorView = new TextView(this, new ByDesc(USER_VALIDATION));
-        TextView pwdErrorView = new TextView(this, new ByDesc(PWD_VALIDATION));
+        Click clickLogin = new Click(new View(getManager(), this, new ByText("登录")));
+        TextView userErrorView = new TextView(getManager(), this, new ByDesc(USER_VALIDATION));
+        TextView pwdErrorView = new TextView(getManager(), this, new ByDesc(PWD_VALIDATION));
 
         createPath(getCreateEvent(), etUser.getContent().getStaticExpectation(Timing.IMMEDIATELY, true, ""));
         createPath(getCreateEvent(), etPwd.getContent().getStaticExpectation(Timing.IMMEDIATELY, true, ""));

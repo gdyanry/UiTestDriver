@@ -155,13 +155,13 @@ public class Graph implements Communicator, Loggable {
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
-            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(this, path) > 0)
+            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
                     .sorted(Comparator.comparingInt(p -> {
-                        log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(this, path), p.getUnsatisfiedDegree(this), Util.getPresentation(p));
-                        return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(this, path) + p.getUnsatisfiedDegree(this);
+                        log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(this), Util.getPresentation(p));
+                        return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) + p.getUnsatisfiedDegree(this);
                     })).findFirst();
             if (first.isPresent()) {
-                log("roll path to init state(%s, %s): %s", first.get().getExpectation().getTotalMatchDegree(this, path), first.get().getUnsatisfiedDegree(this), Util.getPresentation(first.get()));
+                log("roll path to init state(%s, %s): %s", first.get().getExpectation().getTotalMatchDegree(path), first.get().getUnsatisfiedDegree(this), Util.getPresentation(first.get()));
                 roll(first.get(), true);
                 return internalRoll(path, verifySuperPaths);
             }
@@ -225,7 +225,7 @@ public class Graph implements Communicator, Loggable {
 
     private boolean verify(Path path, boolean verifySuperPaths) {
         Expectation expectation = path.getExpectation();
-        boolean isPass = expectation.verify(this, verifySuperPaths);
+        boolean isPass = expectation.verify(verifySuperPaths);
         if (expectation.isNeedCheck()) {
             records.add(new Assertion(expectation, isPass));
         }

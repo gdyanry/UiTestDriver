@@ -17,15 +17,15 @@ public class MenuOnMain extends WindowManager.Window {
 
     public MenuOnMain(WindowManager manager) {
         manager.super();
-        tvLogin = new TextView(this, new ByDesc("登录菜单项"));
+        tvLogin = new TextView(getManager(), this, new ByDesc("登录菜单项"));
     }
 
     @Override
     protected void addCases() {
-        popWindow(new PeriodicReserve(getManager()), new Click(new View(this, new ByText("周期预定"))), Timing.IMMEDIATELY,true, false);
-        popWindow(new MyReservation(getManager()), new Click(new View(this, new ByText("我的预订"))), Timing.IMMEDIATELY,true, false);
+        popWindow(new PeriodicReserve(getManager()), new Click(new View(getManager(), this, new ByText("周期预定"))), Timing.IMMEDIATELY,true, false);
+        popWindow(new MyReservation(getManager()), new Click(new View(getManager(), this, new ByText("我的预订"))), Timing.IMMEDIATELY,true, false);
         LoginState loginState = getProperty(LoginState.class);
-        createPath(getCreateEvent(), tvLogin.getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> loginState.getCurrentValue(getManager()) ? "登录" : "退出登录"));
+        createPath(getCreateEvent(), tvLogin.getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> loginState.getCurrentValue() ? "登录" : "退出登录"));
         close(new Click(tvLogin), Timing.IMMEDIATELY).put(loginState, true);
         popWindow(new Login(getManager()), new Click(tvLogin), Timing.IMMEDIATELY, false, false).put(loginState, false);
         closeOnTouchOutside();

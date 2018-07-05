@@ -22,18 +22,18 @@ public class SelectDayOfWeek extends WindowManager.Window {
     @Override
     protected void addCases() {
         closeOnTouchOutside();
-        close(new Click<>(new View(this, new ByText("取消"))), Timing.IMMEDIATELY);
-        Click<View, Object> clickConfirm = new Click<>(new View(this, new ByText("确定")));
+        close(new Click<>(new View(getManager(), this, new ByText("取消"))), Timing.IMMEDIATELY);
+        Click<View, Object> clickConfirm = new Click<>(new View(getManager(), this, new ByText("确定")));
         close(clickConfirm, Timing.IMMEDIATELY);
         CheckBox[] checkBoxes = new CheckBox[7];
         PeriodicReserve fromWindow = new PeriodicReserve(getManager());
         PeriodicReserve.DayOfWeekValue dayOfWeekValue = fromWindow.getDayOfWeekValue();
         PeriodicReserve.DayOfWeekValidity dayOfWeekValidity = fromWindow.getDayOfWeekValidity();
         for (int i = 0; i < 7; i++) {
-            checkBoxes[i] = new CheckBox(this, new ByIndex(i));
+            checkBoxes[i] = new CheckBox(getManager(), this, new ByIndex(i));
             int finalIndex = i;
             // init state
-            createPath(getCreateEvent(), checkBoxes[i].getCheckState().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> dayOfWeekValue.getCurrentValue(getManager())[finalIndex]));
+            createPath(getCreateEvent(), checkBoxes[i].getCheckState().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> dayOfWeekValue.getCurrentValue()[finalIndex]));
             // day of week validity on true
             createPath(clickConfirm, dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addInitState
                     (checkBoxes[i].getCheckState(), true).addInitState(dayOfWeekValidity, false);
@@ -48,12 +48,12 @@ public class SelectDayOfWeek extends WindowManager.Window {
         createPath(clickConfirm, dayOfWeekValue.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> {
             for (int i = 0; i < checkBoxes.length; i++) {
                 CheckBox checkBox = checkBoxes[i];
-                dayOfWeekValue.getCurrentValue(getManager())[i] = checkBox.getCheckState().getCurrentValue(getManager());
+                dayOfWeekValue.getCurrentValue()[i] = checkBox.getCheckState().getCurrentValue();
             }
-            return dayOfWeekValue.getCurrentValue(getManager());
+            return dayOfWeekValue.getCurrentValue();
         }).addFollowingExpectation(tvDayOfWeek.getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> {
             StringBuilder stringBuilder = new StringBuilder();
-            boolean[] bArr = dayOfWeekValue.getCurrentValue(getManager());
+            boolean[] bArr = dayOfWeekValue.getCurrentValue();
             if (bArr[0]) {
                 stringBuilder.append("星期一，");
             }

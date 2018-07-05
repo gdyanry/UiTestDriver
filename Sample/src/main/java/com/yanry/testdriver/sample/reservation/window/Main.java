@@ -16,7 +16,7 @@ public class Main extends WindowManager.Window {
 
     public Main(WindowManager manager) {
         manager.super();
-        tvDate = new TextView(this, new ByDesc("日期标签"));
+        tvDate = new TextView(getManager(), this, new ByDesc("日期标签"));
     }
 
     public TextView getTvDate() {
@@ -27,14 +27,14 @@ public class Main extends WindowManager.Window {
     protected void addCases() {
         showOnStartUp(Timing.IMMEDIATELY);
         SelectDateOnMain selectDateOnMain = new SelectDateOnMain(getManager());
-        popWindow(selectDateOnMain, new Click<>(new View(this, new ByDesc("选择日期图标"))), Timing
+        popWindow(selectDateOnMain, new Click<>(new View(getManager(), this, new ByDesc("选择日期图标"))), Timing
                 .IMMEDIATELY, false, true);
         popWindow(selectDateOnMain, new Click<>(tvDate), Timing.IMMEDIATELY, false, true);
-        popWindow(selectDateOnMain, new Click(new View(this, new ByText("筛选"))), Timing.IMMEDIATELY,
+        popWindow(selectDateOnMain, new Click(new View(getManager(), this, new ByText("筛选"))), Timing.IMMEDIATELY,
                 false, false);
-        popWindow(new SpecificationOnMain(getManager()), new Click(new View(this, new ByDesc("问号图标"))), Timing
+        popWindow(new SpecificationOnMain(getManager()), new Click(new View(getManager(), this, new ByDesc("问号图标"))), Timing
                 .IMMEDIATELY, false, false);
-        popWindow(new MenuOnMain(getManager()), new Click(new View(this, new ByDesc("菜单图标"))), Timing.IMMEDIATELY,
+        popWindow(new MenuOnMain(getManager()), new Click(new View(getManager(), this, new ByDesc("菜单图标"))), Timing.IMMEDIATELY,
                 false, false);
     }
 }

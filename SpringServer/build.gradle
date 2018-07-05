@@ -15,5 +15,4 @@ apply plugin: 'org.springframework.boot'
 dependencies {
     implementation project(':Core')
     implementation('org.springframework.boot:spring-boot-starter-web')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
