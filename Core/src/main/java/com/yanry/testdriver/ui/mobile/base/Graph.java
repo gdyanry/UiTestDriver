@@ -104,6 +104,8 @@ public class Graph implements Communicator, Loggable {
         unprocessedPaths.clear();
         if (pathIndexes == null) {
             unprocessedPaths.addAll(optionalPaths);
+        } else if (pathIndexes.length >= optionalPaths.size()) {
+            return Collections.EMPTY_LIST;
         } else {
             for (int index : pathIndexes) {
                 unprocessedPaths.add(optionalPaths.get(index));
@@ -278,7 +280,6 @@ public class Graph implements Communicator, Loggable {
     private void logStatus() {
         logCollection("rolling", rollingPaths);
         logCollection("failed", failedPaths);
-        logCollection("record", records);
         log("unprocessed>>>>%s", unprocessedPaths.size());
     }
 
