@@ -3,9 +3,9 @@ package com.yanry.testdriver.ui.mobile;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
+import com.yanry.testdriver.ui.mobile.extend.property.ProcessState;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
 import lib.common.util.StringUtil;
@@ -75,7 +75,9 @@ public class Util {
 
     public static Path createPath(Graph graph, Event event, Expectation expectation) {
         Path path = new Path(event, expectation);
-        path.put(new ProcessState(graph), true);
+        if (!event.equals(new ProcessState(graph).getStateEvent(false, true))) {
+            path.put(new ProcessState(graph), true);
+        }
         graph.addPath(path);
         return path;
     }

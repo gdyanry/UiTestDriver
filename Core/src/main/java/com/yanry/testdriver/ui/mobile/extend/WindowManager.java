@@ -4,7 +4,6 @@ import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.Path;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
-import com.yanry.testdriver.ui.mobile.base.ProcessState;
 import com.yanry.testdriver.ui.mobile.base.event.Event;
 import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.expectation.ActionExpectation;
@@ -15,6 +14,7 @@ import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.extend.action.ClickOutside;
+import com.yanry.testdriver.ui.mobile.extend.property.ProcessState;
 import com.yanry.testdriver.ui.mobile.extend.view.container.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
@@ -32,7 +32,7 @@ public class WindowManager extends Graph {
     private List<Window> windowInstances;
     private HashMap<Class<? extends Property>, Property> propertyInstances;
     private CurrentWindow currentWindow;
-    private NoWindow noWindow;
+    public final NoWindow noWindow;
 
     public WindowManager(boolean debug) {
         super(debug);
@@ -123,13 +123,14 @@ public class WindowManager extends Graph {
                         }
                     }
                 }
-            }).addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? NotCreated : Background))
-                    .addFollowingExpectation(newWindow.visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Foreground))
-                    .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this)));
+            }).addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this))
+                    .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? NotCreated : Background))
+                    .addFollowingExpectation(newWindow.visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Foreground)));
         }
 
         public Path close(Event inputEvent, Timing timing, Expectation... followingExpectations) {
             Expectation expectation = currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
+                    .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow))
                     .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, NotCreated))
                     .addFollowingExpectation(new DDPropertyExpectation<>(Timing.IMMEDIATELY, false, () -> previousWindow.getCurrentValue().visibility, () -> Foreground));
             for (Expectation followingExpectation : followingExpectations) {
@@ -146,8 +147,12 @@ public class WindowManager extends Graph {
             return Util.createPath(getManager(), event, expectation).addInitState(visibility, Foreground);
         }
 
-        public Property<Visibility> getVisibility() {
+        public VisibilityState getVisibility() {
             return visibility;
+        }
+
+        public PreviousWindow getPreviousWindow() {
+            return previousWindow;
         }
 
         public StateEvent<Visibility> getCreateEvent() {

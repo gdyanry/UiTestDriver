@@ -3,16 +3,20 @@ package com.yanry.testdriver.sample.debug;
 import com.yanry.testdriver.sample.debug.window.LoginPage;
 import com.yanry.testdriver.ui.mobile.Util;
 import com.yanry.testdriver.ui.mobile.base.Path;
-import com.yanry.testdriver.ui.mobile.base.ProcessState;
+import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
+import com.yanry.testdriver.ui.mobile.base.runtime.GraphWatcher;
 import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
 import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.communicator.ConsoleCommunicator;
 import com.yanry.testdriver.ui.mobile.extend.property.CurrentUser;
 import com.yanry.testdriver.ui.mobile.extend.property.LoginState;
+import com.yanry.testdriver.ui.mobile.extend.property.ProcessState;
 import lib.common.util.ConsoleUtil;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by rongyu.yan on 2/17/2017.
@@ -26,6 +30,32 @@ public class TestApp {
         WindowManager manager = new WindowManager(true);
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         manager.registerCommunicator(communicator);
+        manager.setWatcher(new GraphWatcher() {
+            @Override
+            public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> failedPaths, Path rollingPath) {
+                for (CacheProperty property : cacheProperties.keySet()) {
+                    ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(property), Util.getPresentation(property.getCurrentValue()));
+                    if (property instanceof WindowManager.Window.PreviousWindow) {
+                        WindowManager.Window.PreviousWindow previousWindow = (WindowManager.Window.PreviousWindow) property;
+                        WindowManager.Window.VisibilityState visibilityState = previousWindow.getWindow().getVisibility();
+                        ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(visibilityState), visibilityState.getCurrentValue());
+                    }
+                }
+//                WindowManager.Window currentWindow = manager.getCurrentWindow().getCurrentValue();
+//                printWindowState(currentWindow);
+//                while (!(currentWindow = currentWindow.getPreviousWindow().getCurrentValue()).equals(manager.noWindow)) {
+//                    printWindowState(currentWindow);
+//                }
+            }
+
+            @Override
+            public void onStartRolling(List<Path> rollingPaths, boolean verifySuperPaths) {
+                ConsoleUtil.debug("rolling: %s", verifySuperPaths);
+                for (Path path : rollingPaths) {
+                    ConsoleUtil.debug("....%s", Util.getPresentation(path));
+                }
+            }
+        });
         defineGraph(manager);
         List<Path> options = manager.prepare();
         int i = 0;
@@ -67,7 +97,11 @@ public class TestApp {
         CurrentUser currentUser = new CurrentUser(manager);
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
         manager.registerProperties(new NetworkState(manager), currentUser, new LoginState(manager, currentUser));
-        Util.createPath(manager, new ProcessState(manager).getStateEvent(false, true), new ShowSplash(manager));
+        manager.addPath(new Path(new ProcessState(manager).getStateEvent(false, true), new ShowSplash(manager)));
         new LoginPage(manager);
+    }
+
+    private static void printWindowState(WindowManager.Window window) {
+        ConsoleUtil.debug("================%s - %s", Util.getPresentation(window), Util.getPresentation(window.getVisibility().getCurrentValue()));
     }
 }

@@ -1,5 +1,6 @@
-package com.yanry.testdriver.ui.mobile.base;
+package com.yanry.testdriver.ui.mobile.extend.property;
 
+import com.yanry.testdriver.ui.mobile.base.Graph;
 import com.yanry.testdriver.ui.mobile.base.event.SwitchStateAction;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;

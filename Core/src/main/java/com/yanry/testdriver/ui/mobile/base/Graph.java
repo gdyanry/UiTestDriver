@@ -12,10 +12,7 @@ import com.yanry.testdriver.ui.mobile.base.expectation.Expectation;
 import com.yanry.testdriver.ui.mobile.base.expectation.PropertyExpectation;
 import com.yanry.testdriver.ui.mobile.base.property.CacheProperty;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
-import com.yanry.testdriver.ui.mobile.base.runtime.Assertion;
-import com.yanry.testdriver.ui.mobile.base.runtime.Communicator;
-import com.yanry.testdriver.ui.mobile.base.runtime.MissedPath;
-import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
+import com.yanry.testdriver.ui.mobile.base.runtime.*;
 import lib.common.interfaces.Loggable;
 import lib.common.util.ConsoleUtil;
 
@@ -40,6 +37,7 @@ public class Graph implements Communicator, Loggable {
     private List<Path> optionalPaths;
     private Map<CacheProperty, Object> cacheProperties;
     private boolean actionDone;
+    private GraphWatcher watcher;
 
     public Graph(boolean debug) {
         this.debug = debug;
@@ -62,6 +60,10 @@ public class Graph implements Communicator, Loggable {
 
     public <V> void setCacheValue(CacheProperty<V> property, V value) {
         cacheProperties.put(property, value);
+    }
+
+    public void setWatcher(GraphWatcher watcher) {
+        this.watcher = watcher;
     }
 
     public void registerCommunicator(Communicator communicator) {
@@ -139,6 +141,9 @@ public class Graph implements Communicator, Loggable {
         if (!rollingPaths.add(path)) {
             return false;
         }
+        if (watcher != null) {
+            watcher.onStartRolling(rollingPaths, verifySuperPaths);
+        }
         boolean pass = internalRoll(path, verifySuperPaths);
         rollingPaths.remove(path);
         return pass;
@@ -146,6 +151,9 @@ public class Graph implements Communicator, Loggable {
 
     private boolean internalRoll(Path path, boolean verifySuperPaths) {
         if (rollingPaths.size() == 1) {
+            if (actionDone && watcher != null) {
+                watcher.onStandby(cacheProperties, failedPaths, path);
+            }
             actionDone = false;
         } else if (actionDone) {
             // TODO 这里返回true还是false好呢？
@@ -155,8 +163,7 @@ public class Graph implements Communicator, Loggable {
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
-            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) &&
-                    p.getExpectation().getTotalMatchDegree(path) > 0)
+            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && !rollingPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
                     .sorted(Comparator.comparingInt(p -> {
                         log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(this), Util.getPresentation(p));
                         return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) + p.getUnsatisfiedDegree(this);
@@ -295,22 +302,8 @@ public class Graph implements Communicator, Loggable {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStatePredicate));
     }
 
-    private void logCollection(String tag, Collection collection) {
-        log(String.format("%s>>>>", tag));
-        for (Object item : collection) {
-            log(String.format("    %s", Util.getPresentation(item)));
-        }
-    }
-
-    private void logStatus() {
-        logCollection("rolling", rollingPaths);
-        logCollection("failed", failedPaths);
-        log("unprocessed>>>>%s", unprocessedPaths.size());
-    }
-
     @Override
     public <V> V checkState(StateToCheck<V> stateToCheck) {
-        logStatus();
         for (Communicator communicator : communicators) {
             V value = communicator.checkState(stateToCheck);
             if (value != null) {
@@ -322,7 +315,6 @@ public class Graph implements Communicator, Loggable {
 
     @Override
     public String fetchValue(Property<String> property) {
-        logStatus();
         for (Communicator communicator : communicators) {
             String value = communicator.fetchValue(property);
             if (value != null) {
@@ -334,7 +326,6 @@ public class Graph implements Communicator, Loggable {
 
     @Override
     public boolean performAction(ActionEvent actionEvent) {
-        logStatus();
         records.add(actionEvent);
         for (Communicator communicator : communicators) {
             if (communicator.performAction(actionEvent)) {
@@ -347,7 +338,6 @@ public class Graph implements Communicator, Loggable {
 
     @Override
     public Boolean verifyExpectation(Expectation expectation) {
-        logStatus();
         for (Communicator communicator : communicators) {
             Boolean result = communicator.verifyExpectation(expectation);
             if (result != null) {

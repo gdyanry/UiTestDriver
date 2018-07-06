@@ -3,6 +3,8 @@ package com.yanry.testdriver.ui.mobile.base.event;
 import com.yanry.testdriver.ui.mobile.base.Presentable;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 
+import java.util.Objects;
+
 /**
  * Created by rongyu.yan on 5/17/2017.
  */
@@ -34,6 +36,11 @@ public class StateEvent<V> implements Event<V> {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(property, from, to);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
@@ -42,7 +49,7 @@ public class StateEvent<V> implements Event<V> {
             return false;
         }
         StateEvent event = (StateEvent) obj;
-        return property.equals(event.getProperty()) && from.equals(event.getFrom()) && to.equals(event.getTo());
+        return property.equals(event.getProperty()) && (from == null ? event.from == null : from.equals(event.getFrom())) && to.equals(event.getTo());
     }
 
     @Override
