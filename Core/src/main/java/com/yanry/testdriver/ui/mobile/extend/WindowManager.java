@@ -254,9 +254,10 @@ public class WindowManager extends Graph {
 
             @Override
             public Visibility getCurrentValue() {
-                if (currentWindow.getCurrentValue().equals(Window.this)) {
+                Window current = currentWindow.getCurrentValue();
+                if (current.equals(Window.this)) {
                     return Foreground;
-                } else if (checkExist(previousWindow)) {
+                } else if (checkExist(current.previousWindow)) {
                     return Background;
                 } else {
                     return NotCreated;

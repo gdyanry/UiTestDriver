@@ -35,17 +35,16 @@ public class TestApp {
             public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> failedPaths, Path rollingPath) {
                 for (CacheProperty property : cacheProperties.keySet()) {
                     ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(property), Util.getPresentation(property.getCurrentValue()));
-                    if (property instanceof WindowManager.Window.PreviousWindow) {
-                        WindowManager.Window.PreviousWindow previousWindow = (WindowManager.Window.PreviousWindow) property;
-                        WindowManager.Window.VisibilityState visibilityState = previousWindow.getWindow().getVisibility();
-                        ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(visibilityState), visibilityState.getCurrentValue());
-                    }
+//                    printWindowVisibility(property);
                 }
-//                WindowManager.Window currentWindow = manager.getCurrentWindow().getCurrentValue();
-//                printWindowState(currentWindow);
-//                while (!(currentWindow = currentWindow.getPreviousWindow().getCurrentValue()).equals(manager.noWindow)) {
-//                    printWindowState(currentWindow);
-//                }
+            }
+
+            private void printWindowVisibility(CacheProperty property) {
+                if (property instanceof WindowManager.Window.PreviousWindow) {
+                    WindowManager.Window.PreviousWindow previousWindow = (WindowManager.Window.PreviousWindow) property;
+                    WindowManager.Window.VisibilityState visibilityState = previousWindow.getWindow().getVisibility();
+                    ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(visibilityState), visibilityState.getCurrentValue());
+                }
             }
 
             @Override
