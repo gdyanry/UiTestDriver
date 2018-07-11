@@ -12,7 +12,12 @@ public abstract class ActionExpectation extends Expectation {
     protected abstract void run();
 
     @Override
-    protected final boolean selfVerify(boolean verifySuperPaths) {
+    protected void onVerify() {
+
+    }
+
+    @Override
+    protected final boolean doVerify(boolean verifySuperPaths) {
         run();
         return true;
     }

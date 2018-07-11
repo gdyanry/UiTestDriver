@@ -18,7 +18,12 @@ public abstract class NonPropertyExpectation extends Expectation {
     }
 
     @Override
-    protected final boolean selfVerify(boolean verifySuperPaths) {
+    protected void onVerify() {
+
+    }
+
+    @Override
+    protected final boolean doVerify(boolean verifySuperPaths) {
         return graph.verifyExpectation(this);
     }
 

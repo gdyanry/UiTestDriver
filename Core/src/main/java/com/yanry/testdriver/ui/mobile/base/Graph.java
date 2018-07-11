@@ -178,8 +178,11 @@ public class Graph implements Communicator, Loggable {
             if (state.getKey().switchTo(state.getValue(), true)) {
                 return internalRoll(path, verifySuperPaths);
             } else {
-                log("switch init state fail: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
-                return fail(path, state.getKey());
+                if (checkFail(path, state.getKey())) {
+                    log("switch init state fail: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
+                    return false;
+                }
+                return true;
             }
         }
         // all environment states are satisfied by now.
@@ -194,25 +197,36 @@ public class Graph implements Communicator, Loggable {
                 if (property.switchTo(event.getFrom(), true)) {
                     return internalRoll(path, verifySuperPaths);
                 } else {
-                    log("switch from state event fail: %s", Util.getPresentation(event));
-                    return fail(path, event);
+                    if (checkFail(path, event)) {
+                        log("switch from state event fail: %s", Util.getPresentation(event));
+                        return false;
+                    }
+                    return true;
                 }
             }
             if (!property.switchTo(event.getTo(), false)) {
-                log("switch to state event fail: %s", Util.getPresentation(event));
-                return fail(path, event);
+                if (checkFail(path, event)) {
+                    log("switch to state event fail: %s", Util.getPresentation(event));
+                    return false;
+                }
+                return true;
             }
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
             event.processPreAction();
             // this is where the action event is performed!
             if (!performAction(event)) {
-                log("perform action fail: %s", Util.getPresentation(event));
-                return fail(path, event);
+                if (checkFail(path, event)) {
+                    log("perform action fail: %s", Util.getPresentation(event));
+                    return false;
+                }
+                return true;
             }
         } else {
-            log("unprocessed event: %s", Util.getPresentation(inputEvent));
-            return fail(path, inputEvent);
+            if (checkFail(path, inputEvent)) {
+                log("unprocessed event: %s", Util.getPresentation(inputEvent));
+            }
+            return false;
         }
         // collect paths that share the same environment states and event
         final boolean[] result = new boolean[1];
@@ -236,21 +250,27 @@ public class Graph implements Communicator, Loggable {
      * @return
      */
     private boolean shouldInterrupt() {
-        return actionDone && rollingPaths.size() > 1;
+        if (actionDone && rollingPaths.size() > 1) {
+            log("interrupt!");
+            return true;
+        }
+        return false;
     }
 
-    private boolean fail(Path path, Object cause) {
+    private boolean checkFail(Path path, Object cause) {
         if (unprocessedPaths.remove(path)) {
             records.add(new MissedPath(path, cause));
         }
         if (!shouldInterrupt()) {
             failedPaths.add(path);
+            return true;
         }
         return false;
     }
 
     private boolean verify(Path path, boolean verifySuperPaths) {
         Expectation expectation = path.getExpectation();
+        expectation.preVerify();
         boolean isPass = expectation.verify(verifySuperPaths);
         if (expectation.isNeedCheck()) {
             records.add(new Assertion(expectation, isPass));
@@ -263,11 +283,13 @@ public class Graph implements Communicator, Loggable {
     }
 
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
-        allPaths.stream().filter(p -> !rollingPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(this) == 0)
-                .forEach(path -> {
-                    log("verify super path: %s", Util.getPresentation(path));
-                    verify(path, true);
-                });
+        if (!to.equals(from)) {
+            allPaths.stream().filter(p -> !rollingPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(this) == 0)
+                    .forEach(path -> {
+                        log("verify super path: %s", Util.getPresentation(path));
+                        verify(path, true);
+                    });
+        }
     }
 
     /**

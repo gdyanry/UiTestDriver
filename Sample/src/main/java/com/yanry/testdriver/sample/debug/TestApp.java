@@ -35,7 +35,7 @@ public class TestApp {
             public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> failedPaths, Path rollingPath) {
                 for (CacheProperty property : cacheProperties.keySet()) {
                     ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(property), Util.getPresentation(property.getCurrentValue()));
-//                    printWindowVisibility(property);
+                    printWindowVisibility(property);
                 }
             }
 

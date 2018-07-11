@@ -10,6 +10,7 @@ import java.util.function.BiPredicate;
  * Created by rongyu.yan on 5/10/2017.
  */
 public abstract class PropertyExpectation<V> extends Expectation {
+    private V oldValue;
 
     public PropertyExpectation(Timing timing, boolean needCheck) {
         super(timing, needCheck);
@@ -24,10 +25,14 @@ public abstract class PropertyExpectation<V> extends Expectation {
     public abstract V getExpectedValue();
 
     @Override
-    protected final boolean selfVerify(boolean verifySuperPaths) {
+    protected void onVerify() {
+        oldValue = getProperty().getCurrentValue();
+    }
+
+    @Override
+    protected final boolean doVerify(boolean verifySuperPaths) {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
-        V oldValue = property.getCurrentValue();
         property.handleExpectation(expectedValue, isNeedCheck());
         if (expectedValue.equals(property.getCurrentValue())) {
             if (verifySuperPaths) {
