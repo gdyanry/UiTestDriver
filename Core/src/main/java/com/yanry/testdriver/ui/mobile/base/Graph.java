@@ -39,6 +39,7 @@ public class Graph implements Communicator, Loggable {
     private boolean actionDone;
     private GraphWatcher watcher;
     private long actionTimeFrame;
+    private int jumpToRollingIndex;
 
     public Graph(boolean debug) {
         this.debug = debug;
@@ -49,6 +50,7 @@ public class Graph implements Communicator, Loggable {
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
         cacheProperties = new HashMap<>();
+        jumpToRollingIndex = -1;
     }
 
     public void addPath(Path path) {
@@ -155,13 +157,23 @@ public class Graph implements Communicator, Loggable {
     }
 
     private boolean internalRoll(Path path, boolean verifySuperPaths) {
+        if (jumpToRollingIndex >= 0) {
+            int currentIndex = rollingPaths.indexOf(path);
+            if (currentIndex > jumpToRollingIndex) {
+                return true;
+            } else if (currentIndex == jumpToRollingIndex) {
+                jumpToRollingIndex = -1;
+                return !failedPaths.contains(path);
+            } else {
+                throw new IllegalStateException(String.format("currentIndex=%s, jumpToRollingIndex=%s", currentIndex, jumpToRollingIndex));
+            }
+        }
         if (rollingPaths.size() == 1) {
             if (actionDone && watcher != null) {
                 watcher.onStandby(cacheProperties, failedPaths, path);
             }
             actionDone = false;
         } else if (actionDone) {
-            // TODO 这里返回true还是false好呢？
             return true;
         }
         // make sure environment states are satisfied.
@@ -255,7 +267,7 @@ public class Graph implements Communicator, Loggable {
      * @return
      */
     private boolean shouldInterrupt() {
-        if (actionDone && rollingPaths.size() > 1) {
+        if (jumpToRollingIndex >= 0 || actionDone && rollingPaths.size() > 1) {
             log("interrupt!");
             return true;
         }
@@ -274,6 +286,11 @@ public class Graph implements Communicator, Loggable {
     }
 
     private boolean verify(Path path, boolean verifySuperPaths) {
+        int index = rollingPaths.indexOf(path);
+        if (index != rollingPaths.size() - 1 && index >= 0 && (jumpToRollingIndex == -1 || jumpToRollingIndex > index)) {
+            log("jump to rolling index: %s.", index);
+            jumpToRollingIndex = index;
+        }
         Expectation expectation = path.getExpectation();
         expectation.preVerify();
         boolean isPass = expectation.verify(verifySuperPaths);
@@ -289,7 +306,7 @@ public class Graph implements Communicator, Loggable {
 
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
-            allPaths.stream().filter(p -> !rollingPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(this) == 0)
+            allPaths.stream().filter(p -> p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(this) == 0)
                     .forEach(path -> {
                         log("verify super path: %s", Util.getPresentation(path));
                         verify(path, true);
