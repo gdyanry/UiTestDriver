@@ -20,8 +20,10 @@ public abstract class CacheProperty<V> extends Property<V> {
     @Override
     public final void handleExpectation(V expectedValue, boolean needCheck) {
         if (expectedValue != null && needCheck) {
-            // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
-            getGraph().setCacheValue(this, null);
+            if (!getGraph().isValueFresh(this)) {
+                // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
+                getGraph().setCacheValue(this, null);
+            }
         } else {
             // 不查询客户端，直接通过验证并更新状态值
             getGraph().setCacheValue(this, expectedValue);

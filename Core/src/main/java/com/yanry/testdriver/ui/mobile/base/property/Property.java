@@ -21,6 +21,10 @@ import java.util.function.Supplier;
 @Presentable
 public abstract class Property<V> {
     private Graph graph;
+    /**
+     * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
+     */
+    private long communicateTimeFrame;
 
     public Property(Graph graph) {
         this.graph = graph;
@@ -56,6 +60,14 @@ public abstract class Property<V> {
 
     public SDPropertyExpectation<V> getDynamicExpectation(Timing timing, boolean needCheck, Supplier<V> valueSupplier) {
         return new SDPropertyExpectation<>(timing, needCheck, this, valueSupplier);
+    }
+
+    public long getCommunicateTimeFrame() {
+        return communicateTimeFrame;
+    }
+
+    public void setCommunicateTimeFrame(long communicateTimeFrame) {
+        this.communicateTimeFrame = communicateTimeFrame;
     }
 
     @Override

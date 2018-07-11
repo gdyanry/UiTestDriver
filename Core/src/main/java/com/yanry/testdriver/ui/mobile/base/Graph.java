@@ -38,6 +38,7 @@ public class Graph implements Communicator, Loggable {
     private Map<CacheProperty, Object> cacheProperties;
     private boolean actionDone;
     private GraphWatcher watcher;
+    private long actionTimeFrame;
 
     public Graph(boolean debug) {
         this.debug = debug;
@@ -60,6 +61,10 @@ public class Graph implements Communicator, Loggable {
 
     public <V> void setCacheValue(CacheProperty<V> property, V value) {
         cacheProperties.put(property, value);
+    }
+
+    public boolean isValueFresh(Property property) {
+        return actionTimeFrame > 0 && property.getCommunicateTimeFrame() == actionTimeFrame;
     }
 
     public void setWatcher(GraphWatcher watcher) {
@@ -326,24 +331,33 @@ public class Graph implements Communicator, Loggable {
 
     @Override
     public <V> V checkState(StateToCheck<V> stateToCheck) {
+        CacheProperty<V> property = stateToCheck.getProperty();
+        if (isValueFresh(property)) {
+            return property.getCurrentValue();
+        }
         for (Communicator communicator : communicators) {
             V value = communicator.checkState(stateToCheck);
             if (value != null) {
+                property.setCommunicateTimeFrame(actionTimeFrame);
                 return value;
             }
         }
-        throw new NullPointerException(Util.getPresentation(stateToCheck).toString());
+        throw new NullPointerException(String.format("unable to check state: %s", Util.getPresentation(stateToCheck)));
     }
 
     @Override
     public String fetchValue(Property<String> property) {
+        if (isValueFresh(property)) {
+            return property.getCurrentValue();
+        }
         for (Communicator communicator : communicators) {
             String value = communicator.fetchValue(property);
             if (value != null) {
+                property.setCommunicateTimeFrame(actionTimeFrame);
                 return value;
             }
         }
-        return "";
+        throw new NullPointerException(String.format("unable to fetch value: %s", Util.getPresentation(property)));
     }
 
     @Override
@@ -352,6 +366,7 @@ public class Graph implements Communicator, Loggable {
         for (Communicator communicator : communicators) {
             if (communicator.performAction(actionEvent)) {
                 actionDone = true;
+                actionTimeFrame = System.currentTimeMillis();
                 return true;
             }
         }
