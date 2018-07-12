@@ -144,15 +144,13 @@ public class Graph implements Communicator, Loggable {
         if (path.getEvent() instanceof StateChangeCallback) {
             return false;
         }
-        // to avoid infinite loop
-        if (!rollingPaths.add(path)) {
-            return false;
-        }
+        handleJumpToRollingIndex(path);
+        rollingPaths.add(path);
         if (watcher != null) {
             watcher.onStartRolling(rollingPaths, verifySuperPaths);
         }
         boolean pass = internalRoll(path, verifySuperPaths);
-        rollingPaths.remove(path);
+        rollingPaths.removeLastOccurrence(path);
         return pass;
     }
 
@@ -170,7 +168,7 @@ public class Graph implements Communicator, Loggable {
         }
         if (rollingPaths.size() == 1) {
             if (actionDone && watcher != null) {
-                watcher.onStandby(cacheProperties, failedPaths, path);
+                watcher.onStandby(cacheProperties, unprocessedPaths, failedPaths, path);
             }
             actionDone = false;
         } else if (actionDone) {
@@ -180,13 +178,13 @@ public class Graph implements Communicator, Loggable {
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
                 equals(state.getKey().getCurrentValue())).findFirst();
         if (any.isPresent()) {
-            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && !rollingPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
+            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
                     .sorted(Comparator.comparingInt(p -> {
-                        log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(this), Util.getPresentation(p));
-                        return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) + p.getUnsatisfiedDegree(this);
+                        log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
+                        return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) * 100 + p.getUnsatisfiedDegree(actionTimeFrame, true);
                     })).findFirst();
             if (first.isPresent()) {
-                log("roll path to init state(%s, %s): %s", first.get().getExpectation().getTotalMatchDegree(path), first.get().getUnsatisfiedDegree(this), Util.getPresentation(first.get()));
+                log("roll path to init state(%s, %s): %s", first.get().getExpectation().getTotalMatchDegree(path), first.get().getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(first.get()));
                 roll(first.get(), true);
                 return internalRoll(path, verifySuperPaths);
             }
@@ -248,7 +246,7 @@ public class Graph implements Communicator, Loggable {
         // collect paths that share the same environment states and event
         final boolean[] result = new boolean[1];
         // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-        allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(this) == 0)
+        allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                 .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             if (p == path) {
                 log("verify path(%s): %s", verifySuperPaths, Util.getPresentation(p));
@@ -268,7 +266,7 @@ public class Graph implements Communicator, Loggable {
      */
     private boolean shouldInterrupt() {
         if (jumpToRollingIndex >= 0 || actionDone && rollingPaths.size() > 1) {
-            log("interrupt!");
+            log("interrupt! jumpToRollingIndex=%s, actionDone=%s.", jumpToRollingIndex, actionDone);
             return true;
         }
         return false;
@@ -286,11 +284,7 @@ public class Graph implements Communicator, Loggable {
     }
 
     private boolean verify(Path path, boolean verifySuperPaths) {
-        int index = rollingPaths.indexOf(path);
-        if (index != rollingPaths.size() - 1 && index >= 0 && (jumpToRollingIndex == -1 || jumpToRollingIndex > index)) {
-            log("jump to rolling index: %s.", index);
-            jumpToRollingIndex = index;
-        }
+        handleJumpToRollingIndex(path);
         Expectation expectation = path.getExpectation();
         expectation.preVerify();
         boolean isPass = expectation.verify(verifySuperPaths);
@@ -304,9 +298,17 @@ public class Graph implements Communicator, Loggable {
         return isPass;
     }
 
+    private void handleJumpToRollingIndex(Path path) {
+        int index = rollingPaths.indexOf(path);
+        if (index != rollingPaths.size() - 1 && index >= 0 && (jumpToRollingIndex == -1 || jumpToRollingIndex > index)) {
+            log("update jump to rolling index: %s.", index);
+            jumpToRollingIndex = index;
+        }
+    }
+
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
-            allPaths.stream().filter(p -> p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(this) == 0)
+            allPaths.stream().filter(p -> p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .forEach(path -> {
                         log("verify super path: %s", Util.getPresentation(path));
                         verify(path, true);
@@ -322,17 +324,20 @@ public class Graph implements Communicator, Loggable {
      */
     public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate, boolean verifySuperPaths) {
         return allPaths.stream().filter(p -> {
-            if (!failedPaths.contains(p) && !rollingPaths.contains(p)) {
+            if (!failedPaths.contains(p)) {
                 return isSatisfied(p.getExpectation(), endStatePredicate);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {
-            int unsatisfiedDegree = p.getUnsatisfiedDegree(this);
+            int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
             log("compare value: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
             return unsatisfiedDegree;
         })).filter(p -> {
             log("try to roll: %s", Util.getPresentation(p));
-            return !shouldInterrupt() && roll(p, verifySuperPaths);
+            if (shouldInterrupt()) {
+                return true;
+            }
+            return roll(p, verifySuperPaths);
         }).findFirst().isPresent();
     }
 

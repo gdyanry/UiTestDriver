@@ -1,6 +1,7 @@
 package com.yanry.testdriver.ui.mobile.base.expectation;
 
 import com.yanry.testdriver.ui.mobile.base.Path;
+import com.yanry.testdriver.ui.mobile.base.event.StateEvent;
 import com.yanry.testdriver.ui.mobile.base.property.Property;
 
 import java.util.function.BiPredicate;
@@ -46,7 +47,17 @@ public abstract class PropertyExpectation<V> extends Expectation {
     @Override
     protected final int getMatchDegree(Path path) {
         Property<V> property = getProperty();
+        if (path.getEvent() instanceof StateEvent) {
+            StateEvent stateEvent = (StateEvent) path.getEvent();
+            if (stateEvent.getProperty().equals(property) && isMatch(property, stateEvent.getFrom())) {
+                return 1;
+            }
+        }
         Object value = path.get(property);
-        return value != null && !value.equals(property.getCurrentValue()) && value.equals(getExpectedValue()) ? 100 : 0;
+        return isMatch(property, value) ? 1 : 0;
+    }
+
+    private boolean isMatch(Property<V> property, Object value) {
+        return value != null && !value.equals(property.getCurrentValue()) && value.equals(getExpectedValue());
     }
 }

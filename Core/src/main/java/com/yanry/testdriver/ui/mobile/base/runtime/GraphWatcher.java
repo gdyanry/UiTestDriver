@@ -15,7 +15,7 @@ public interface GraphWatcher {
      * @param failedPaths
      * @param rollingPath
      */
-    void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> failedPaths, Path rollingPath);
+    void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> failedPaths, Path rollingPath);
 
     void onStartRolling(List<Path> rollingPaths, boolean verifySuperPaths);
 }

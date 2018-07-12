@@ -32,10 +32,11 @@ public class TestApp {
         manager.registerCommunicator(communicator);
         manager.setWatcher(new GraphWatcher() {
             @Override
-            public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> failedPaths, Path rollingPath) {
+            public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> failedPaths, Path rollingPath) {
+                ConsoleUtil.debug("unprocessed paths: %s.", unprocessedPaths.size());
                 for (CacheProperty property : cacheProperties.keySet()) {
                     ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(property), Util.getPresentation(property.getCurrentValue()));
-                    printWindowVisibility(property);
+//                    printWindowVisibility(property);
                 }
             }
 
