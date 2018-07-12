@@ -36,7 +36,6 @@ public class Graph implements Communicator, Loggable {
     private List<Communicator> communicators;
     private List<Path> optionalPaths;
     private Map<CacheProperty, Object> cacheProperties;
-    private boolean actionDone;
     private GraphWatcher watcher;
     private long actionTimeFrame;
     private int jumpToRollingIndex;
@@ -125,7 +124,7 @@ public class Graph implements Communicator, Loggable {
             rollingPaths.clear();
             Path path = unprocessedPaths.stream().findAny().get();
             log("traverse: %s", Util.getPresentation(path));
-            roll(path, true);
+            deepRoll(path);
         }
         List<Object> result = new ArrayList<>(records);
         isTraversing = false;
@@ -139,66 +138,39 @@ public class Graph implements Communicator, Loggable {
         isTraversing = false;
     }
 
-    private boolean roll(Path path, boolean verifySuperPaths) {
+    private boolean deepRoll(Path path) {
         // 状态变化回调事件只能被动触发，即成为其他路径的父路径
         if (path.getEvent() instanceof StateChangeCallback) {
             return false;
         }
-        handleJumpToRollingIndex(path);
+
         rollingPaths.add(path);
         if (watcher != null) {
-            watcher.onStartRolling(rollingPaths, verifySuperPaths);
+            watcher.onStartRolling(rollingPaths);
+            watcher.onStandby(cacheProperties, unprocessedPaths, failedPaths, path);
         }
-        boolean pass = internalRoll(path, verifySuperPaths);
+        boolean pass = shallowRoll(path);
         rollingPaths.removeLastOccurrence(path);
         return pass;
     }
 
-    private boolean internalRoll(Path path, boolean verifySuperPaths) {
-        if (jumpToRollingIndex >= 0) {
-            int currentIndex = rollingPaths.indexOf(path);
-            if (currentIndex > jumpToRollingIndex) {
+    private boolean shallowRoll(Path path) {
+        for (Path p : allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
+                .sorted(Comparator.comparingInt(p -> {
+                    log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
+                    return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) * 100 + p.getUnsatisfiedDegree(actionTimeFrame, true);
+                })).collect(Collectors.toList())) {
+            log("deepRoll path to init state(%s, %s): %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
+            if (shallowRoll(p)) {
                 return true;
-            } else if (currentIndex == jumpToRollingIndex) {
-                jumpToRollingIndex = -1;
-                return !failedPaths.contains(path);
-            } else {
-                throw new IllegalStateException(String.format("currentIndex=%s, jumpToRollingIndex=%s", currentIndex, jumpToRollingIndex));
             }
-        }
-        if (rollingPaths.size() == 1) {
-            if (actionDone && watcher != null) {
-                watcher.onStandby(cacheProperties, unprocessedPaths, failedPaths, path);
-            }
-            actionDone = false;
-        } else if (actionDone) {
-            return true;
         }
         // make sure environment states are satisfied.
-        Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().
-                equals(state.getKey().getCurrentValue())).findFirst();
+        Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().equals(state.getKey().getCurrentValue())).findAny();
         if (any.isPresent()) {
-            Optional<Path> first = allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
-                    .sorted(Comparator.comparingInt(p -> {
-                        log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
-                        return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) * 100 + p.getUnsatisfiedDegree(actionTimeFrame, true);
-                    })).findFirst();
-            if (first.isPresent()) {
-                log("roll path to init state(%s, %s): %s", first.get().getExpectation().getTotalMatchDegree(path), first.get().getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(first.get()));
-                roll(first.get(), true);
-                return internalRoll(path, verifySuperPaths);
-            }
             Map.Entry<Property, Object> state = any.get();
             log("switch init state: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
-            if (state.getKey().switchTo(state.getValue(), true)) {
-                return internalRoll(path, verifySuperPaths);
-            } else {
-                if (checkFail(path, state.getKey())) {
-                    log("switch init state fail: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
-                    return false;
-                }
-                return true;
-            }
+            return state.getKey().switchTo(state.getValue(), true);
         }
         // all environment states are satisfied by now.
         // trigger event
@@ -208,75 +180,35 @@ public class Graph implements Communicator, Loggable {
             // roll path for this switch event.
             log("switch state event: %s", Util.getPresentation(event));
             Property property = event.getProperty();
-            if (!property.getCurrentValue().equals(event.getFrom())) {
-                if (property.switchTo(event.getFrom(), true)) {
-                    return internalRoll(path, verifySuperPaths);
-                } else {
-                    if (checkFail(path, event)) {
-                        log("switch from state event fail: %s", Util.getPresentation(event));
-                        return false;
-                    }
-                    return true;
-                }
+            if (event.getFrom() != null && !event.getFrom().equals(property.getCurrentValue())) {
+                return property.switchTo(event.getFrom(), true);
             }
-            if (!property.switchTo(event.getTo(), false)) {
-                if (checkFail(path, event)) {
-                    log("switch to state event fail: %s", Util.getPresentation(event));
-                    return false;
-                }
-                return true;
-            }
+            return property.switchTo(event.getTo(), true);
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
             event.processPreAction();
             // this is where the action event is performed!
             if (!performAction(event)) {
-                if (checkFail(path, event)) {
-                    log("perform action fail: %s", Util.getPresentation(event));
-                    return false;
-                }
-                return true;
+                log("perform action fail: %s", Util.getPresentation(event));
+                return false;
             }
         } else {
-            if (checkFail(path, inputEvent)) {
-                log("unprocessed event: %s", Util.getPresentation(inputEvent));
-            }
+            log("unprocessed event: %s", Util.getPresentation(inputEvent));
             return false;
         }
         // collect paths that share the same environment states and event
-        final boolean[] result = new boolean[1];
         // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
         allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                 .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
-            if (p == path) {
-                log("verify path(%s): %s", verifySuperPaths, Util.getPresentation(p));
-                result[0] = verify(p, verifySuperPaths);
-            } else {
-                log("verify sibling path: %s", Util.getPresentation(p));
-                verify(p, true);
-            }
+            log("verify path: %s", Util.getPresentation(p));
+            verify(p, true);
         });
-        return result[0];
-    }
-
-    /**
-     * 指示程序避免进一步加深执行深度，处理好应有的状态变换后尽快返回，并从头执行栈底的路径。
-     *
-     * @return
-     */
-    private boolean shouldInterrupt() {
-        if (jumpToRollingIndex >= 0 || actionDone && rollingPaths.size() > 1) {
-            log("interrupt! jumpToRollingIndex=%s, actionDone=%s.", jumpToRollingIndex, actionDone);
-            return true;
-        }
-        return false;
+        return true;
     }
 
     private boolean checkFail(Path path, Object cause) {
         if (unprocessedPaths.remove(path)) {
             records.add(new MissedPath(path, cause));
-        }
-        if (!shouldInterrupt()) {
             failedPaths.add(path);
             return true;
         }
@@ -333,11 +265,8 @@ public class Graph implements Communicator, Loggable {
             log("compare value: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
             return unsatisfiedDegree;
         })).filter(p -> {
-            log("try to roll: %s", Util.getPresentation(p));
-            if (shouldInterrupt()) {
-                return true;
-            }
-            return roll(p, verifySuperPaths);
+            log("try to deepRoll: %s", Util.getPresentation(p));
+            return shallowRoll(p);
         }).findFirst().isPresent();
     }
 
