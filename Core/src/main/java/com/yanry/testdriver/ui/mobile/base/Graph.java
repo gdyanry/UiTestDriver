@@ -32,24 +32,22 @@ public class Graph implements Communicator, Loggable {
     private Set<Path> failedPaths;
     private List<Object> records;
     private boolean isTraversing;
-    private LinkedList<Path> rollingPaths;
     private List<Communicator> communicators;
     private List<Path> optionalPaths;
     private Map<CacheProperty, Object> cacheProperties;
     private GraphWatcher watcher;
     private long actionTimeFrame;
-    private int jumpToRollingIndex;
+    private Set<Path> successTemp;
 
     public Graph(boolean debug) {
         this.debug = debug;
         allPaths = new LinkedList<>();
         records = new LinkedList<>();
         failedPaths = new HashSet<>();
-        rollingPaths = new LinkedList<>();
         unprocessedPaths = new HashSet<>();
         communicators = new ArrayList<>();
         cacheProperties = new HashMap<>();
-        jumpToRollingIndex = -1;
+        successTemp = new HashSet<>();
     }
 
     public void addPath(Path path) {
@@ -121,7 +119,6 @@ public class Graph implements Communicator, Loggable {
             }
         }
         while (!unprocessedPaths.isEmpty() && isTraversing) {
-            rollingPaths.clear();
             Path path = unprocessedPaths.stream().findAny().get();
             log("traverse: %s", Util.getPresentation(path));
             deepRoll(path);
@@ -138,22 +135,34 @@ public class Graph implements Communicator, Loggable {
         isTraversing = false;
     }
 
+    /**
+     * @param path
+     * @return 是否成功
+     */
     private boolean deepRoll(Path path) {
         // 状态变化回调事件只能被动触发，即成为其他路径的父路径
         if (path.getEvent() instanceof StateChangeCallback) {
             return false;
         }
-
-        rollingPaths.add(path);
         if (watcher != null) {
-            watcher.onStartRolling(rollingPaths);
             watcher.onStandby(cacheProperties, unprocessedPaths, failedPaths, path);
         }
-        boolean pass = shallowRoll(path);
-        rollingPaths.removeLastOccurrence(path);
-        return pass;
+        while (shallowRoll(path)) {
+            if (successTemp.contains(path)) {
+                successTemp.clear();
+                return true;
+            } else if (failedPaths.contains(path)) {
+                successTemp.clear();
+                return false;
+            }
+        }
+        return false;
     }
 
+    /**
+     * @param path
+     * @return 是否触发ActionEvent
+     */
     private boolean shallowRoll(Path path) {
         for (Path p : allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
                 .sorted(Comparator.comparingInt(p -> {
@@ -216,26 +225,19 @@ public class Graph implements Communicator, Loggable {
     }
 
     private boolean verify(Path path, boolean verifySuperPaths) {
-        handleJumpToRollingIndex(path);
         Expectation expectation = path.getExpectation();
         expectation.preVerify();
         boolean isPass = expectation.verify(verifySuperPaths);
         if (expectation.isNeedCheck()) {
             records.add(new Assertion(expectation, isPass));
         }
-        if (!isPass) {
+        if (isPass) {
+            successTemp.add(path);
+        } else {
             failedPaths.add(path);
         }
         unprocessedPaths.remove(path);
         return isPass;
-    }
-
-    private void handleJumpToRollingIndex(Path path) {
-        int index = rollingPaths.indexOf(path);
-        if (index != rollingPaths.size() - 1 && index >= 0 && (jumpToRollingIndex == -1 || jumpToRollingIndex > index)) {
-            log("update jump to rolling index: %s.", index);
-            jumpToRollingIndex = index;
-        }
     }
 
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
@@ -316,7 +318,6 @@ public class Graph implements Communicator, Loggable {
         records.add(actionEvent);
         for (Communicator communicator : communicators) {
             if (communicator.performAction(actionEvent)) {
-                actionDone = true;
                 actionTimeFrame = System.currentTimeMillis();
                 return true;
             }

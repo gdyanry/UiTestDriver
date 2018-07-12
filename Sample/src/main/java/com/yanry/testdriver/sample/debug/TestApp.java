@@ -47,14 +47,6 @@ public class TestApp {
                     ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(visibilityState), visibilityState.getCurrentValue());
                 }
             }
-
-            @Override
-            public void onStartRolling(List<Path> rollingPaths, boolean verifySuperPaths) {
-                ConsoleUtil.debug("rolling: %s", verifySuperPaths);
-                for (Path path : rollingPaths) {
-                    ConsoleUtil.debug("....%s", Util.getPresentation(path));
-                }
-            }
         });
         defineGraph(manager);
         List<Path> options = manager.prepare();
