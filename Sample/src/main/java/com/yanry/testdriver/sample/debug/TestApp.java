@@ -34,6 +34,7 @@ public class TestApp {
             @Override
             public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> successTemp, Set<Path> failedPaths, Path rollingPath) {
                 ConsoleUtil.debug("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                ConsoleUtil.debug("rolling path: %s.", Util.getPresentation(rollingPath));
                 ConsoleUtil.debug("unprocessed paths: %s.", unprocessedPaths.size());
                 for (CacheProperty property : cacheProperties.keySet()) {
                     ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(property), Util.getPresentation(property.getCurrentValue()));

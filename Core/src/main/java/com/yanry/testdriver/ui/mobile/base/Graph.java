@@ -119,7 +119,7 @@ public class Graph implements Communicator, Loggable {
             }
         }
         while (!unprocessedPaths.isEmpty() && isTraversing) {
-            Path path = unprocessedPaths.stream().findAny().get();
+            Path path = unprocessedPaths.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true))).findFirst().get();
             log("traverse: %s", Util.getPresentation(path));
             deepRoll(path);
         }
@@ -144,10 +144,8 @@ public class Graph implements Communicator, Loggable {
         if (path.getEvent() instanceof StateChangeCallback) {
             return false;
         }
+        notifyStandBy(path);
         while (shallowRoll(path)) {
-            if (watcher != null) {
-                watcher.onStandby(cacheProperties, unprocessedPaths, successTemp, failedPaths, path);
-            }
             if (successTemp.contains(path)) {
                 successTemp.clear();
                 return true;
@@ -155,8 +153,17 @@ public class Graph implements Communicator, Loggable {
                 successTemp.clear();
                 return false;
             }
+            notifyStandBy(path);
         }
+        unprocessedPaths.remove(path);
+        failedPaths.add(path);
         return false;
+    }
+
+    private void notifyStandBy(Path path) {
+        if (watcher != null) {
+            watcher.onStandby(cacheProperties, unprocessedPaths, successTemp, failedPaths, path);
+        }
     }
 
     /**
@@ -199,13 +206,12 @@ public class Graph implements Communicator, Loggable {
             // this is where the action event is performed!
             if (!performAction(event)) {
                 log("perform action fail: %s", Util.getPresentation(event));
-                unprocessedPaths.remove(path);
                 records.add(new MissedPath(path, event));
-                failedPaths.add(path);
                 return false;
             }
         } else {
             log("unprocessed event: %s", Util.getPresentation(inputEvent));
+            records.add(new MissedPath(path, inputEvent));
             return false;
         }
         // collect paths that share the same environment states and event
@@ -218,7 +224,7 @@ public class Graph implements Communicator, Loggable {
         return true;
     }
 
-    private boolean verify(Path path) {
+    private void verify(Path path) {
         Expectation expectation = path.getExpectation();
         expectation.preVerify();
         boolean isPass = expectation.verify();
@@ -231,7 +237,6 @@ public class Graph implements Communicator, Loggable {
             failedPaths.add(path);
         }
         unprocessedPaths.remove(path);
-        return isPass;
     }
 
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
@@ -245,25 +250,29 @@ public class Graph implements Communicator, Loggable {
     }
 
     /**
-     * try paths that satisfy the given predicates until one successfully rolled.
+     * try paths that satisfy the given predicates until an action event is triggered.
      *
      * @param endStatePredicate
      * @return
      */
     public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate) {
-        return allPaths.stream().filter(p -> {
+        if (!allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p)) {
                 return isSatisfied(p.getExpectation(), endStatePredicate);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {
             int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
-            log("compare value: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
+            log("compare unsatisfied degree: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
             return unsatisfiedDegree;
         })).filter(p -> {
             log("try to roll: %s", Util.getPresentation(p));
             return shallowRoll(p);
-        }).findFirst().isPresent();
+        }).findFirst().isPresent()) {
+            log("find path to roll failed.");
+            return false;
+        }
+        return true;
     }
 
     private <V> boolean isSatisfied(Expectation expectation, BiPredicate<Property<V>, V> endStatePredicate) {

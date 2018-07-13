@@ -35,11 +35,9 @@ public abstract class Property<V> {
     }
 
     public final boolean switchTo(V to) {
-        return to.equals(getCurrentValue())
+        return !to.equals(getCurrentValue())
                 // 先尝试自转化再搜索是否存在可用路径
-                || (verifySuperPaths(to)
-                || graph.findPathToRoll((prop, val) -> equals(prop) && to.equals(val)))
-                && to.equals(getCurrentValue());
+                && (verifySuperPaths(to) || graph.findPathToRoll((prop, val) -> equals(prop) && to.equals(val)));
     }
 
     private boolean verifySuperPaths(V to) {
