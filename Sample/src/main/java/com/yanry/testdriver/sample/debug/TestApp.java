@@ -32,12 +32,22 @@ public class TestApp {
         manager.registerCommunicator(communicator);
         manager.setWatcher(new GraphWatcher() {
             @Override
-            public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> failedPaths, Path rollingPath) {
+            public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> successTemp, Set<Path> failedPaths, Path rollingPath) {
+                ConsoleUtil.debug("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                 ConsoleUtil.debug("unprocessed paths: %s.", unprocessedPaths.size());
                 for (CacheProperty property : cacheProperties.keySet()) {
                     ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(property), Util.getPresentation(property.getCurrentValue()));
 //                    printWindowVisibility(property);
                 }
+                ConsoleUtil.debug("success temp:");
+                for (Path path : successTemp) {
+                    ConsoleUtil.debug("    %s", Util.getPresentation(path));
+                }
+                ConsoleUtil.debug("failed paths:");
+                for (Path failedPath : failedPaths) {
+                    ConsoleUtil.debug("    %s", Util.getPresentation(failedPath));
+                }
+                ConsoleUtil.debug("------------------------------------------------------------------------------------------");
             }
 
             private void printWindowVisibility(CacheProperty property) {
@@ -91,9 +101,5 @@ public class TestApp {
         manager.registerProperties(new NetworkState(manager), currentUser, new LoginState(manager, currentUser));
         manager.addPath(new Path(new ProcessState(manager).getStateEvent(false, true), new ShowSplash(manager)));
         new LoginPage(manager);
-    }
-
-    private static void printWindowState(WindowManager.Window window) {
-        ConsoleUtil.debug("================%s - %s", Util.getPresentation(window), Util.getPresentation(window.getVisibility().getCurrentValue()));
     }
 }

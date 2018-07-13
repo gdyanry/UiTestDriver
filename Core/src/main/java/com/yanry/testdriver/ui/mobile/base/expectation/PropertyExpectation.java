@@ -31,14 +31,12 @@ public abstract class PropertyExpectation<V> extends Expectation {
     }
 
     @Override
-    protected final boolean doVerify(boolean verifySuperPaths) {
+    protected final boolean doVerify() {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
         property.handleExpectation(expectedValue, isNeedCheck());
         if (expectedValue.equals(property.getCurrentValue())) {
-            if (verifySuperPaths) {
-                property.getGraph().verifySuperPaths(property, oldValue, expectedValue);
-            }
+            property.getGraph().verifySuperPaths(property, oldValue, expectedValue);
             return true;
         }
         return false;

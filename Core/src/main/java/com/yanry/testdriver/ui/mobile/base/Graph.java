@@ -144,10 +144,10 @@ public class Graph implements Communicator, Loggable {
         if (path.getEvent() instanceof StateChangeCallback) {
             return false;
         }
-        if (watcher != null) {
-            watcher.onStandby(cacheProperties, unprocessedPaths, failedPaths, path);
-        }
         while (shallowRoll(path)) {
+            if (watcher != null) {
+                watcher.onStandby(cacheProperties, unprocessedPaths, successTemp, failedPaths, path);
+            }
             if (successTemp.contains(path)) {
                 successTemp.clear();
                 return true;
@@ -164,22 +164,22 @@ public class Graph implements Communicator, Loggable {
      * @return 是否触发ActionEvent
      */
     private boolean shallowRoll(Path path) {
-        for (Path p : allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
-                .sorted(Comparator.comparingInt(p -> {
-                    log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
-                    return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) * 100 + p.getUnsatisfiedDegree(actionTimeFrame, true);
-                })).collect(Collectors.toList())) {
-            log("deepRoll path to init state(%s, %s): %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
-            if (shallowRoll(p)) {
-                return true;
-            }
-        }
+//        for (Path p : allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
+//                .sorted(Comparator.comparingInt(p -> {
+//                    log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
+//                    return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) * 100 + p.getUnsatisfiedDegree(actionTimeFrame, true);
+//                })).collect(Collectors.toList())) {
+//            log("roll path to init state(%s, %s): %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
+//            if (shallowRoll(p)) {
+//                return true;
+//            }
+//        }
         // make sure environment states are satisfied.
         Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().equals(state.getKey().getCurrentValue())).findAny();
         if (any.isPresent()) {
             Map.Entry<Property, Object> state = any.get();
             log("switch init state: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
-            return state.getKey().switchTo(state.getValue(), true);
+            return state.getKey().switchTo(state.getValue());
         }
         // all environment states are satisfied by now.
         // trigger event
@@ -190,15 +190,18 @@ public class Graph implements Communicator, Loggable {
             log("switch state event: %s", Util.getPresentation(event));
             Property property = event.getProperty();
             if (event.getFrom() != null && !event.getFrom().equals(property.getCurrentValue())) {
-                return property.switchTo(event.getFrom(), true);
+                return property.switchTo(event.getFrom());
             }
-            return property.switchTo(event.getTo(), true);
+            return property.switchTo(event.getTo());
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
             event.processPreAction();
             // this is where the action event is performed!
             if (!performAction(event)) {
                 log("perform action fail: %s", Util.getPresentation(event));
+                unprocessedPaths.remove(path);
+                records.add(new MissedPath(path, event));
+                failedPaths.add(path);
                 return false;
             }
         } else {
@@ -210,24 +213,15 @@ public class Graph implements Communicator, Loggable {
         allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                 .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             log("verify path: %s", Util.getPresentation(p));
-            verify(p, true);
+            verify(p);
         });
         return true;
     }
 
-    private boolean checkFail(Path path, Object cause) {
-        if (unprocessedPaths.remove(path)) {
-            records.add(new MissedPath(path, cause));
-            failedPaths.add(path);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean verify(Path path, boolean verifySuperPaths) {
+    private boolean verify(Path path) {
         Expectation expectation = path.getExpectation();
         expectation.preVerify();
-        boolean isPass = expectation.verify(verifySuperPaths);
+        boolean isPass = expectation.verify();
         if (expectation.isNeedCheck()) {
             records.add(new Assertion(expectation, isPass));
         }
@@ -245,7 +239,7 @@ public class Graph implements Communicator, Loggable {
             allPaths.stream().filter(p -> p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .forEach(path -> {
                         log("verify super path: %s", Util.getPresentation(path));
-                        verify(path, true);
+                        verify(path);
                     });
         }
     }
@@ -256,7 +250,7 @@ public class Graph implements Communicator, Loggable {
      * @param endStatePredicate
      * @return
      */
-    public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate, boolean verifySuperPaths) {
+    public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate) {
         return allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p)) {
                 return isSatisfied(p.getExpectation(), endStatePredicate);
@@ -267,7 +261,7 @@ public class Graph implements Communicator, Loggable {
             log("compare value: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
             return unsatisfiedDegree;
         })).filter(p -> {
-            log("try to deepRoll: %s", Util.getPresentation(p));
+            log("try to roll: %s", Util.getPresentation(p));
             return shallowRoll(p);
         }).findFirst().isPresent();
     }

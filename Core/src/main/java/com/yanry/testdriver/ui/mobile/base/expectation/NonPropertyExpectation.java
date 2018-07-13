@@ -23,7 +23,7 @@ public abstract class NonPropertyExpectation extends Expectation {
     }
 
     @Override
-    protected final boolean doVerify(boolean verifySuperPaths) {
+    protected final boolean doVerify() {
         return graph.verifyExpectation(this);
     }
 

@@ -45,7 +45,7 @@ public class EditText extends View {
 
         @Override
         protected boolean doSelfSwitch(String to) {
-            return getWindow().getVisibility().switchTo(WindowManager.Visibility.Foreground, true) &&
+            return getWindow().getVisibility().switchTo(WindowManager.Visibility.Foreground) &&
                     getGraph().performAction(new EnterText(EditText.this, to));
         }
 

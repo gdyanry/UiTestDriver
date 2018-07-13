@@ -17,7 +17,7 @@ public abstract class ActionExpectation extends Expectation {
     }
 
     @Override
-    protected final boolean doVerify(boolean verifySuperPaths) {
+    protected final boolean doVerify() {
         run();
         return true;
     }

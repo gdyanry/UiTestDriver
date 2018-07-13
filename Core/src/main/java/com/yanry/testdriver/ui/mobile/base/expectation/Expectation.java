@@ -45,9 +45,9 @@ public abstract class Expectation {
         followingExpectations.forEach(e -> e.preVerify());
     }
 
-    public final boolean verify(boolean verifySuperPaths) {
-        if (doVerify(verifySuperPaths)) {
-            followingExpectations.forEach(e -> e.verify(true));
+    public final boolean verify() {
+        if (doVerify()) {
+            followingExpectations.forEach(e -> e.verify());
             return true;
         }
         return false;
@@ -67,7 +67,7 @@ public abstract class Expectation {
 
     protected abstract void onVerify();
 
-    protected abstract boolean doVerify(boolean verifySuperPaths);
+    protected abstract boolean doVerify();
 
     protected abstract int getMatchDegree(Path path);
 

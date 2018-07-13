@@ -75,9 +75,9 @@ public class ValidateEditText extends EditText {
         @Override
         protected boolean selfSwitch(Boolean to) {
             if (to) {
-                return validContents.stream().anyMatch(c -> getContent().switchTo(c, true));
+                return validContents.stream().anyMatch(c -> getContent().switchTo(c));
             }
-            return invalidContents.stream().anyMatch(c -> getContent().switchTo(c, true));
+            return invalidContents.stream().anyMatch(c -> getContent().switchTo(c));
         }
 
         @Override

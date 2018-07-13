@@ -34,21 +34,21 @@ public abstract class Property<V> {
         return graph;
     }
 
-    public final boolean switchTo(V to, boolean verifySuperPaths) {
+    public final boolean switchTo(V to) {
         return to.equals(getCurrentValue())
                 // 先尝试自转化再搜索是否存在可用路径
-                || (verifySuperPaths(to, verifySuperPaths)
-                || graph.findPathToRoll((prop, val) -> equals(prop) && to.equals(val), verifySuperPaths))
+                || (verifySuperPaths(to)
+                || graph.findPathToRoll((prop, val) -> equals(prop) && to.equals(val)))
                 && to.equals(getCurrentValue());
     }
 
-    private boolean verifySuperPaths(V to, boolean verifySuperPaths) {
+    private boolean verifySuperPaths(V to) {
         V currentValue = getCurrentValue();
-        boolean selfSwitch = selfSwitch(to);
-        if (selfSwitch && verifySuperPaths) {
+        if (selfSwitch(to)) {
             graph.verifySuperPaths(this, currentValue, to);
+            return true;
         }
-        return selfSwitch;
+        return false;
     }
 
     public StateEvent<V> getStateEvent(V from, V to) {

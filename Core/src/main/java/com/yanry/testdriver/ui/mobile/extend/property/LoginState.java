@@ -22,9 +22,9 @@ public class LoginState extends Property<Boolean> {
     @Override
     protected boolean selfSwitch(Boolean to) {
         if (to) {
-            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(u, true));
+            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchTo(u));
         }
-        return currentUser.switchTo("", true);
+        return currentUser.switchTo("");
     }
 
     @Override
