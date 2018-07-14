@@ -52,8 +52,7 @@ public class Path extends HashMap<Property, Object> {
         }
         if (timeFrame == 0 || timeFrame != this.timeFrame) {
             Property finalExcludeProperty = excludeProperty;
-            unsatisfiedDegree = keySet().stream().filter(property -> !get(property).equals(property.getCurrentValue())).mapToInt(prop -> prop.equals(finalExcludeProperty) ? 0 : 1).sum();
-            unsatisfiedDegree = entrySet().stream().filter(state -> !state.getValue().equals(state.getKey().getCurrentValue())).mapToInt(state -> 1).sum();
+            unsatisfiedDegree = keySet().stream().filter(property -> !property.equals(finalExcludeProperty) && !get(property).equals(property.getCurrentValue())).mapToInt(prop -> 1).sum();
             this.timeFrame = timeFrame;
         }
         return unsatisfiedDegree + (addOne ? 1 : 0);

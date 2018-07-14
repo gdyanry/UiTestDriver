@@ -38,6 +38,7 @@ public class Graph implements Communicator, Loggable {
     private GraphWatcher watcher;
     private long actionTimeFrame;
     private Set<Path> successTemp;
+    private Set<Path> rollingPath;
 
     public Graph(boolean debug) {
         this.debug = debug;
@@ -48,6 +49,7 @@ public class Graph implements Communicator, Loggable {
         communicators = new ArrayList<>();
         cacheProperties = new HashMap<>();
         successTemp = new HashSet<>();
+        rollingPath = new HashSet<>();
     }
 
     public void addPath(Path path) {
@@ -156,6 +158,7 @@ public class Graph implements Communicator, Loggable {
             notifyStandBy(path);
         }
         // 未执行verify()
+        successTemp.clear();
         unprocessedPaths.remove(path);
         failedPaths.add(path);
         return false;
@@ -172,6 +175,10 @@ public class Graph implements Communicator, Loggable {
      * @return 是否触发ActionEvent
      */
     private boolean shallowRoll(Path path) {
+        if (!rollingPath.add(path)) {
+            error("fail for repeating rolling: %s.", Util.getPresentation(path));
+            return false;
+        }
         // make sure environment states are satisfied.
         Optional<Property> any = path.keySet().stream().filter(property -> !path.get(property).equals(property.getCurrentValue())).findAny();
         if (any.isPresent()) {
@@ -182,8 +189,10 @@ public class Graph implements Communicator, Loggable {
             if (!property.switchTo(toValue)) {
                 error("switch init state failed: %s, %s", Util.getPresentation(property), Util.getPresentation(toValue));
                 records.add(new MissedPath(path, new StateEvent<>(property, oldValue, toValue)));
+                rollingPath.remove(path);
                 return false;
             }
+            rollingPath.remove(path);
             return true;
         }
         // all environment states are satisfied by now.
@@ -199,16 +208,20 @@ public class Graph implements Communicator, Loggable {
                 if (!property.switchTo(event.getFrom())) {
                     error("switch from state event failed: %s", Util.getPresentation(event));
                     records.add(new MissedPath(path, event));
+                    rollingPath.remove(path);
                     return false;
                 }
+                rollingPath.remove(path);
                 return true;
             }
             debug("switch to state event: %s", Util.getPresentation(event));
             if (!property.switchTo(event.getTo())) {
                 error("switch to state event failed: %s", Util.getPresentation(event));
                 records.add(new MissedPath(path, event));
+                rollingPath.remove(path);
                 return false;
             }
+            rollingPath.remove(path);
             return true;
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
@@ -217,20 +230,23 @@ public class Graph implements Communicator, Loggable {
             if (!performAction(event)) {
                 error("perform action fail: %s", Util.getPresentation(event));
                 records.add(new MissedPath(path, event));
+                rollingPath.remove(path);
                 return false;
             }
         } else {
             error("unprocessed event: %s", Util.getPresentation(inputEvent));
             records.add(new MissedPath(path, inputEvent));
+            rollingPath.remove(path);
             return false;
         }
         // collect paths that share the same environment states and event
         // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-        allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+        allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                 .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             debug("verify path: %s", Util.getPresentation(p));
             verify(p);
         });
+        rollingPath.remove(path);
         return true;
     }
 
