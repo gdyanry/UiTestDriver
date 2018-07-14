@@ -37,22 +37,26 @@ public class Path extends HashMap<Property, Object> {
     }
 
     public int getUnsatisfiedDegree(long timeFrame, boolean isToRoll) {
+        Property excludeProperty = null;
+        boolean addOne = false;
+        if (event instanceof StateEvent) {
+            StateEvent stateEvent = (StateEvent) event;
+            if (isToRoll) {
+                Object from = stateEvent.getFrom();
+                if (from != null && !from.equals(stateEvent.getProperty().getCurrentValue())) {
+                    addOne = true;
+                }
+            } else {
+                excludeProperty = stateEvent.getProperty();
+            }
+        }
         if (timeFrame == 0 || timeFrame != this.timeFrame) {
+            Property finalExcludeProperty = excludeProperty;
+            unsatisfiedDegree = keySet().stream().filter(property -> !get(property).equals(property.getCurrentValue())).mapToInt(prop -> prop.equals(finalExcludeProperty) ? 0 : 1).sum();
             unsatisfiedDegree = entrySet().stream().filter(state -> !state.getValue().equals(state.getKey().getCurrentValue())).mapToInt(state -> 1).sum();
             this.timeFrame = timeFrame;
         }
-        return unsatisfiedDegree + (isToRoll ? getUnsatisfiedDegreeByEvent() : 0);
-    }
-
-    private int getUnsatisfiedDegreeByEvent() {
-        if (event instanceof StateEvent) {
-            StateEvent stateEvent = (StateEvent) event;
-            Object from = stateEvent.getFrom();
-            if (from != null && !from.equals(stateEvent.getProperty().getCurrentValue())) {
-                return 1;
-            }
-        }
-        return 0;
+        return unsatisfiedDegree + (addOne ? 1 : 0);
     }
 
     @Presentable

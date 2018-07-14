@@ -35,11 +35,11 @@ public abstract class PropertyExpectation<V> extends Expectation {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
         property.handleExpectation(expectedValue, isNeedCheck());
-        if (expectedValue.equals(property.getCurrentValue())) {
-            property.getGraph().verifySuperPaths(property, oldValue, expectedValue);
-            return true;
+        V actualValue = property.getCurrentValue();
+        if (actualValue != null && !actualValue.equals(oldValue)) {
+            property.getGraph().verifySuperPaths(property, oldValue, actualValue);
         }
-        return false;
+        return expectedValue.equals(actualValue);
     }
 
     @Override

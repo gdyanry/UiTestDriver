@@ -120,7 +120,7 @@ public class Graph implements Communicator, Loggable {
         }
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = unprocessedPaths.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true))).findFirst().get();
-            log("traverse: %s", Util.getPresentation(path));
+            debug("traverse: %s", Util.getPresentation(path));
             deepRoll(path);
         }
         List<Object> result = new ArrayList<>(records);
@@ -155,6 +155,7 @@ public class Graph implements Communicator, Loggable {
             }
             notifyStandBy(path);
         }
+        // 未执行verify()
         unprocessedPaths.remove(path);
         failedPaths.add(path);
         return false;
@@ -171,22 +172,19 @@ public class Graph implements Communicator, Loggable {
      * @return 是否触发ActionEvent
      */
     private boolean shallowRoll(Path path) {
-//        for (Path p : allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation().getTotalMatchDegree(path) > 0)
-//                .sorted(Comparator.comparingInt(p -> {
-//                    log("%s - %s: %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
-//                    return Integer.MAX_VALUE - p.getExpectation().getTotalMatchDegree(path) * 100 + p.getUnsatisfiedDegree(actionTimeFrame, true);
-//                })).collect(Collectors.toList())) {
-//            log("roll path to init state(%s, %s): %s", p.getExpectation().getTotalMatchDegree(path), p.getUnsatisfiedDegree(actionTimeFrame, true), Util.getPresentation(p));
-//            if (shallowRoll(p)) {
-//                return true;
-//            }
-//        }
         // make sure environment states are satisfied.
-        Optional<Map.Entry<Property, Object>> any = path.entrySet().stream().filter(state -> !state.getValue().equals(state.getKey().getCurrentValue())).findAny();
+        Optional<Property> any = path.keySet().stream().filter(property -> !path.get(property).equals(property.getCurrentValue())).findAny();
         if (any.isPresent()) {
-            Map.Entry<Property, Object> state = any.get();
-            log("switch init state: %s, %s", Util.getPresentation(state.getKey()), state.getValue());
-            return state.getKey().switchTo(state.getValue());
+            Property property = any.get();
+            Object oldValue = property.getCurrentValue();
+            Object toValue = path.get(property);
+            debug("switch init state: %s, %s", Util.getPresentation(property), Util.getPresentation(toValue));
+            if (!property.switchTo(toValue)) {
+                error("switch init state failed: %s, %s", Util.getPresentation(property), Util.getPresentation(toValue));
+                records.add(new MissedPath(path, new StateEvent<>(property, oldValue, toValue)));
+                return false;
+            }
+            return true;
         }
         // all environment states are satisfied by now.
         // trigger event
@@ -194,23 +192,35 @@ public class Graph implements Communicator, Loggable {
         if (inputEvent instanceof StateEvent) {
             StateEvent event = (StateEvent) inputEvent;
             // roll path for this switch event.
-            log("switch state event: %s", Util.getPresentation(event));
             Property property = event.getProperty();
-            if (event.getFrom() != null && !event.getFrom().equals(property.getCurrentValue())) {
-                return property.switchTo(event.getFrom());
+            Object oldValue = property.getCurrentValue();
+            if (event.getFrom() != null && !event.getFrom().equals(oldValue)) {
+                debug("switch from state event: %s", Util.getPresentation(event));
+                if (!property.switchTo(event.getFrom())) {
+                    error("switch from state event failed: %s", Util.getPresentation(event));
+                    records.add(new MissedPath(path, event));
+                    return false;
+                }
+                return true;
             }
-            return property.switchTo(event.getTo());
+            debug("switch to state event: %s", Util.getPresentation(event));
+            if (!property.switchTo(event.getTo())) {
+                error("switch to state event failed: %s", Util.getPresentation(event));
+                records.add(new MissedPath(path, event));
+                return false;
+            }
+            return true;
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
             event.processPreAction();
             // this is where the action event is performed!
             if (!performAction(event)) {
-                log("perform action fail: %s", Util.getPresentation(event));
+                error("perform action fail: %s", Util.getPresentation(event));
                 records.add(new MissedPath(path, event));
                 return false;
             }
         } else {
-            log("unprocessed event: %s", Util.getPresentation(inputEvent));
+            error("unprocessed event: %s", Util.getPresentation(inputEvent));
             records.add(new MissedPath(path, inputEvent));
             return false;
         }
@@ -218,7 +228,7 @@ public class Graph implements Communicator, Loggable {
         // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
         allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                 .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
-            log("verify path: %s", Util.getPresentation(p));
+            debug("verify path: %s", Util.getPresentation(p));
             verify(p);
         });
         return true;
@@ -234,6 +244,7 @@ public class Graph implements Communicator, Loggable {
         if (isPass) {
             successTemp.add(path);
         } else {
+            error("verify path failed: %s.", Util.getPresentation(path));
             failedPaths.add(path);
         }
         unprocessedPaths.remove(path);
@@ -241,9 +252,9 @@ public class Graph implements Communicator, Loggable {
 
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
-            allPaths.stream().filter(p -> p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+            allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .forEach(path -> {
-                        log("verify super path: %s", Util.getPresentation(path));
+                        debug("verify super path: %s", Util.getPresentation(path));
                         verify(path);
                     });
         }
@@ -263,13 +274,13 @@ public class Graph implements Communicator, Loggable {
             return false;
         }).sorted(Comparator.comparingInt(p -> {
             int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
-            log("compare unsatisfied degree: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
+            debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
             return unsatisfiedDegree;
         })).filter(p -> {
-            log("try to roll: %s", Util.getPresentation(p));
+            debug("try to roll: %s", Util.getPresentation(p));
             return shallowRoll(p);
         }).findFirst().isPresent()) {
-            log("find path to roll failed.");
+            error("find path to roll failed.");
             return false;
         }
         return true;
@@ -340,9 +351,16 @@ public class Graph implements Communicator, Loggable {
     }
 
     @Override
-    public void log(String s, Object... objects) {
+    public void debug(String s, Object... objects) {
         if (debug) {
             ConsoleUtil.debug(1, s, objects);
+        }
+    }
+
+    @Override
+    public void error(String s, Object... objects) {
+        if (debug) {
+            ConsoleUtil.error(1, s, objects);
         }
     }
 }
