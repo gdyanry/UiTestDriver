@@ -1,4 +1,4 @@
 dependencies {
     implementation project(':Core')
-    implementation 'io.appium:java-client:5.0.4'
+    implementation 'io.appium:java-client:6.1.0'
 }

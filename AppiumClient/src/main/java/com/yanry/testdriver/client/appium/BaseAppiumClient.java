@@ -2,15 +2,14 @@ package com.yanry.testdriver.client.appium;
 
 import com.yanry.testdriver.ui.mobile.base.runtime.StateToCheck;
 import com.yanry.testdriver.ui.mobile.distribute.HttpClientReception;
+import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import com.yanry.testdriver.ui.mobile.extend.action.Click;
 import com.yanry.testdriver.ui.mobile.extend.action.EnterText;
 import com.yanry.testdriver.ui.mobile.extend.expectation.Toast;
-import com.yanry.testdriver.ui.mobile.extend.WindowManager;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
-import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -66,8 +65,8 @@ public abstract class BaseAppiumClient extends HttpClientReception {
                 // TODO
                 // {".":"Toast","message":"无网络连接","duration":2000,"timing":{".":"Timing","second":0,"isWithin":false}}
                 WebDriverWait wait = new WebDriverWait(driver,2);
-                Assert.assertNotNull(wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[contains" +
-                        "(@text,'"+ instruction.getString("message") + "')]"))));
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(".//*[contains" +
+                        "(@text,'"+ instruction.getString("message") + "')]")));
             }
 //            if (type.equals(StartProcess.class.getSimpleName())) {
 //                driver.launchApp();
