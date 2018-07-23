@@ -1,12 +1,11 @@
 package com.yanry.driver.core.distribute;
 
-import com.yanry.driver.core.extend.communicator.SerializedCommunicator;
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.communicator.SerializedCommunicator;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.expectation.Expectation;
 import com.yanry.driver.core.model.property.Property;
-import com.yanry.driver.core.Util;
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.runtime.StateToCheck;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
@@ -38,7 +37,7 @@ public class ServerReception extends SerializedCommunicator {
         List<Path> paths = graph.prepare();
         JSONArray jsonArray = new JSONArray();
         for (Path path : paths) {
-            jsonArray.put(Util.getPresentation(path));
+            jsonArray.put(Graph.getPresentation(path));
         }
         return jsonArray;
     }
@@ -63,7 +62,7 @@ public class ServerReception extends SerializedCommunicator {
             List<Object> result = graph.traverse(finalIndexes);
             JSONArray ja = new JSONArray();
             for (Object o : result) {
-                ja.put(Util.getPresentation(o));
+                ja.put(Graph.getPresentation(o));
             }
             lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_RECORD, ja);
             try {
@@ -120,7 +119,7 @@ public class ServerReception extends SerializedCommunicator {
             return "0";
         }
         try {
-            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(Util.getPresentation(presentable)));
+            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(Graph.getPresentation(presentable)));
             instructionQueue.put(lastInstruction);
             return feedbackQueue.take();
         } catch (InterruptedException e) {

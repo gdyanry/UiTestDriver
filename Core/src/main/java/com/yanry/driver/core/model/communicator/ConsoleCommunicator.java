@@ -1,6 +1,5 @@
-package com.yanry.driver.mobile.communicator;
+package com.yanry.driver.core.model.communicator;
 
-import com.yanry.driver.core.Util;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.expectation.Expectation;
 import com.yanry.driver.core.model.property.Property;

@@ -3,7 +3,7 @@
  */
 package com.yanry.driver.core.model;
 
-import com.yanry.driver.core.Util;
+import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
@@ -13,10 +13,15 @@ import com.yanry.driver.core.model.expectation.PropertyExpectation;
 import com.yanry.driver.core.model.property.CacheProperty;
 import com.yanry.driver.core.model.property.Property;
 import com.yanry.driver.core.model.runtime.*;
-import com.yanry.testdriver.ui.mobile.model.runtime.*;
 import lib.common.interfaces.Loggable;
+import lib.common.model.json.JSONArray;
+import lib.common.model.json.JSONObject;
 import lib.common.util.ConsoleUtil;
+import lib.common.util.StringUtil;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -123,7 +128,7 @@ public class Graph implements Communicator, Loggable {
         }
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = unprocessedPaths.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true))).findFirst().get();
-            debug("traverse: %s", Util.getPresentation(path));
+            debug("traverse: %s", getPresentation(path));
             deepRoll(path);
         }
         List<Object> result = new ArrayList<>(records);
@@ -177,7 +182,7 @@ public class Graph implements Communicator, Loggable {
      */
     private boolean shallowRoll(Path path) {
         if (!rollingPath.add(path)) {
-            error("fail for repeating rolling: %s.", Util.getPresentation(path));
+            error("fail for repeating rolling: %s.", getPresentation(path));
             return false;
         }
         // make sure environment states are satisfied.
@@ -186,9 +191,9 @@ public class Graph implements Communicator, Loggable {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
             Object toValue = path.get(property);
-            debug("switch init state: %s, %s", Util.getPresentation(property), Util.getPresentation(toValue));
+            debug("switch init state: %s, %s", getPresentation(property), getPresentation(toValue));
             if (!property.switchTo(toValue)) {
-                error("switch init state failed: %s, %s", Util.getPresentation(property), Util.getPresentation(toValue));
+                error("switch init state failed: %s, %s", getPresentation(property), getPresentation(toValue));
                 records.add(new MissedPath(path, new StateEvent<>(property, oldValue, toValue)));
                 rollingPath.remove(path);
                 return false;
@@ -205,9 +210,9 @@ public class Graph implements Communicator, Loggable {
             Property property = event.getProperty();
             Object oldValue = property.getCurrentValue();
             if (event.getFrom() != null && !event.getFrom().equals(oldValue)) {
-                debug("switch from state event: %s", Util.getPresentation(event));
+                debug("switch from state event: %s", getPresentation(event));
                 if (!property.switchTo(event.getFrom())) {
-                    error("switch from state event failed: %s", Util.getPresentation(event));
+                    error("switch from state event failed: %s", getPresentation(event));
                     records.add(new MissedPath(path, event));
                     rollingPath.remove(path);
                     return false;
@@ -215,9 +220,9 @@ public class Graph implements Communicator, Loggable {
                 rollingPath.remove(path);
                 return true;
             }
-            debug("switch to state event: %s", Util.getPresentation(event));
+            debug("switch to state event: %s", getPresentation(event));
             if (!property.switchTo(event.getTo())) {
-                error("switch to state event failed: %s", Util.getPresentation(event));
+                error("switch to state event failed: %s", getPresentation(event));
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
                 return false;
@@ -229,13 +234,13 @@ public class Graph implements Communicator, Loggable {
             event.processPreAction();
             // this is where the action event is performed!
             if (!performAction(event)) {
-                error("perform action fail: %s", Util.getPresentation(event));
+                error("perform action fail: %s", getPresentation(event));
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
                 return false;
             }
         } else {
-            error("unprocessed event: %s", Util.getPresentation(inputEvent));
+            error("unprocessed event: %s", getPresentation(inputEvent));
             records.add(new MissedPath(path, inputEvent));
             rollingPath.remove(path);
             return false;
@@ -244,7 +249,7 @@ public class Graph implements Communicator, Loggable {
         // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
         allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                 .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
-            debug("verify path: %s", Util.getPresentation(p));
+            debug("verify path: %s", getPresentation(p));
             verify(p);
         });
         rollingPath.remove(path);
@@ -261,7 +266,7 @@ public class Graph implements Communicator, Loggable {
         if (isPass) {
             successTemp.add(path);
         } else {
-            error("verify path failed: %s.", Util.getPresentation(path));
+            error("verify path failed: %s.", getPresentation(path));
             failedPaths.add(path);
         }
         unprocessedPaths.remove(path);
@@ -271,7 +276,7 @@ public class Graph implements Communicator, Loggable {
         if (!to.equals(from)) {
             allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .forEach(path -> {
-                        debug("verify super path: %s", Util.getPresentation(path));
+                        debug("verify super path: %s", getPresentation(path));
                         verify(path);
                     });
         }
@@ -291,10 +296,10 @@ public class Graph implements Communicator, Loggable {
             return false;
         }).sorted(Comparator.comparingInt(p -> {
             int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
-            debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, Util.getPresentation(p));
+            debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, getPresentation(p));
             return unsatisfiedDegree;
         })).filter(p -> {
-            debug("try to roll: %s", Util.getPresentation(p));
+            debug("try to roll: %s", getPresentation(p));
             return shallowRoll(p);
         }).findFirst().isPresent()) {
             error("find path to roll failed.");
@@ -313,6 +318,59 @@ public class Graph implements Communicator, Loggable {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStatePredicate));
     }
 
+    public static Object getPresentation(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Enum) {
+            return ((Enum) obj).name();
+        }
+        if (obj.getClass().isArray()) {
+            JSONArray jsonArray = new JSONArray();
+            int len = Array.getLength(obj);
+            for (int i = 0; i < len; i++) {
+                jsonArray.put(getPresentation(Array.get(obj, i)));
+            }
+            return jsonArray;
+        } else if (obj instanceof List) {
+            JSONArray jsonArray = new JSONArray();
+            List list = (List) obj;
+            for (Object item : list) {
+                jsonArray.put(getPresentation(item));
+            }
+            return jsonArray;
+        }
+        Class<?> clazz = obj.getClass();
+        if (clazz.isAnnotationPresent(Presentable.class)) {
+            JSONObject jsonObject = new JSONObject().put(".", StringUtil.getClassName(obj));
+            for (Method method : clazz.getMethods()) {
+                if (method.isAnnotationPresent(Presentable.class)) {
+                    String key = StringUtil.setFirstLetterCase(method.getName().replaceFirst("^get", ""), false);
+                    try {
+                        Object value = method.invoke(obj);
+                        if (value != null) {
+                            jsonObject.put(key, getPresentation(value));
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if (obj instanceof Map) {
+                JSONArray jsonArray = new JSONArray();
+                Map map = (Map) obj;
+                for (Object key : map.keySet()) {
+                    jsonArray.put(new JSONArray().put(getPresentation(key)).put(getPresentation(map.get(key))));
+                }
+                jsonObject.put("{}", jsonArray);
+            }
+            return jsonObject;
+        }
+        return obj;
+    }
+
     @Override
     public <V> V checkState(StateToCheck<V> stateToCheck) {
         CacheProperty<V> property = stateToCheck.getProperty();
@@ -326,7 +384,7 @@ public class Graph implements Communicator, Loggable {
                 return value;
             }
         }
-        throw new NullPointerException(String.format("unable to check state: %s", Util.getPresentation(stateToCheck)));
+        throw new NullPointerException(String.format("unable to check state: %s", getPresentation(stateToCheck)));
     }
 
     @Override
@@ -341,7 +399,7 @@ public class Graph implements Communicator, Loggable {
                 return value;
             }
         }
-        throw new NullPointerException(String.format("unable to fetch value: %s", Util.getPresentation(property)));
+        throw new NullPointerException(String.format("unable to fetch value: %s", getPresentation(property)));
     }
 
     @Override

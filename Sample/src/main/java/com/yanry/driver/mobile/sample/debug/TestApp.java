@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.debug;
 
-import com.yanry.driver.core.Util;
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.Path;
 import com.yanry.driver.core.model.property.CacheProperty;
 import com.yanry.driver.core.model.runtime.Assertion;
@@ -27,26 +27,27 @@ public class TestApp {
     public static final int PLASH_DURATION = 3000;
 
     public static void main(String[] args) {
-        WindowManager manager = new WindowManager(true);
+        Graph graph = new Graph(true);
+        WindowManager manager = new WindowManager(graph);
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         manager.registerCommunicator(communicator);
         manager.setWatcher(new GraphWatcher() {
             @Override
             public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> successTemp, Set<Path> failedPaths, Path rollingPath) {
                 ConsoleUtil.debug("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                ConsoleUtil.debug("rolling path: %s.", Util.getPresentation(rollingPath));
+                ConsoleUtil.debug("rolling path: %s.", Graph.getPresentation(rollingPath));
                 ConsoleUtil.debug("unprocessed paths: %s.", unprocessedPaths.size());
                 for (CacheProperty property : cacheProperties.keySet()) {
-                    ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(property), Util.getPresentation(property.getCurrentValue()));
+                    ConsoleUtil.debug(">>>>%s - %s", Graph.getPresentation(property), Graph.getPresentation(property.getCurrentValue()));
 //                    printWindowVisibility(property);
                 }
                 ConsoleUtil.debug("success temp:");
                 for (Path path : successTemp) {
-                    ConsoleUtil.debug("    %s", Util.getPresentation(path));
+                    ConsoleUtil.debug("    %s", Graph.getPresentation(path));
                 }
                 ConsoleUtil.debug("failed paths:");
                 for (Path failedPath : failedPaths) {
-                    ConsoleUtil.debug("    %s", Util.getPresentation(failedPath));
+                    ConsoleUtil.debug("    %s", Graph.getPresentation(failedPath));
                 }
                 ConsoleUtil.debug("------------------------------------------------------------------------------------------");
             }
@@ -55,7 +56,7 @@ public class TestApp {
                 if (property instanceof WindowManager.Window.PreviousWindow) {
                     WindowManager.Window.PreviousWindow previousWindow = (WindowManager.Window.PreviousWindow) property;
                     WindowManager.Window.VisibilityState visibilityState = previousWindow.getWindow().getVisibility();
-                    ConsoleUtil.debug(">>>>%s - %s", Util.getPresentation(visibilityState), visibilityState.getCurrentValue());
+                    ConsoleUtil.debug(">>>>%s - %s", Graph.getPresentation(visibilityState), visibilityState.getCurrentValue());
                 }
             }
         });
@@ -63,7 +64,7 @@ public class TestApp {
         List<Path> options = manager.prepare();
         int i = 0;
         for (Path option : options) {
-            System.out.println(String.format("%02d - %s", i++, Util.getPresentation(option)));
+            System.out.println(String.format("%02d - %s", i++, Graph.getPresentation(option)));
         }
         String input = ConsoleUtil.readLine("请选择需要测试的path：").trim();
         int[] pathIndexes = null;
@@ -91,12 +92,12 @@ public class TestApp {
             } else if (record instanceof MissedPath) {
                 missCount++;
             }
-            System.out.println(Util.getPresentation(record));
+            System.out.println(Graph.getPresentation(record));
         }
         System.out.printf("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);
     }
 
-    public static void defineGraph(WindowManager manager) {
+    public static void defineGraph(Graph manager) {
         CurrentUser currentUser = new CurrentUser(manager);
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
         manager.registerProperties(new NetworkState(manager), currentUser, new LoginState(manager, currentUser));

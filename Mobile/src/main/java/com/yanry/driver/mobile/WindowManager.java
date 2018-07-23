@@ -25,13 +25,14 @@ import java.util.Objects;
 /**
  * Created by rongyu.yan on 4/17/2017.
  */
-public class WindowManager extends Graph {
+public class WindowManager {
+    private Graph graph;
     private List<Window> windowInstances;
     private HashMap<Class<? extends Property>, Property> propertyInstances;
     private CurrentWindow currentWindow;
     public final NoWindow noWindow;
 
-    private static Path newPath(Graph graph, Event event, Expectation expectation) {
+    private Path newPath(Event event, Expectation expectation) {
         Path path = new Path(event, expectation);
         if (!event.equals(new ProcessState(graph).getStateEvent(false, true))) {
             path.put(new ProcessState(graph), true);
@@ -40,14 +41,14 @@ public class WindowManager extends Graph {
         return path;
     }
 
-    public WindowManager(boolean debug) {
-        super(debug);
+    public WindowManager(Graph graph) {
+        this.graph = graph;
         windowInstances = new LinkedList<>();
         propertyInstances = new HashMap<>();
-        currentWindow = new CurrentWindow(this);
+        currentWindow = new CurrentWindow(graph);
         noWindow = new NoWindow();
         currentWindow.handleExpectation(noWindow, false);
-        newPath(this, new ProcessState(this).getStateEvent(true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow));
+        newPath(new ProcessState(graph).getStateEvent(true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow));
     }
 
     public void registerProperties(Property... properties) {
@@ -79,9 +80,9 @@ public class WindowManager extends Graph {
         private PreviousWindow previousWindow;
 
         public Window() {
-            previousWindow = new PreviousWindow(WindowManager.this);
+            previousWindow = new PreviousWindow(graph);
             previousWindow.handleExpectation(noWindow, false);
-            visibility = new VisibilityState(WindowManager.this);
+            visibility = new VisibilityState(graph);
             visibility.handleExpectation(WindowManager.Visibility.NotCreated, false);
             createEvent = new StateEvent<>(visibility, WindowManager.Visibility.NotCreated, WindowManager.Visibility.Foreground);
             closeEvent = new StateEvent<>(visibility, WindowManager.Visibility.Foreground, WindowManager.Visibility.NotCreated);
@@ -92,7 +93,7 @@ public class WindowManager extends Graph {
                 ReflectionUtil.initStaticStringFields(getClass());
                 addCases();
                 if (!getClass().equals(NoWindow.class)) {
-                    newPath(WindowManager.this, new ProcessState(WindowManager.this).getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.NotCreated));
+                    newPath(new ProcessState(graph).getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.NotCreated));
                 }
             }
         }
@@ -100,11 +101,11 @@ public class WindowManager extends Graph {
         protected abstract void addCases();
 
         public Path showOnStartUp(Timing timing) {
-            Path path = new Path(new ProcessState(WindowManager.this).getStateEvent(false, true),
+            Path path = new Path(new ProcessState(graph).getStateEvent(false, true),
                     currentWindow.getStaticExpectation(timing, true, this)
                             .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow))
                             .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.Foreground)));
-            addPath(path);
+            graph.addPath(path);
             return path;
         }
 
@@ -150,7 +151,7 @@ public class WindowManager extends Graph {
         }
 
         public Path createPath(Event event, Expectation expectation) {
-            return newPath(getManager(), event, expectation).addInitState(visibility, WindowManager.Visibility.Foreground);
+            return newPath(event, expectation).addInitState(visibility, WindowManager.Visibility.Foreground);
         }
 
         public VisibilityState getVisibility() {

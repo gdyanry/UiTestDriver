@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.core.extend.WindowManager;
-import com.yanry.driver.core.extend.view.TextView;
+import com.yanry.driver.mobile.WindowManager;
 import com.yanry.driver.mobile.sample.reservation.window.PeriodicReserve.Validity;
+import com.yanry.driver.mobile.view.TextView;
 
 /**
  * Created by rongyu.yan on 5/19/2017.

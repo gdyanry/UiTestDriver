@@ -25,9 +25,7 @@ public abstract class BaseAppiumClient extends HttpClientReception {
         this.driver = driver;
     }
 
-    protected abstract boolean isWindowPresent(String windowTag, boolean isWithin, int second);
-
-    protected abstract int checkState(JSONObject property, JSONArray options, boolean isWithin, int second);
+    protected abstract int checkState(JSONObject property, JSONArray options);
 
     protected abstract MobileElement findView(JSONObject view);
 
@@ -47,20 +45,9 @@ public abstract class BaseAppiumClient extends HttpClientReception {
         if (repeat == 0) {
             String type = instruction.getString(".");
             if (type.equals(StateToCheck.class.getSimpleName())) {
-                JSONObject timing = instruction.getJSONObject("timing");
                 JSONObject property = instruction.getJSONObject("property");
-                boolean isWithin = timing.getBoolean("isWithin");
-                int second = timing.getInt("second");
-                if (property.getString(".").equals(WindowManager.Window.VisibilityState.class.getSimpleName())) {
-                    return isWindowPresent(property.getJSONObject("window").getString("tag"), isWithin, second) ? 1 : 0;
-                }
-                return checkState(property, instruction.getJSONArray("options"), isWithin, second);
+                return checkState(property, instruction.getJSONArray("options"));
             }
-//            if (type.equals(GeneralTransientExpectation.class.getSimpleName())) {
-//                JSONObject timing = instruction.getJSONObject("timing");
-//                return verifyExpectation(instruction.getString("tag"), timing.getBoolean("isWithin"), timing.getInt
-//                        ("second"), instruction.getInt("duration")) ? 1 : 0;
-//            }
             if (type.equals(Toast.class.getSimpleName())) {
                 // TODO
                 // {".":"Toast","message":"无网络连接","duration":2000,"timing":{".":"Timing","second":0,"isWithin":false}}

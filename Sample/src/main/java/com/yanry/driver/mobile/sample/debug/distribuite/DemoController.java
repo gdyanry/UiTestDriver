@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.debug.distribuite;
 
-import com.yanry.driver.core.extend.WindowManager;
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.mobile.sample.debug.TestApp;
 import com.yanry.driver.server.springboot.CommunicatorController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +17,7 @@ public class DemoController extends CommunicatorController {
     }
 
     @Override
-    protected void populateGraph(WindowManager manager) {
-        TestApp.defineGraph(manager);
+    protected void populateGraph(Graph graph) {
+        TestApp.defineGraph(graph);
     }
 }

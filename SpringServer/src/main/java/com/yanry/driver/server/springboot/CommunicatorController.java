@@ -32,7 +32,7 @@ public abstract class CommunicatorController {
         executor = Executors.newCachedThreadPool();
     }
 
-    protected abstract void populateGraph(Graph manager);
+    protected abstract void populateGraph(Graph graph);
 
     @GetMapping(Const.HTTP_PATH_PREPARE)
     public String prepare(HttpServletResponse response) {

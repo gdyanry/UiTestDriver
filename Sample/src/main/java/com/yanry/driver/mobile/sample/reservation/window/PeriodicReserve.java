@@ -1,17 +1,17 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.core.extend.WindowManager;
-import com.yanry.driver.core.extend.action.Click;
-import com.yanry.driver.core.extend.expectation.Toast;
-import com.yanry.driver.core.extend.view.TextView;
-import com.yanry.driver.core.extend.view.ValidateEditText;
-import com.yanry.driver.core.extend.view.View;
-import com.yanry.driver.core.extend.view.selector.ByDesc;
 import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.property.CacheProperty;
 import com.yanry.driver.core.model.property.Property;
+import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.mobile.action.Click;
+import com.yanry.driver.mobile.expectation.Toast;
 import com.yanry.driver.mobile.sample.reservation.server.Config;
+import com.yanry.driver.mobile.view.TextView;
+import com.yanry.driver.mobile.view.ValidateEditText;
+import com.yanry.driver.mobile.view.View;
+import com.yanry.driver.mobile.view.selector.ByDesc;
 
 /**
  * Created by rongyu.yan on 5/12/2017.

@@ -14,6 +14,7 @@ apply plugin: 'org.springframework.boot'
 
 dependencies {
     implementation project(':Core')
+    implementation project(':Mobile')
     implementation project(':SpringServer')
     compile('org.springframework.boot:spring-boot-starter-web')
 }

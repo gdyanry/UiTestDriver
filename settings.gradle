@@ -4,5 +4,4 @@ include 'SpringServer'
 include 'Sample'
 include 'AppiumClient'
 include 'Mobile'
-findProject(':Mobile')?.name = 'mobile'
 
