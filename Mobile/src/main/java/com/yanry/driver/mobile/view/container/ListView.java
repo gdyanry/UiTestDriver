@@ -87,11 +87,5 @@ public class ListView extends View implements ViewContainer {
         protected boolean doSelfSwitch(Integer to) {
             return false;
         }
-
-        @Override
-        protected boolean equalsWithSameClass(Property<Integer> property) {
-            ListViewSize size = (ListViewSize) property;
-            return ListView.this.equals(size.getListView());
-        }
     }
 }

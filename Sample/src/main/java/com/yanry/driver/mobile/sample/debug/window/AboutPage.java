@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.sample.debug.window;
 
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.WindowManager;
 import com.yanry.driver.mobile.action.Click;
@@ -15,7 +16,7 @@ public class AboutPage extends WindowManager.Window {
     }
 
     @Override
-    protected void addCases() {
-        close(new Click<>(new View(getManager(), this, new ByText("关闭"))), Timing.IMMEDIATELY);
+    protected void addCases(Graph graph, WindowManager manager) {
+        close(new Click<>(new View(graph, this, new ByText("关闭"))), Timing.IMMEDIATELY);
     }
 }

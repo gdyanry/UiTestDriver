@@ -81,12 +81,6 @@ public class ValidateEditText extends EditText {
         }
 
         @Override
-        protected boolean equalsWithSameClass(Property<Boolean> property) {
-            ValidityState validityState = (ValidityState) property;
-            return getEditText().equals(validityState.getEditText());
-        }
-
-        @Override
         public Boolean getCurrentValue() {
             return validContents.contains(getContent().getCurrentValue());
         }

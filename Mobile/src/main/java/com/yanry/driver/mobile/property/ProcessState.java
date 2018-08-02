@@ -23,9 +23,4 @@ public class ProcessState extends CacheProperty<Boolean> {
     protected boolean doSelfSwitch(Boolean to) {
         return getGraph().performAction(new SwitchStateAction(this, to));
     }
-
-    @Override
-    protected boolean equalsWithSameClass(Property<Boolean> property) {
-        return true;
-    }
 }

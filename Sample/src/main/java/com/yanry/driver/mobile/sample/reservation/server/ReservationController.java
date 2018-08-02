@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.sample.reservation.server;
 
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.mobile.WindowManager;
 import com.yanry.driver.mobile.property.CurrentUser;
 import com.yanry.driver.mobile.property.LoginState;
@@ -19,11 +20,8 @@ public class ReservationController extends CommunicatorController {
     }
 
     @Override
-    protected void populateGraph(WindowManager manager) {
-        CurrentUser currentUser = new CurrentUser(manager);
+    protected void populateGraph(Graph graph) {
+        CurrentUser currentUser = new CurrentUser(graph);
         currentUser.addUserPassword("xiaoming.wang", "aaa111").addUserPassword("daming.wang", "aaa111");
-        LoginState loginState = new LoginState(manager, currentUser);
-        NetworkConnectivity connectivity = new NetworkConnectivity(manager);
-        manager.registerProperties(currentUser, loginState, connectivity);
     }
 }

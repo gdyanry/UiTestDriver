@@ -46,11 +46,5 @@ public class CheckBox extends TextView {
             return getWindow().getVisibility().switchTo(WindowManager.Visibility.Foreground) ||
                     getGraph().performAction(new Click<>(CheckBox.this));
         }
-
-        @Override
-        protected boolean equalsWithSameClass(Property<Boolean> property) {
-            CheckState checkState = (CheckState) property;
-            return CheckBox.this.equals(checkState.getCheckBox());
-        }
     }
 }

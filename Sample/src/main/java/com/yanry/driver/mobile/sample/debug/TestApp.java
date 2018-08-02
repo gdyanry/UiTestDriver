@@ -2,16 +2,15 @@ package com.yanry.driver.mobile.sample.debug;
 
 import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.communicator.ConsoleCommunicator;
 import com.yanry.driver.core.model.property.CacheProperty;
 import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.MissedPath;
 import com.yanry.driver.mobile.WindowManager;
-import com.yanry.driver.mobile.communicator.ConsoleCommunicator;
 import com.yanry.driver.mobile.property.CurrentUser;
-import com.yanry.driver.mobile.property.LoginState;
-import com.yanry.driver.mobile.property.ProcessState;
 import com.yanry.driver.mobile.sample.debug.window.LoginPage;
+import com.yanry.driver.mobile.sample.debug.window.MainPage;
 import lib.common.util.ConsoleUtil;
 
 import java.util.List;
@@ -28,10 +27,9 @@ public class TestApp {
 
     public static void main(String[] args) {
         Graph graph = new Graph(true);
-        WindowManager manager = new WindowManager(graph);
         ConsoleCommunicator communicator = new ConsoleCommunicator();
-        manager.registerCommunicator(communicator);
-        manager.setWatcher(new GraphWatcher() {
+        graph.registerCommunicator(communicator);
+        graph.setWatcher(new GraphWatcher() {
             @Override
             public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> successTemp, Set<Path> failedPaths, Path rollingPath) {
                 ConsoleUtil.debug("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -60,8 +58,8 @@ public class TestApp {
                 }
             }
         });
-        defineGraph(manager);
-        List<Path> options = manager.prepare();
+        defineGraph(graph);
+        List<Path> options = graph.prepare();
         int i = 0;
         for (Path option : options) {
             System.out.println(String.format("%02d - %s", i++, Graph.getPresentation(option)));
@@ -73,7 +71,7 @@ public class TestApp {
         }
 
         // 打印测试记录
-        List<Object> records = manager.traverse(pathIndexes);
+        List<Object> records = graph.traverse(pathIndexes);
         int passCount = 0;
         int failCount = 0;
         int missCount = 0;
@@ -97,11 +95,37 @@ public class TestApp {
         System.out.printf("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);
     }
 
-    public static void defineGraph(Graph manager) {
-        CurrentUser currentUser = new CurrentUser(manager);
+    public static void defineGraph(Graph graph) {
+        WindowManager manager = new WindowManager(graph);
+        CurrentUser currentUser = new CurrentUser(graph);
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
-        manager.registerProperties(new NetworkState(manager), currentUser, new LoginState(manager, currentUser));
-        manager.addPath(new Path(new ProcessState(manager).getStateEvent(false, true), new ShowSplash(manager)));
-        new LoginPage(manager);
+        graph.addPath(new Path(manager.getProcessState().getStateEvent(false, true), new ShowSplash(graph)));
+        LoginPage loginPage = new LoginPage(manager) {
+            @Override
+            protected CurrentUser getCurrentUser() {
+                return null;
+            }
+
+            @Override
+            protected NetworkState getNetworkState() {
+                return null;
+            }
+
+            @Override
+            protected MainPage getMainPage() {
+                return mainPage;
+            }
+        };
+        MainPage mainPage = new MainPage(manager) {
+            @Override
+            protected CurrentUser getCurrentUser() {
+                return null;
+            }
+
+            @Override
+            protected LoginPage getLoginPage() {
+                return loginPage;
+            }
+        };
     }
 }

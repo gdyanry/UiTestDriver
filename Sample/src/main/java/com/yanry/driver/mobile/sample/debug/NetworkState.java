@@ -25,11 +25,6 @@ public class NetworkState extends CacheProperty<NetworkState.Network> {
         return getGraph().performAction(new SwitchStateAction<>(this, to));
     }
 
-    @Override
-    protected boolean equalsWithSameClass(Property<Network> property) {
-        return true;
-    }
-
     /**
      * Created by rongyu.yan on 3/2/2017.
      */

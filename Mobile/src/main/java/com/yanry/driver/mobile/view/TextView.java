@@ -44,11 +44,5 @@ public class TextView extends View {
         protected boolean doSelfSwitch(String to) {
             return false;
         }
-
-        @Override
-        protected boolean equalsWithSameClass(Property<String> property) {
-            TextValue textValue = (TextValue) property;
-            return TextView.this.equals(textValue.getTextView());
-        }
     }
 }

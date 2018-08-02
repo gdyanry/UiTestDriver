@@ -69,28 +69,9 @@ public abstract class Property<V> {
         this.communicateTimeFrame = communicateTimeFrame;
     }
 
-    @Override
-    public final boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj == null || !obj.getClass().equals(getClass())) {
-            return false;
-        }
-        Property<V> property = (Property<V>) obj;
-        return property.graph.equals(graph) && equalsWithSameClass(property);
-    }
-
-    @Override
-    public final int hashCode() {
-        return Objects.hash(graph, getClass());
-    }
-
     public abstract void handleExpectation(V expectedValue, boolean needCheck);
 
     public abstract V getCurrentValue();
 
     protected abstract boolean selfSwitch(V to);
-
-    protected abstract boolean equalsWithSameClass(Property<V> property);
 }

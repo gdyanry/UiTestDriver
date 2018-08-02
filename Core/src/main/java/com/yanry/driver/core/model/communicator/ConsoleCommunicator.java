@@ -1,5 +1,6 @@
 package com.yanry.driver.core.model.communicator;
 
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.expectation.Expectation;
 import com.yanry.driver.core.model.property.Property;
@@ -11,7 +12,7 @@ import lib.common.util.ConsoleUtil;
  */
 public class ConsoleCommunicator extends SerializedCommunicator {
     private String getInput(int repeat, String type, Object content, Runnable showHint) {
-        String prompt = String.format("----%s: %s", type, Util.getPresentation(content));
+        String prompt = String.format("----%s: %s", type, Graph.getPresentation(content));
         if (repeat == 0) {
             return ConsoleUtil.readLine(prompt);
         } else {
@@ -29,7 +30,7 @@ public class ConsoleCommunicator extends SerializedCommunicator {
         return getInput(repeat, "select", stateToCheck, () -> {
             for (int i = 0; i < stateToCheck.getOptions().length; i++) {
                 V v = stateToCheck.getOptions()[i];
-                System.out.printf("%s - %s%n", i, Util.getPresentation(v));
+                System.out.printf("%s - %s%n", i, Graph.getPresentation(v));
             }
         });
     }

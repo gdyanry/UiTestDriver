@@ -78,11 +78,5 @@ public class View {
         protected boolean doSelfSwitch(Boolean to) {
             return false;
         }
-
-        @Override
-        protected boolean equalsWithSameClass(Property<Boolean> property) {
-            ViewVisibility visibility = (ViewVisibility) property;
-            return visibility.getView().equals(getView());
-        }
     }
 }

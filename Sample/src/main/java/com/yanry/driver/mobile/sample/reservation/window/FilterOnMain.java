@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.mobile.WindowManager;
 
 /**
@@ -11,7 +12,7 @@ public class FilterOnMain extends WindowManager.Window {
     }
 
     @Override
-    protected void addCases() {
-        closeOnTouchOutside();
+    protected void addCases(Graph graph, WindowManager manager) {
+
     }
 }

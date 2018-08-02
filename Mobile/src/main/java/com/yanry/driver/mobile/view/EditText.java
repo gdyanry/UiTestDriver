@@ -48,11 +48,5 @@ public class EditText extends View {
             return getWindow().getVisibility().switchTo(WindowManager.Visibility.Foreground) ||
                     getGraph().performAction(new EnterText(EditText.this, to));
         }
-
-        @Override
-        protected boolean equalsWithSameClass(Property<String> property) {
-            Content content = (Content) property;
-            return EditText.this.equals(content.getEditText());
-        }
     }
 }

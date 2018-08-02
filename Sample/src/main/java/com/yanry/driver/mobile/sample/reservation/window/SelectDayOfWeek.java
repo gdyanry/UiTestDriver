@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
+import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.Path;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.WindowManager;
@@ -20,17 +21,17 @@ public class SelectDayOfWeek extends WindowManager.Window {
     }
 
     @Override
-    protected void addCases() {
+    protected void addCases(Graph graph, WindowManager manager) {
         closeOnTouchOutside();
-        close(new Click<>(new View(getManager(), this, new ByText("取消"))), Timing.IMMEDIATELY);
-        Click<View, Object> clickConfirm = new Click<>(new View(getManager(), this, new ByText("确定")));
+        close(new Click<>(new View(graph, this, new ByText("取消"))), Timing.IMMEDIATELY);
+        Click<View, Object> clickConfirm = new Click<>(new View(graph, this, new ByText("确定")));
         close(clickConfirm, Timing.IMMEDIATELY);
         CheckBox[] checkBoxes = new CheckBox[7];
-        PeriodicReserve fromWindow = new PeriodicReserve(getManager());
+        PeriodicReserve fromWindow = new PeriodicReserve(manager);
         PeriodicReserve.DayOfWeekValue dayOfWeekValue = fromWindow.getDayOfWeekValue();
         PeriodicReserve.DayOfWeekValidity dayOfWeekValidity = fromWindow.getDayOfWeekValidity();
         for (int i = 0; i < 7; i++) {
-            checkBoxes[i] = new CheckBox(getManager(), this, new ByIndex(i));
+            checkBoxes[i] = new CheckBox(graph, this, new ByIndex(i));
             int finalIndex = i;
             // init state
             createPath(getCreateEvent(), checkBoxes[i].getCheckState().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> dayOfWeekValue.getCurrentValue()[finalIndex]));

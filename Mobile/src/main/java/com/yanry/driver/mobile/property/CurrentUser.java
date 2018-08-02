@@ -44,9 +44,4 @@ public class CurrentUser extends CacheProperty<String> {
     protected boolean doSelfSwitch(String to) {
         return false;
     }
-
-    @Override
-    protected boolean equalsWithSameClass(Property<String> property) {
-        return true;
-    }
 }
