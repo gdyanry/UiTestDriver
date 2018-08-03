@@ -23,12 +23,14 @@ public abstract class MainPage extends WindowManager.Window {
     protected void addCases(Graph graph, WindowManager manager) {
         showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).addInitState(new LoginState(graph, getCurrentUser()), true);
         Click clickLogout = new Click(new View(graph, this, new ByText("退出登录")));
-        popWindow(getLoginPage(), clickLogout, Timing.IMMEDIATELY, true, true);
+        popWindow(getLoginPage(), clickLogout, Timing.IMMEDIATELY, true);
         createPath(clickLogout, getCurrentUser().getStaticExpectation(Timing.IMMEDIATELY, false, ""));
-        popWindow(new AboutPage(manager), new Click<>(new View(graph, this, new ByText("关于"))), Timing.IMMEDIATELY, false, true);
+        popWindow(getAboutPage(), new Click<>(new View(graph, this, new ByText("关于"))), Timing.IMMEDIATELY, false);
     }
 
     protected abstract CurrentUser getCurrentUser();
 
     protected abstract LoginPage getLoginPage();
+
+    protected abstract AboutPage getAboutPage();
 }

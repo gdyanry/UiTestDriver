@@ -101,27 +101,27 @@ public class PeriodicReserve extends WindowManager.Window {
         etTopic.addPositiveCases(String.format("test topic<%tR>", System.currentTimeMillis()));
 
         popWindow(new SelectRoom(manager), new Click<>(new View(getGraph(), this, new ByDesc(DESC_ITEM_ROOM))), Timing
-                .IMMEDIATELY, false, false);
+                .IMMEDIATELY, false);
         createPath(getCreateEvent(), roomValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, getGraph(), Config.TOAST_DURATION, "必须选择会议室"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, false);
 
         popWindow(new SelectStartTime(manager), new Click<>(new View(getGraph(), this, new ByDesc(DESC_ITEM_START_TIME))), Timing
-                .IMMEDIATELY, false, false);
+                .IMMEDIATELY, false);
         createPath(getCreateEvent(), startTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, getGraph(), Config.TOAST_DURATION, "必须选择会议开始时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, false);
 
         popWindow(new SelectEndTime(manager), new Click<>(new View(getGraph(), this, new ByDesc(DESC_ITEM_END_TIME))),
-                Timing.IMMEDIATELY, false, false);
+                Timing.IMMEDIATELY, false);
         createPath(getCreateEvent(), endTimeValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(clickSubmit, new Toast(Timing.IMMEDIATELY, getGraph(), Config.TOAST_DURATION, "必须选择会议结束时间"))
                 .addInitState(etTopic.getValidity(), true).addInitState(roomValidity, true).addInitState
                 (startTimeValidity, true).addInitState(endTimeValidity, false);
 
         popWindow(new SelectDayOfWeek(manager), new Click<>(new View(getGraph(), this, new ByDesc(DESC_ITEM_DAY_OF_WEEK))),
-                Timing.IMMEDIATELY, false, false);
+                Timing.IMMEDIATELY, false);
         createPath(getCreateEvent(), dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         createPath(getCreateEvent(), dayOfWeekValue.getStaticExpectation(Timing.IMMEDIATELY, false, new boolean[]{false, false,
                 false, false, false, false, false}));

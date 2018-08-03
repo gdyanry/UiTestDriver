@@ -29,13 +29,13 @@ public class Main extends WindowManager.Window {
         showOnStartUp(Timing.IMMEDIATELY);
         SelectDateOnMain selectDateOnMain = new SelectDateOnMain(getManager());
         popWindow(selectDateOnMain, new Click<>(new View(graph, this, new ByDesc("选择日期图标"))), Timing
-                .IMMEDIATELY, false, true);
-        popWindow(selectDateOnMain, new Click<>(tvDate), Timing.IMMEDIATELY, false, true);
+                .IMMEDIATELY, false);
+        popWindow(selectDateOnMain, new Click<>(tvDate), Timing.IMMEDIATELY, false);
         popWindow(selectDateOnMain, new Click(new View(graph, this, new ByText("筛选"))), Timing.IMMEDIATELY,
-                false, false);
+                false);
         popWindow(new SpecificationOnMain(getManager()), new Click(new View(graph, this, new ByDesc("问号图标"))), Timing
-                .IMMEDIATELY, false, false);
+                .IMMEDIATELY, false);
         popWindow(new MenuOnMain(getManager()), new Click(new View(graph, this, new ByDesc("菜单图标"))), Timing.IMMEDIATELY,
-                false, false);
+                false);
     }
 }

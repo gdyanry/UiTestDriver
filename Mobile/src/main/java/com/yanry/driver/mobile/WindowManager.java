@@ -50,6 +50,13 @@ public class WindowManager {
         return path;
     }
 
+    /**
+     * 所有window实例化完成后必须调用此方法添加路径到状态空间中。
+     */
+    public void setup() {
+        windowInstances.forEach(window -> window.addCases(graph, this));
+    }
+
     public CurrentWindow getCurrentWindow() {
         return currentWindow;
     }
@@ -85,13 +92,10 @@ public class WindowManager {
             closeEvent = new StateEvent<>(visibility, WindowManager.Visibility.Foreground, WindowManager.Visibility.NotCreated);
             resumeEvent = new StateEvent<>(visibility, WindowManager.Visibility.Background, WindowManager.Visibility.Foreground);
             pauseEvent = new StateEvent<>(visibility, WindowManager.Visibility.Foreground, WindowManager.Visibility.Background);
-            if (!windowInstances.contains(this)) {
-                windowInstances.add(this);
-                ReflectionUtil.initStaticStringFields(getClass());
-                addCases(graph, WindowManager.this);
-                if (!getClass().equals(NoWindow.class)) {
-                    newPath(processState.getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.NotCreated));
-                }
+            windowInstances.add(this);
+            ReflectionUtil.initStaticStringFields(getClass());
+            if (!getClass().equals(NoWindow.class)) {
+                newPath(processState.getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.NotCreated));
             }
         }
 
@@ -106,13 +110,11 @@ public class WindowManager {
             return path;
         }
 
-        public Path popWindow(Window newWindow, Event inputEvent, Timing timing, boolean closeCurrent, boolean singleInstance) {
+        public Path popWindow(Window newWindow, Event inputEvent, Timing timing, boolean closeCurrent) {
             return createPath(inputEvent, currentWindow.getStaticExpectation(timing, true, newWindow).addFollowingExpectation(new ActionExpectation() {
                 @Override
                 protected void run() {
-                    if (singleInstance) {
-                        handleSingleInstance(newWindow.previousWindow.getCurrentValue(), newWindow);
-                    }
+                    handleSingleInstance(newWindow.previousWindow.getCurrentValue(), newWindow);
                 }
 
                 private void handleSingleInstance(Window queriedWindow, Window kickWindow) {

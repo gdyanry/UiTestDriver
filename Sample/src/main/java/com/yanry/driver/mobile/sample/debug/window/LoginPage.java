@@ -70,7 +70,7 @@ public abstract class LoginPage extends WindowManager.Window {
         loginPathHandler.handleCurrentUserOnSuccessLogin(withinTimeout, e -> createPath(clickLogin, e)
                 .addInitState(getNetworkState(), NetworkState.Network.Normal));
         // pop main page
-        loginPathHandler.initStateToSuccessLogin(() -> popWindow(getMainPage(), clickLogin, withinTimeout, true, true)
+        loginPathHandler.initStateToSuccessLogin(() -> popWindow(getMainPage(), clickLogin, withinTimeout, true)
                 .addInitState(getNetworkState(), NetworkState.Network.Normal));
         // business error
         loginPathHandler.initStateToInvalidUser(() -> createPath(clickLogin, new Toast(withinTimeout, graph, TestApp.TOAST_DURATION, "用户不存在"))

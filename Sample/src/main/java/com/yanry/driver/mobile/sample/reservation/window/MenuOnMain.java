@@ -23,12 +23,12 @@ public class MenuOnMain extends WindowManager.Window {
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
         TextView tvLogin = new TextView(graph, this, new ByDesc("登录菜单项"));
-        popWindow(new PeriodicReserve(manager), new Click(new View(graph, this, new ByText("周期预定"))), Timing.IMMEDIATELY, true, false);
-        popWindow(new MyReservation(manager), new Click(new View(graph, this, new ByText("我的预订"))), Timing.IMMEDIATELY, true, false);
+        popWindow(new PeriodicReserve(manager), new Click(new View(graph, this, new ByText("周期预定"))), Timing.IMMEDIATELY, true);
+        popWindow(new MyReservation(manager), new Click(new View(graph, this, new ByText("我的预订"))), Timing.IMMEDIATELY, true);
         LoginState loginState = new LoginState(graph, new CurrentUser(graph));
         createPath(getCreateEvent(), tvLogin.getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> loginState.getCurrentValue() ? "登录" : "退出登录"));
         close(new Click(tvLogin), Timing.IMMEDIATELY).put(loginState, true);
-        popWindow(new Login(getManager()), new Click(tvLogin), Timing.IMMEDIATELY, false, false).put(loginState, false);
+        popWindow(new Login(getManager()), new Click(tvLogin), Timing.IMMEDIATELY, false).put(loginState, false);
         closeOnTouchOutside();
     }
 }

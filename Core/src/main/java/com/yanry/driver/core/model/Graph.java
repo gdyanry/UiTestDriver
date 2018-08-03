@@ -16,7 +16,6 @@ import com.yanry.driver.core.model.runtime.*;
 import lib.common.interfaces.Loggable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
-import lib.common.util.ConsoleUtil;
 import lib.common.util.StringUtil;
 
 import java.lang.reflect.Array;
@@ -31,8 +30,7 @@ import java.util.stream.Collectors;
  * <p>
  * Jan 5, 2017
  */
-public class Graph implements Communicator, Loggable {
-    private boolean debug;
+public class Graph {
     private List<Path> allPaths;
     private Set<Path> unprocessedPaths;
     private Set<Path> failedPaths;
@@ -45,17 +43,76 @@ public class Graph implements Communicator, Loggable {
     private long actionTimeFrame;
     private Set<Path> successTemp;
     private Set<Path> rollingPath;
+    private Loggable loggable;
 
-    public Graph(boolean debug) {
-        this.debug = debug;
+    public Graph(Loggable loggable, GraphWatcher watcher) {
+        this.loggable = loggable;
+        this.watcher = watcher;
+        this.communicators = new LinkedList<>();
         allPaths = new LinkedList<>();
         records = new LinkedList<>();
         failedPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
-        communicators = new ArrayList<>();
         cacheProperties = new HashMap<>();
         successTemp = new HashSet<>();
         rollingPath = new HashSet<>();
+    }
+
+    public static Object getPresentation(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Enum) {
+            return ((Enum) obj).name();
+        }
+        if (obj.getClass().isArray()) {
+            JSONArray jsonArray = new JSONArray();
+            int len = Array.getLength(obj);
+            for (int i = 0; i < len; i++) {
+                jsonArray.put(getPresentation(Array.get(obj, i)));
+            }
+            return jsonArray;
+        } else if (obj instanceof List) {
+            JSONArray jsonArray = new JSONArray();
+            List list = (List) obj;
+            for (Object item : list) {
+                jsonArray.put(getPresentation(item));
+            }
+            return jsonArray;
+        }
+        Class<?> clazz = obj.getClass();
+        if (clazz.isAnnotationPresent(Presentable.class)) {
+            JSONObject jsonObject = new JSONObject().put(".", StringUtil.getClassName(obj));
+            for (Method method : clazz.getMethods()) {
+                if (method.isAnnotationPresent(Presentable.class)) {
+                    String key = StringUtil.setFirstLetterCase(method.getName().replaceFirst("^get", ""), false);
+                    try {
+                        Object value = method.invoke(obj);
+                        if (value != null) {
+                            jsonObject.put(key, getPresentation(value));
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if (obj instanceof Map) {
+                JSONArray jsonArray = new JSONArray();
+                Map map = (Map) obj;
+                for (Object key : map.keySet()) {
+                    jsonArray.put(new JSONArray().put(getPresentation(key)).put(getPresentation(map.get(key))));
+                }
+                jsonObject.put("{}", jsonArray);
+            }
+            return jsonObject;
+        }
+        return obj;
+    }
+
+    public void registerCommunicator(Communicator communicator) {
+        communicators.add(communicator);
     }
 
     public void addPath(Path path) {
@@ -72,16 +129,6 @@ public class Graph implements Communicator, Loggable {
 
     public boolean isValueFresh(Property property) {
         return actionTimeFrame > 0 && property.getCommunicateTimeFrame() == actionTimeFrame;
-    }
-
-    public void setWatcher(GraphWatcher watcher) {
-        this.watcher = watcher;
-    }
-
-    public void registerCommunicator(Communicator communicator) {
-        if (!communicators.contains(communicator)) {
-            communicators.add(communicator);
-        }
     }
 
     /**
@@ -318,60 +365,6 @@ public class Graph implements Communicator, Loggable {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStatePredicate));
     }
 
-    public static Object getPresentation(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-        if (obj instanceof Enum) {
-            return ((Enum) obj).name();
-        }
-        if (obj.getClass().isArray()) {
-            JSONArray jsonArray = new JSONArray();
-            int len = Array.getLength(obj);
-            for (int i = 0; i < len; i++) {
-                jsonArray.put(getPresentation(Array.get(obj, i)));
-            }
-            return jsonArray;
-        } else if (obj instanceof List) {
-            JSONArray jsonArray = new JSONArray();
-            List list = (List) obj;
-            for (Object item : list) {
-                jsonArray.put(getPresentation(item));
-            }
-            return jsonArray;
-        }
-        Class<?> clazz = obj.getClass();
-        if (clazz.isAnnotationPresent(Presentable.class)) {
-            JSONObject jsonObject = new JSONObject().put(".", StringUtil.getClassName(obj));
-            for (Method method : clazz.getMethods()) {
-                if (method.isAnnotationPresent(Presentable.class)) {
-                    String key = StringUtil.setFirstLetterCase(method.getName().replaceFirst("^get", ""), false);
-                    try {
-                        Object value = method.invoke(obj);
-                        if (value != null) {
-                            jsonObject.put(key, getPresentation(value));
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if (obj instanceof Map) {
-                JSONArray jsonArray = new JSONArray();
-                Map map = (Map) obj;
-                for (Object key : map.keySet()) {
-                    jsonArray.put(new JSONArray().put(getPresentation(key)).put(getPresentation(map.get(key))));
-                }
-                jsonObject.put("{}", jsonArray);
-            }
-            return jsonObject;
-        }
-        return obj;
-    }
-
-    @Override
     public <V> V checkState(StateToCheck<V> stateToCheck) {
         CacheProperty<V> property = stateToCheck.getProperty();
         if (isValueFresh(property)) {
@@ -387,7 +380,6 @@ public class Graph implements Communicator, Loggable {
         throw new NullPointerException(String.format("unable to check state: %s", getPresentation(stateToCheck)));
     }
 
-    @Override
     public String fetchValue(Property<String> property) {
         if (isValueFresh(property)) {
             return property.getCurrentValue();
@@ -402,7 +394,6 @@ public class Graph implements Communicator, Loggable {
         throw new NullPointerException(String.format("unable to fetch value: %s", getPresentation(property)));
     }
 
-    @Override
     public boolean performAction(ActionEvent actionEvent) {
         records.add(actionEvent);
         for (Communicator communicator : communicators) {
@@ -414,7 +405,6 @@ public class Graph implements Communicator, Loggable {
         return false;
     }
 
-    @Override
     public Boolean verifyExpectation(Expectation expectation) {
         for (Communicator communicator : communicators) {
             Boolean result = communicator.verifyExpectation(expectation);
@@ -425,17 +415,15 @@ public class Graph implements Communicator, Loggable {
         return null;
     }
 
-    @Override
-    public void debug(String s, Object... objects) {
-        if (debug) {
-            ConsoleUtil.debug(1, s, objects);
+    private void debug(String s, Object... objects) {
+        if (loggable != null) {
+            loggable.debug(s, objects);
         }
     }
 
-    @Override
-    public void error(String s, Object... objects) {
-        if (debug) {
-            ConsoleUtil.error(1, s, objects);
+    private void error(String s, Object... objects) {
+        if (loggable != null) {
+            loggable.error(s, objects);
         }
     }
 }
