@@ -5,29 +5,28 @@ import com.yanry.driver.core.model.Path;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.expectation.Expectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.property.CacheProperty;
-import com.yanry.driver.core.model.property.Property;
-import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.mobile.property.ListViewSize;
 import com.yanry.driver.mobile.view.View;
+import com.yanry.driver.mobile.view.ViewContainer;
 import com.yanry.driver.mobile.view.selector.ByIndex;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 import lib.common.model.Singletons;
 
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
  * Created by rongyu.yan on 4/25/2017.
  */
-public class ListView extends View implements ViewContainer {
+public class ListView extends View implements ViewContainer{
     private ListViewSize size;
 
     public ListView(Graph graph, ViewContainer parent, ViewSelector selector) {
         super(graph, parent, selector);
-        size = new ListViewSize(graph);
+        size = new ListViewSize(this);
         refresh(getWindow().getCreateEvent());
     }
 
@@ -39,14 +38,18 @@ public class ListView extends View implements ViewContainer {
         verifySizePath.apply(size.getStaticExpectation(Timing.IMMEDIATELY, true, expectedSize));
     }
 
-    public Supplier<ListViewItem> getRandomItem() {
+    public Supplier<ListViewItem> getItemBySize(IntFunction<Integer> index) {
         return () -> {
             int iSize = size.getCurrentValue();
             if (iSize > 0) {
-                return new ListViewItem(getGraph(), this, new ByIndex(Singletons.get(Random.class).nextInt(iSize)));
+                return new ListViewItem(getGraph(), this, new ByIndex(index.apply(iSize)));
             }
             return null;
         };
+    }
+
+    public Supplier<ListViewItem> getRandomItem() {
+        return getItemBySize(size -> Singletons.get(Random.class).nextInt(size));
     }
 
     public Supplier<ListViewItem> getItem(Predicate<ListViewItem> predicate) {
@@ -60,32 +63,5 @@ public class ListView extends View implements ViewContainer {
             }
             return null;
         };
-    }
-
-    @Override
-    public void present(Path path) {
-        getParent().present(path);
-    }
-
-    public class ListViewSize extends CacheProperty<Integer> {
-
-        public ListViewSize(Graph graph) {
-            super(graph);
-        }
-
-        @Presentable
-        public ListView getListView() {
-            return ListView.this;
-        }
-
-        @Override
-        protected Integer checkValue() {
-            return getGraph().checkState(new StateToCheck<>(this));
-        }
-
-        @Override
-        protected boolean doSelfSwitch(Integer to) {
-            return false;
-        }
     }
 }

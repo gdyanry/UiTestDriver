@@ -22,14 +22,12 @@ import java.util.Random;
 public class Path extends HashMap<Property, Object> {
     private Event event;
     private Expectation expectation;
-    private int hashCode;
     private long timeFrame;
     private int unsatisfiedDegree;
 
     public Path(Event event, Expectation expectation) {
         this.event = event;
         this.expectation = expectation;
-        hashCode = Singletons.get(Random.class).nextInt();
     }
 
     public <V> Path addInitState(Property<V> property, V value) {
@@ -67,15 +65,5 @@ public class Path extends HashMap<Property, Object> {
     @Presentable
     public Expectation getExpectation() {
         return expectation;
-    }
-
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return this == o;
     }
 }

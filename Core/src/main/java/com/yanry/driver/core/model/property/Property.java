@@ -34,6 +34,11 @@ public abstract class Property<V> {
         return graph;
     }
 
+    /**
+     *
+     * @param to
+     * @return 是否触发ActionEvent
+     */
     public final boolean switchTo(V to) {
         return !to.equals(getCurrentValue())
                 // 先尝试自转化再搜索是否存在可用路径
@@ -73,5 +78,10 @@ public abstract class Property<V> {
 
     public abstract V getCurrentValue();
 
+    /**
+     *
+     * @param to
+     * @return 是否触发ActionEvent
+     */
     protected abstract boolean selfSwitch(V to);
 }

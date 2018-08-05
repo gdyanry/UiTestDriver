@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.view.container;
 
 import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.core.model.Path;
 import com.yanry.driver.mobile.view.View;
+import com.yanry.driver.mobile.view.ViewContainer;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 
 /**
@@ -12,10 +12,5 @@ public class ListViewItem extends View implements ViewContainer {
 
     public ListViewItem(Graph graph, ViewContainer parent, ViewSelector selector) {
         super(graph, parent, selector);
-    }
-
-    @Override
-    public void present(Path path) {
-        getParent().present(path);
     }
 }

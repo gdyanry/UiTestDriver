@@ -28,7 +28,7 @@ public class SelectDateOnMain extends WindowManager.Window {
 //        });
         // 校验日期标签是否正确显示
         Main main = new Main(manager);
-        close(clickItem, Timing.IMMEDIATELY, main.getTvDate().getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> {
+        close(clickItem, Timing.IMMEDIATELY, main.getTxtDate().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> {
             String[] result = clickItem.getPreActionResult();
             return String.format("%s-%s-%s", result[2], result[1], result[0]);
         }));

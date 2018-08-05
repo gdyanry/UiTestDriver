@@ -5,11 +5,9 @@ package com.yanry.driver.mobile.view;
 
 import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.property.CacheProperty;
-import com.yanry.driver.core.model.property.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.runtime.StateToCheck;
 import com.yanry.driver.mobile.WindowManager;
-import com.yanry.driver.mobile.view.container.ViewContainer;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 
 /**
@@ -18,17 +16,17 @@ import com.yanry.driver.mobile.view.selector.ViewSelector;
  * Jan 10, 2017
  */
 @Presentable
-public class View {
+public class View implements Visible {
     private ViewContainer parent;
     private ViewSelector selector;
-    private ViewVisibility visibility;
+    private IndependentVisibility independentVisibility;
     private Graph graph;
 
     public View(Graph graph, ViewContainer parent, ViewSelector selector) {
         this.graph = graph;
         this.parent = parent;
         this.selector = selector;
-        visibility = new ViewVisibility(graph);
+        independentVisibility = new IndependentVisibility(graph);
     }
 
     public WindowManager.Window getWindow() {
@@ -40,8 +38,8 @@ public class View {
         return null;
     }
 
-    public ViewVisibility getVisibility() {
-        return visibility;
+    public IndependentVisibility getIndependentVisibility() {
+        return independentVisibility;
     }
 
     public Graph getGraph() {
@@ -58,9 +56,19 @@ public class View {
         return selector;
     }
 
-    public class ViewVisibility extends CacheProperty<Boolean> {
+    @Override
+    public final boolean isVisible() {
+        return parent.isVisible() && independentVisibility.getCurrentValue();
+    }
 
-        public ViewVisibility(Graph graph) {
+    @Override
+    public final boolean switchToVisible() {
+        return parent.switchToVisible() || independentVisibility.switchTo(true);
+    }
+
+    public class IndependentVisibility extends CacheProperty<Boolean> {
+
+        public IndependentVisibility(Graph graph) {
             super(graph);
         }
 
@@ -71,7 +79,7 @@ public class View {
 
         @Override
         protected Boolean checkValue() {
-            return getGraph().checkState(new StateToCheck<>(this, false, true));
+            return parent.isVisible() && getGraph().checkState(new StateToCheck<>(this, false, true));
         }
 
         @Override

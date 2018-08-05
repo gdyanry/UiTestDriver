@@ -5,8 +5,8 @@ import com.yanry.driver.core.model.Path;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.WindowManager;
 import com.yanry.driver.mobile.action.Click;
-import com.yanry.driver.mobile.view.CheckBox;
-import com.yanry.driver.mobile.view.TextView;
+import com.yanry.driver.mobile.property.CheckState;
+import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.selector.ByIndex;
 import com.yanry.driver.mobile.view.selector.ByText;
@@ -26,33 +26,34 @@ public class SelectDayOfWeek extends WindowManager.Window {
         close(new Click<>(new View(graph, this, new ByText("取消"))), Timing.IMMEDIATELY);
         Click<View, Object> clickConfirm = new Click<>(new View(graph, this, new ByText("确定")));
         close(clickConfirm, Timing.IMMEDIATELY);
-        CheckBox[] checkBoxes = new CheckBox[7];
+        CheckState[] checkBoxes = new CheckState[7];
         PeriodicReserve fromWindow = new PeriodicReserve(manager);
         PeriodicReserve.DayOfWeekValue dayOfWeekValue = fromWindow.getDayOfWeekValue();
         PeriodicReserve.DayOfWeekValidity dayOfWeekValidity = fromWindow.getDayOfWeekValidity();
         for (int i = 0; i < 7; i++) {
-            checkBoxes[i] = new CheckBox(graph, this, new ByIndex(i));
+            checkBoxes[i] = new CheckState(new View(graph, this, new ByIndex(i)));
             int finalIndex = i;
             // init state
-            createPath(getCreateEvent(), checkBoxes[i].getCheckState().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> dayOfWeekValue.getCurrentValue()[finalIndex]));
+            createPath(getCreateEvent(), checkBoxes[i].getDynamicExpectation(Timing.IMMEDIATELY, true, () -> dayOfWeekValue.getCurrentValue()[finalIndex]));
             // day of week validity on true
-            createPath(clickConfirm, dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addInitState
-                    (checkBoxes[i].getCheckState(), true).addInitState(dayOfWeekValidity, false);
+            createPath(clickConfirm, dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, false, true))
+                    .addInitState(checkBoxes[i], true)
+                    .addInitState(dayOfWeekValidity, false);
         }
         // day of week validity on false
         Path path = createPath(clickConfirm, dayOfWeekValidity.getStaticExpectation(Timing.IMMEDIATELY, true, false));
-        for (CheckBox checkBox : checkBoxes) {
-            path.addInitState(checkBox.getCheckState(), false);
+        for (CheckState checkBox : checkBoxes) {
+            path.addInitState(checkBox, false);
         }
         // day of week value
-        TextView tvDayOfWeek = fromWindow.getTvDayOfWeek();
+        Text tvDayOfWeek = fromWindow.getTvDayOfWeek();
         createPath(clickConfirm, dayOfWeekValue.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> {
             for (int i = 0; i < checkBoxes.length; i++) {
-                CheckBox checkBox = checkBoxes[i];
-                dayOfWeekValue.getCurrentValue()[i] = checkBox.getCheckState().getCurrentValue();
+                CheckState checkBox = checkBoxes[i];
+                dayOfWeekValue.getCurrentValue()[i] = checkBox.getCurrentValue();
             }
             return dayOfWeekValue.getCurrentValue();
-        }).addFollowingExpectation(tvDayOfWeek.getText().getDynamicExpectation(Timing.IMMEDIATELY, true, () -> {
+        }).addFollowingExpectation(tvDayOfWeek.getDynamicExpectation(Timing.IMMEDIATELY, true, () -> {
             StringBuilder stringBuilder = new StringBuilder();
             boolean[] bArr = dayOfWeekValue.getCurrentValue();
             if (bArr[0]) {

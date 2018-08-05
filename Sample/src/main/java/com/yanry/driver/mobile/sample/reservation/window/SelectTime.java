@@ -4,10 +4,12 @@ import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.WindowManager;
 import com.yanry.driver.mobile.action.Click;
+import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.sample.reservation.window.PeriodicReserve.Validity;
-import com.yanry.driver.mobile.view.TextView;
+import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.container.ListView;
 import com.yanry.driver.mobile.view.container.ListViewItem;
+import com.yanry.driver.mobile.view.selector.ById;
 
 /**
  * Created by rongyu.yan on 5/19/2017.
@@ -17,7 +19,7 @@ public abstract class SelectTime extends WindowManager.Window {
         manager.super();
     }
 
-    protected abstract TextView getTextView(PeriodicReserve reserve);
+    protected abstract Text getTextView(PeriodicReserve reserve);
 
     protected abstract Validity getValidity(PeriodicReserve reserve);
 
@@ -28,9 +30,9 @@ public abstract class SelectTime extends WindowManager.Window {
         closeOnTouchOutside();
         ListView listView = new ListView(getGraph(), this, null);
         Click<ListViewItem, String> click = new Click<>(listView.getRandomItem());
-        click.setPreAction(item -> new TextView(getGraph(), item, null).getText().getCurrentValue());
+        click.setPreAction(item -> new Text(new View(graph, item, new ById("tv"))).getCurrentValue());
         PeriodicReserve periodicReserve = new PeriodicReserve(manager);
-        close(click, Timing.IMMEDIATELY, getTextView(periodicReserve).getText().getStaticExpectation(Timing.IMMEDIATELY, true, getExpectedText(click.getPreActionResult()))
+        close(click, Timing.IMMEDIATELY, getTextView(periodicReserve).getStaticExpectation(Timing.IMMEDIATELY, true, getExpectedText(click.getPreActionResult()))
                 .addFollowingExpectation(getValidity(periodicReserve).getStaticExpectation(Timing.IMMEDIATELY, false, true)));
     }
 }

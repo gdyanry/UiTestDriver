@@ -15,6 +15,11 @@ public abstract class CacheProperty<V> extends Property<V> {
 
     protected abstract V checkValue();
 
+    /**
+     *
+     * @param to
+     * @return 是否触发ActionEvent
+     */
     protected abstract boolean doSelfSwitch(V to);
 
     @Override

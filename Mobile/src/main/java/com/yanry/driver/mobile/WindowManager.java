@@ -14,7 +14,7 @@ import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.runtime.StateToCheck;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.property.ProcessState;
-import com.yanry.driver.mobile.view.container.ViewContainer;
+import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
 import java.util.LinkedList;
@@ -29,7 +29,7 @@ public class WindowManager {
     private List<Window> windowInstances;
     private CurrentWindow currentWindow;
     private ProcessState processState;
-    public final NoWindow noWindow;
+    private final NoWindow noWindow;
 
     public WindowManager(Graph graph) {
         this.graph = graph;
@@ -55,10 +55,6 @@ public class WindowManager {
      */
     public void setup() {
         windowInstances.forEach(window -> window.addCases(graph, this));
-    }
-
-    public CurrentWindow getCurrentWindow() {
-        return currentWindow;
     }
 
     public ProcessState getProcessState() {
@@ -95,7 +91,10 @@ public class WindowManager {
             windowInstances.add(this);
             ReflectionUtil.initStaticStringFields(getClass());
             if (!getClass().equals(NoWindow.class)) {
-                newPath(processState.getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.NotCreated));
+                newPath(processState.getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.NotCreated))
+                        .addInitState(visibility, Visibility.Background);
+                newPath(processState.getStateEvent(true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, WindowManager.Visibility.NotCreated))
+                        .addInitState(visibility, Visibility.Foreground);
             }
         }
 
@@ -187,8 +186,13 @@ public class WindowManager {
         }
 
         @Override
-        public void present(Path path) {
-            path.addInitState(visibility, WindowManager.Visibility.Foreground);
+        public boolean isVisible() {
+            return visibility.getCurrentValue() == Visibility.Foreground;
+        }
+
+        @Override
+        public boolean switchToVisible() {
+            return currentWindow.switchTo(this);
         }
 
         @Override

@@ -1,9 +1,8 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.core.model.Graph;
 import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.sample.reservation.window.PeriodicReserve.Validity;
-import com.yanry.driver.mobile.view.TextView;
 
 /**
  * Created by rongyu.yan on 5/19/2017.
@@ -14,8 +13,8 @@ public class SelectStartTime extends SelectTime {
     }
 
     @Override
-    protected TextView getTextView(PeriodicReserve reserve) {
-        return reserve.getTvStartTime();
+    protected Text getTextView(PeriodicReserve reserve) {
+        return reserve.getTxtStartTime();
     }
 
     @Override

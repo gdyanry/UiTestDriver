@@ -7,11 +7,9 @@ import com.yanry.driver.mobile.WindowManager;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.RequestDialog;
 import com.yanry.driver.mobile.expectation.Toast;
-import com.yanry.driver.mobile.property.CurrentUser;
-import com.yanry.driver.mobile.property.LoginState;
+import com.yanry.driver.mobile.property.*;
 import com.yanry.driver.mobile.sample.debug.NetworkState;
 import com.yanry.driver.mobile.sample.debug.TestApp;
-import com.yanry.driver.mobile.view.ValidateEditText;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.selector.ByDesc;
 import com.yanry.driver.mobile.view.selector.ByText;
@@ -30,42 +28,46 @@ public abstract class LoginPage extends WindowManager.Window {
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
         showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).put(new LoginState(graph, getCurrentUser()), false);
-        ValidateEditText etUser = new ValidateEditText(graph, this, new ByDesc(DESC_USER));
-        ValidateEditText etPwd = new ValidateEditText(graph, this, new ByDesc(DESC_PWD));
+        View etUser = new View(graph, this, new ByDesc(DESC_USER));
+        Text txtUser = new EditableText(etUser);
+        TextValidity userValidity = new TextValidity(etUser, txtUser);
+        View etPwd = new View(graph, this, new ByDesc(DESC_PWD));
+        Text txtPwd = new EditableText(etPwd);
+        TextValidity pwdValidity = new TextValidity(etPwd, txtPwd);
         // 页面打开时输入框内容为空
-        createPath(getCreateEvent(), etUser.getContent().getStaticExpectation(Timing.IMMEDIATELY, true, ""));
-        createPath(getCreateEvent(), etPwd.getContent().getStaticExpectation(Timing.IMMEDIATELY, true, ""));
+        createPath(getCreateEvent(), txtUser.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
+        createPath(getCreateEvent(), txtPwd.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
 
         Click clickLogin = new Click(new View(graph, this, new ByText("登录")));
         // 添加输入框用例
-        etUser.setEmptyValidationCase(clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "用户名不能为空"));
-        etUser.addNegativeCase("A lan", clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "用户名不能包含空格"));
-        etUser.addPositiveCases("daming.wang");
-        etPwd.setEmptyValidationCase(clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "密码不能为空"), etUser.getValidity());
-        etPwd.addNegativeCase("124", clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "密码长度不能小于6"), etUser.getValidity());
-        etPwd.addPositiveCases("123456");
+        userValidity.addNegativeCase("", clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "用户名不能为空"));
+        userValidity.addNegativeCase("A lan", clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "用户名不能包含空格"));
+        userValidity.addPositiveCases("daming.wang");
+        pwdValidity.addNegativeCase("", clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "密码不能为空"), userValidity);
+        pwdValidity.addNegativeCase("124", clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "密码长度不能小于6"), userValidity);
+        pwdValidity.addPositiveCases("123456");
         // 无网络连接
         createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "无网络连接"))
                 .addInitState(getNetworkState(), NetworkState.Network.Disconnected)
-                .addInitState(etUser.getValidity(), true)
-                .addInitState(etPwd.getValidity(), true);
+                .addInitState(userValidity, true)
+                .addInitState(pwdValidity, true);
         // 请求对话框
         createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, TestApp.HTTP_TIMEOUT))
                 .addInitState(getNetworkState(), NetworkState.Network.Abnormal)
-                .addInitState(etUser.getValidity(), true)
-                .addInitState(etPwd.getValidity(), true);
+                .addInitState(userValidity, true)
+                .addInitState(pwdValidity, true);
         createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, TestApp.HTTP_TIMEOUT))
                 .addInitState(getNetworkState(), NetworkState.Network.Normal)
-                .addInitState(etUser.getValidity(), true)
-                .addInitState(etPwd.getValidity(), true);
+                .addInitState(userValidity, true)
+                .addInitState(pwdValidity, true);
         // 连接超时
         Timing withinTimeout = new Timing(true, TestApp.HTTP_TIMEOUT);
         createPath(clickLogin, new Toast(withinTimeout, graph, TestApp.TOAST_DURATION, "网络错误"))
                 .addInitState(getNetworkState(), NetworkState.Network.Abnormal)
-                .addInitState(etUser.getValidity(), true)
-                .addInitState(etPwd.getValidity(), true);
+                .addInitState(userValidity, true)
+                .addInitState(pwdValidity, true);
         // 请求成功
-        LoginPathHandler loginPathHandler = new LoginPathHandler(getCurrentUser(), etUser, etPwd);
+        LoginPathHandler loginPathHandler = new LoginPathHandler(getCurrentUser(), userValidity, pwdValidity);
         // login state
         loginPathHandler.handleCurrentUserOnSuccessLogin(withinTimeout, e -> createPath(clickLogin, e)
                 .addInitState(getNetworkState(), NetworkState.Network.Normal));

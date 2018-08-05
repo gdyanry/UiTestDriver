@@ -40,9 +40,9 @@ public abstract class Expectation {
         return degree;
     }
 
-    public void preVerify() {
+    public void beforeVerify() {
         onVerify();
-        followingExpectations.forEach(e -> e.preVerify());
+        followingExpectations.forEach(e -> e.beforeVerify());
     }
 
     public final boolean verify() {

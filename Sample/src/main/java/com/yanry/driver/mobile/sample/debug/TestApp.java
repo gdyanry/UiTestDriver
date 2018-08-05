@@ -31,7 +31,7 @@ public class TestApp {
         List<Path> options = graph.prepare();
         int i = 0;
         for (Path option : options) {
-            System.out.println(String.format("%02d - %s", i++, Graph.getPresentation(option)));
+            System.out.println(String.format("%05d - %s", i++, Graph.getPresentation(option)));
         }
         String input = ConsoleUtil.readLine("请选择需要测试的path：").trim();
         int[] pathIndexes = null;

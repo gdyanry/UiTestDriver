@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ public class Graph {
     private Set<Path> successTemp;
     private Set<Path> rollingPath;
     private Loggable loggable;
+    private AtomicInteger stackDepth;
 
     public Graph(Loggable loggable, GraphWatcher watcher) {
         this.loggable = loggable;
@@ -56,6 +58,7 @@ public class Graph {
         cacheProperties = new HashMap<>();
         successTemp = new HashSet<>();
         rollingPath = new HashSet<>();
+        stackDepth = new AtomicInteger();
     }
 
     public static Object getPresentation(Object obj) {
@@ -228,8 +231,9 @@ public class Graph {
      * @return 是否触发ActionEvent
      */
     private boolean shallowRoll(Path path) {
+        int depth = enterStack(String.format("roll: %s", getPresentation(path)));
         if (!rollingPath.add(path)) {
-            error("fail for repeating rolling: %s.", getPresentation(path));
+            exitStack(depth, true, "fail for repeating rolling");
             return false;
         }
         // make sure environment states are satisfied.
@@ -238,14 +242,16 @@ public class Graph {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
             Object toValue = path.get(property);
-            debug("switch init state: %s, %s", getPresentation(property), getPresentation(toValue));
+            String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toValue));
+            debug(msg);
             if (!property.switchTo(toValue)) {
-                error("switch init state failed: %s, %s", getPresentation(property), getPresentation(toValue));
                 records.add(new MissedPath(path, new StateEvent<>(property, oldValue, toValue)));
                 rollingPath.remove(path);
+                exitStack(depth, true, msg);
                 return false;
             }
             rollingPath.remove(path);
+            exitStack(depth, false, msg);
             return true;
         }
         // all environment states are satisfied by now.
@@ -257,39 +263,43 @@ public class Graph {
             Property property = event.getProperty();
             Object oldValue = property.getCurrentValue();
             if (event.getFrom() != null && !event.getFrom().equals(oldValue)) {
-                debug("switch from state event: %s", getPresentation(event));
+                String msg = String.format("switch state event(from): %s", getPresentation(event));
+                debug(msg);
                 if (!property.switchTo(event.getFrom())) {
-                    error("switch from state event failed: %s", getPresentation(event));
                     records.add(new MissedPath(path, event));
                     rollingPath.remove(path);
+                    exitStack(depth, true, msg);
                     return false;
                 }
                 rollingPath.remove(path);
+                exitStack(depth, false, msg);
                 return true;
             }
-            debug("switch to state event: %s", getPresentation(event));
+            String msg = String.format("switch state event(to): %s", getPresentation(event));
+            debug(msg);
             if (!property.switchTo(event.getTo())) {
-                error("switch to state event failed: %s", getPresentation(event));
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
+                exitStack(depth, true, msg);
                 return false;
             }
             rollingPath.remove(path);
+            exitStack(depth, false, msg);
             return true;
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
             event.processPreAction();
             // this is where the action event is performed!
             if (!performAction(event)) {
-                error("perform action fail: %s", getPresentation(event));
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
+                exitStack(depth, true, String.format("perform action fail: %s", getPresentation(event)));
                 return false;
             }
         } else {
-            error("unprocessed event: %s", getPresentation(inputEvent));
             records.add(new MissedPath(path, inputEvent));
             rollingPath.remove(path);
+            exitStack(depth, true, String.format("unprocessed event: %s", getPresentation(inputEvent)));
             return false;
         }
         // collect paths that share the same environment states and event
@@ -297,15 +307,18 @@ public class Graph {
         allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                 .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
             debug("verify path: %s", getPresentation(p));
-            verify(p);
+            verify(p, false);
         });
         rollingPath.remove(path);
+        exitStack(depth, false, "perform action success");
         return true;
     }
 
-    private void verify(Path path) {
+    private void verify(Path path, boolean isSuper) {
+        String msg = String.format("%s: %s", isSuper ? "verify super" : "verify", getPresentation(path));
+        int depth = enterStack(msg);
         Expectation expectation = path.getExpectation();
-        expectation.preVerify();
+        expectation.beforeVerify();
         boolean isPass = expectation.verify();
         if (expectation.isNeedCheck()) {
             records.add(new Assertion(expectation, isPass));
@@ -313,18 +326,17 @@ public class Graph {
         if (isPass) {
             successTemp.add(path);
         } else {
-            error("verify path failed: %s.", getPresentation(path));
             failedPaths.add(path);
         }
         unprocessedPaths.remove(path);
+        exitStack(depth, !isPass, msg);
     }
 
     public <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
             allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .forEach(path -> {
-                        debug("verify super path: %s", getPresentation(path));
-                        verify(path);
+                        verify(path, true);
                     });
         }
     }
@@ -333,9 +345,11 @@ public class Graph {
      * try paths that satisfy the given predicates until an action event is triggered.
      *
      * @param endStatePredicate
-     * @return
+     * @return 是否触发ActionEvent
      */
     public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate) {
+        String msg = "find path to roll";
+        int depth = enterStack(msg);
         if (!allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p)) {
                 return isSatisfied(p.getExpectation(), endStatePredicate);
@@ -349,9 +363,10 @@ public class Graph {
             debug("try to roll: %s", getPresentation(p));
             return shallowRoll(p);
         }).findFirst().isPresent()) {
-            error("find path to roll failed.");
+            exitStack(depth, true, msg);
             return false;
         }
+        exitStack(depth, false, msg);
         return true;
     }
 
@@ -421,9 +436,22 @@ public class Graph {
         }
     }
 
-    private void error(String s, Object... objects) {
+    private int enterStack(String msg) {
+        int depth = stackDepth.incrementAndGet();
         if (loggable != null) {
-            loggable.error(s, objects);
+            loggable.debug("stack(%s) + %s", depth, msg);
         }
+        return depth;
+    }
+
+    private void exitStack(int depth, boolean isError, String msg) {
+        if (loggable != null) {
+            if (isError) {
+                loggable.error("stack(%s) - %s", depth, msg);
+            } else {
+                loggable.debug("stack(%s) - %s", depth, msg);
+            }
+        }
+        stackDepth.decrementAndGet();
     }
 }
