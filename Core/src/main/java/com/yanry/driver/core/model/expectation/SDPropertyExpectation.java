@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 /**
  * Created by rongyu.yan on 5/19/2017.
  */
-public class SDPropertyExpectation<V> extends AbstractStaticPropertyExpectation<V> {
+public class SDPropertyExpectation<V> extends StaticPropertyExpectation<V> {
     private Supplier<V> valueSupplier;
 
     public SDPropertyExpectation(Timing timing, boolean needCheck, Property<V> property, Supplier<V> valueSupplier) {

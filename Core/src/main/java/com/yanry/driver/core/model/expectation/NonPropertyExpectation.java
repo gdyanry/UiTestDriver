@@ -27,9 +27,4 @@ public abstract class NonPropertyExpectation extends Expectation {
     protected final boolean doVerify() {
         return graph.verifyExpectation(this);
     }
-
-    @Override
-    protected int getMatchDegree(Path path) {
-        return 0;
-    }
 }

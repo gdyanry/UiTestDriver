@@ -3,7 +3,7 @@ package com.yanry.driver.core.model.expectation;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.base.Property;
 
-public class SSPropertyExpectation<V> extends AbstractStaticPropertyExpectation<V> {
+public class SSPropertyExpectation<V> extends StaticPropertyExpectation<V> {
     private V value;
 
     public SSPropertyExpectation(Timing timing, boolean needCheck, Property<V> property, V value) {

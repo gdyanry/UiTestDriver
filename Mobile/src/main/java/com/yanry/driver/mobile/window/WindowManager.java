@@ -38,6 +38,4 @@ public class WindowManager {
     public ProcessState getProcessState() {
         return processState;
     }
-
-
 }

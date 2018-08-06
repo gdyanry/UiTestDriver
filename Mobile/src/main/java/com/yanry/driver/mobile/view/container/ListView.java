@@ -32,6 +32,10 @@ public class ListView extends View implements ViewContainer{
         verifySizePath.apply(size.getStaticExpectation(Timing.IMMEDIATELY, true, expectedSize));
     }
 
+    public ListViewSize getSize() {
+        return size;
+    }
+
     public Supplier<ListViewItem> getItemBySize(IntFunction<Integer> index) {
         return () -> {
             int iSize = size.getCurrentValue();

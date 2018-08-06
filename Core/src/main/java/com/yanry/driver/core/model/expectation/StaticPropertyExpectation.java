@@ -8,10 +8,10 @@ import com.yanry.driver.core.model.runtime.Presentable;
  * A key-value pair (aka state) expectation
  * Created by rongyu.yan on 5/10/2017.
  */
-public abstract class AbstractStaticPropertyExpectation<V> extends PropertyExpectation<V> {
+public abstract class StaticPropertyExpectation<V> extends PropertyExpectation<V> {
     private Property<V> property;
 
-    public AbstractStaticPropertyExpectation(Timing timing, boolean needCheck, Property<V> property) {
+    public StaticPropertyExpectation(Timing timing, boolean needCheck, Property<V> property) {
         super(timing, needCheck);
         this.property = property;
     }

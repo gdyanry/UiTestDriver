@@ -32,14 +32,6 @@ public abstract class Expectation {
         return followingExpectations;
     }
 
-    final int getTotalMatchDegree(Path path) {
-        int degree = getMatchDegree(path);
-        for (Expectation expectation : followingExpectations) {
-            degree += expectation.getTotalMatchDegree(path);
-        }
-        return degree;
-    }
-
     void beforeVerify() {
         onVerify();
         followingExpectations.forEach(e -> e.beforeVerify());
@@ -68,7 +60,5 @@ public abstract class Expectation {
     protected abstract void onVerify();
 
     protected abstract boolean doVerify();
-
-    protected abstract int getMatchDegree(Path path);
 
 }

@@ -12,6 +12,7 @@ import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.mobile.action.ClickOutside;
+import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
@@ -44,8 +45,6 @@ public abstract class Window implements ViewContainer {
             createPath(exitProcess, notCreated).addInitState(visibility, Visibility.Foreground);
         }
     }
-
-    protected abstract void addCases(Graph graph, WindowManager manager);
 
     public Path showOnStartUp(Timing timing) {
         return createPath(manager.getProcessState().getStateEvent(false, true), manager.currentWindow.getStaticExpectation(timing, true, this)
@@ -87,6 +86,10 @@ public abstract class Window implements ViewContainer {
             expectation.addFollowingExpectation(followingExpectation);
         }
         return createPath(inputEvent, expectation);
+    }
+
+    public Path closeOnPressBack() {
+        return close(PressBack.get(), Timing.IMMEDIATELY);
     }
 
     public Path closeOnTouchOutside() {
@@ -153,4 +156,6 @@ public abstract class Window implements ViewContainer {
     public boolean switchToVisible() {
         return manager.currentWindow.switchTo(this);
     }
+
+    protected abstract void addCases(Graph graph, WindowManager manager);
 }

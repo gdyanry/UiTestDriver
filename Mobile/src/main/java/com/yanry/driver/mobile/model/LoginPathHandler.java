@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.model;
 
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.expectation.AbstractStaticPropertyExpectation;
+import com.yanry.driver.core.model.expectation.StaticPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.property.CurrentUser;
 import com.yanry.driver.mobile.property.TextValidity;
@@ -27,7 +27,7 @@ public class LoginPathHandler {
         });
     }
 
-    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<AbstractStaticPropertyExpectation, Path> getSuccessLoginPath) {
+    public void handleCurrentUserOnSuccessLogin(Timing timing, Function<StaticPropertyExpectation, Path> getSuccessLoginPath) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> getSuccessLoginPath.apply(currentUser
                 .getStaticExpectation(timing, false, e.getKey()))
                 .addInitState(userValidity.getText(), e.getKey())

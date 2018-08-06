@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -327,15 +328,15 @@ public class Graph {
     /**
      * try paths that satisfy the given predicates until an action event is triggered.
      *
-     * @param endStatePredicate
+     * @param pathFilter
      * @return 是否触发ActionEvent
      */
-    <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate) {
+    boolean findPathToRoll(Predicate<Path> pathFilter) {
         String msg = "find path to roll";
         int depth = enterStack(msg);
         if (!allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p)) {
-                return isSatisfied(p.getExpectation(), endStatePredicate);
+                return pathFilter.test(p);
             }
             return false;
         }).sorted(Comparator.comparingInt(p -> {
@@ -353,14 +354,18 @@ public class Graph {
         return true;
     }
 
-    private <V> boolean isSatisfied(Expectation expectation, BiPredicate<Property<V>, V> endStatePredicate) {
+    <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStateFilter) {
+        return findPathToRoll(p -> isSatisfied(p.getExpectation(), endStateFilter));
+    }
+
+    private <V> boolean isSatisfied(Expectation expectation, BiPredicate<Property<V>, V> endStateFilter) {
         if (expectation instanceof PropertyExpectation) {
             PropertyExpectation<V> exp = (PropertyExpectation<V>) expectation;
-            if (endStatePredicate.test(exp.getProperty(), exp.getExpectedValue())) {
+            if (endStateFilter.test(exp.getProperty(), exp.getExpectedValue())) {
                 return true;
             }
         }
-        return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStatePredicate));
+        return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStateFilter));
     }
 
     boolean isValueFresh(Property property) {

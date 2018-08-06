@@ -21,9 +21,4 @@ public abstract class ActionExpectation extends Expectation {
         run();
         return true;
     }
-
-    @Override
-    protected int getMatchDegree(Path path) {
-        return 0;
-    }
 }

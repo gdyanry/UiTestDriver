@@ -11,15 +11,6 @@ public abstract class CacheProperty<V> extends Property<V> {
         super(graph);
     }
 
-    protected abstract V checkValue();
-
-    /**
-     *
-     * @param to
-     * @return 是否触发ActionEvent
-     */
-    protected abstract boolean doSelfSwitch(V to);
-
     @Override
     public final void handleExpectation(V expectedValue, boolean needCheck) {
         if (expectedValue != null && needCheck) {
@@ -46,9 +37,27 @@ public abstract class CacheProperty<V> extends Property<V> {
     @Override
     protected final boolean selfSwitch(V to) {
         if (doSelfSwitch(to)) {
-            handleExpectation(to, false);
+            // 注意此时不是通过搜寻路径来实现状态变迁的，故触发动作后需要处理缓存值。
+            handleExpectation(to, needCheckAfterSelfSwitch());
             return true;
         }
         return false;
     }
+
+    /**
+     * 默认是认为{@link #doSelfSwitch(Object)}触发了必然导致状态变迁为期望值的某动作（ActionEvent），此时直接修改缓存值为预期值。
+     *
+     * @return 若不符合上述默认情形，则重新此方法并返回true
+     */
+    protected boolean needCheckAfterSelfSwitch() {
+        return false;
+    }
+
+    protected abstract V checkValue();
+
+    /**
+     * @param to
+     * @return 是否触发ActionEvent
+     */
+    protected abstract boolean doSelfSwitch(V to);
 }

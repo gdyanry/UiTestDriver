@@ -36,21 +36,4 @@ public abstract class PropertyExpectation<V> extends Expectation {
         }
         return expectedValue.equals(actualValue);
     }
-
-    @Override
-    protected final int getMatchDegree(Path path) {
-        Property<V> property = getProperty();
-        if (path.getEvent() instanceof StateEvent) {
-            StateEvent stateEvent = (StateEvent) path.getEvent();
-            if (stateEvent.getProperty().equals(property) && isMatch(property, stateEvent.getFrom())) {
-                return 1;
-            }
-        }
-        Object value = path.initState.get(property);
-        return isMatch(property, value) ? 1 : 0;
-    }
-
-    private boolean isMatch(Property<V> property, Object value) {
-        return value != null && !value.equals(property.getCurrentValue()) && value.equals(getExpectedValue());
-    }
 }

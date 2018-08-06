@@ -1,6 +1,7 @@
 package com.yanry.driver.mobile.sample.interest.window;
 
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.view.View;
@@ -10,8 +11,9 @@ import com.yanry.driver.mobile.view.selector.ById;
 import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 
-public class MainPage extends Window {
+public abstract class MainPage extends Window {
     private ListView listView;
+    private Click<ListViewItem, ItemData> clickItem;
 
     public MainPage(WindowManager manager) {
         super(manager);
@@ -20,13 +22,21 @@ public class MainPage extends Window {
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        Click<ListViewItem, ItemData> clickItem = new Click<>(listView.getRandomItem());
+        closeOnPressBack();
+        clickItem = new Click<>(listView.getRandomItem());
         clickItem.setPreAction(listViewItem -> {
             ItemData itemData = new ItemData(graph, listViewItem);
             return itemData;
         });
-
+        // 点击进入详情页
+        popWindow(getDetailPage(), clickItem, Timing.IMMEDIATELY, false).addInitState(listView.getSize(), 1);
     }
+
+    public Click<ListViewItem, ItemData> getClickItem() {
+        return clickItem;
+    }
+
+    protected abstract DetailPage getDetailPage();
 
     public class ItemData {
         private Text tvFinishDate;
@@ -51,5 +61,4 @@ public class MainPage extends Window {
             return tvTotalRate;
         }
     }
-
 }
