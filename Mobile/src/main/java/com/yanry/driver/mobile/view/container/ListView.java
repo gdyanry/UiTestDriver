@@ -1,9 +1,8 @@
 package com.yanry.driver.mobile.view.container;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.core.model.Path;
-import com.yanry.driver.core.model.event.Event;
-import com.yanry.driver.core.model.expectation.Expectation;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.property.ListViewSize;
 import com.yanry.driver.mobile.view.View;
@@ -27,11 +26,6 @@ public class ListView extends View implements ViewContainer{
     public ListView(Graph graph, ViewContainer parent, ViewSelector selector) {
         super(graph, parent, selector);
         size = new ListViewSize(this);
-        refresh(getWindow().getCreateEvent());
-    }
-
-    public void refresh(Event event) {
-        getWindow().createPath(event, size.getStaticExpectation(Timing.IMMEDIATELY, false, null));
     }
 
     public void verifySize(int expectedSize, Function<Expectation, Path> verifySizePath) {
@@ -52,12 +46,12 @@ public class ListView extends View implements ViewContainer{
         return getItemBySize(size -> Singletons.get(Random.class).nextInt(size));
     }
 
-    public Supplier<ListViewItem> getItem(Predicate<ListViewItem> predicate) {
+    public Supplier<ListViewItem> getItemByFilter(Predicate<ListViewItem> filter) {
         return () -> {
             int iSize = size.getCurrentValue();
             for (int i = 0; i < iSize; i++) {
                 ListViewItem item = new ListViewItem(getGraph(), this, new ByIndex(i));
-                if (predicate.test(item)) {
+                if (filter.test(item)) {
                     return item;
                 }
             }

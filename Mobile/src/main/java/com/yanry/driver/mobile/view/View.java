@@ -3,12 +3,12 @@
  */
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.core.model.property.CacheProperty;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.CacheProperty;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.runtime.StateToCheck;
-import com.yanry.driver.mobile.WindowManager;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
+import com.yanry.driver.mobile.window.Window;
 
 /**
  * @author yanry
@@ -29,9 +29,9 @@ public class View implements Visible {
         independentVisibility = new IndependentVisibility(graph);
     }
 
-    public WindowManager.Window getWindow() {
-        if (parent instanceof WindowManager.Window) {
-            return (WindowManager.Window) parent;
+    public Window getWindow() {
+        if (parent instanceof Window) {
+            return (Window) parent;
         } else if (parent instanceof View) {
             return ((View) parent).getWindow();
         }

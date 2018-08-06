@@ -1,17 +1,13 @@
 /**
  *
  */
-package com.yanry.driver.core.model;
+package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateEvent;
-import com.yanry.driver.core.model.property.Property;
-import com.yanry.driver.core.model.expectation.Expectation;
 import com.yanry.driver.core.model.runtime.Presentable;
-import lib.common.model.Singletons;
 
 import java.util.HashMap;
-import java.util.Random;
 
 /**
  * @author yanry
@@ -19,23 +15,25 @@ import java.util.Random;
  * Jan 5, 2017
  */
 @Presentable
-public class Path extends HashMap<Property, Object> {
+public class Path {
     private Event event;
     private Expectation expectation;
     private long timeFrame;
     private int unsatisfiedDegree;
+    HashMap<Property, Object> initState;
 
     public Path(Event event, Expectation expectation) {
         this.event = event;
         this.expectation = expectation;
+        initState = new HashMap<>();
     }
 
     public <V> Path addInitState(Property<V> property, V value) {
-        put(property, value);
+        initState.put(property, value);
         return this;
     }
 
-    public int getUnsatisfiedDegree(long timeFrame, boolean isToRoll) {
+    int getUnsatisfiedDegree(long timeFrame, boolean isToRoll) {
         Property excludeProperty = null;
         boolean addOne = false;
         if (event instanceof StateEvent) {
@@ -51,10 +49,17 @@ public class Path extends HashMap<Property, Object> {
         }
         if (timeFrame == 0 || timeFrame != this.timeFrame) {
             Property finalExcludeProperty = excludeProperty;
-            unsatisfiedDegree = keySet().stream().filter(property -> !property.equals(finalExcludeProperty) && !get(property).equals(property.getCurrentValue())).mapToInt(prop -> 1).sum();
+            unsatisfiedDegree = initState.keySet().stream()
+                    .filter(property -> !property.equals(finalExcludeProperty) && !initState.get(property).equals(property.getCurrentValue()))
+                    .mapToInt(prop -> 1).sum();
             this.timeFrame = timeFrame;
         }
         return unsatisfiedDegree + (addOne ? 1 : 0);
+    }
+
+    @Presentable
+    public HashMap<Property, Object> getInitState() {
+        return initState;
     }
 
     @Presentable

@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.communicator;
 
-import com.yanry.driver.core.model.expectation.Expectation;
-import com.yanry.driver.core.model.property.Property;
+import com.yanry.driver.core.model.base.Expectation;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.runtime.StateToCheck;
 

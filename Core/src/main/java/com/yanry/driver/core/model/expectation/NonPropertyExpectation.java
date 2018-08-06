@@ -1,7 +1,8 @@
 package com.yanry.driver.core.model.expectation;
 
-import com.yanry.driver.core.model.Path;
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Expectation;
+import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.runtime.Presentable;
 
 /**

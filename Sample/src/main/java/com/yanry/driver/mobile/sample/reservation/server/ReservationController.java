@@ -1,10 +1,7 @@
 package com.yanry.driver.mobile.sample.reservation.server;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.mobile.property.CurrentUser;
-import com.yanry.driver.mobile.property.LoginState;
-import com.yanry.driver.mobile.sample.reservation.property.NetworkConnectivity;
 import com.yanry.driver.server.springboot.CommunicatorController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

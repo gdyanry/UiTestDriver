@@ -1,15 +1,16 @@
-package com.yanry.driver.mobile.sample.debug.window;
+package com.yanry.driver.mobile.sample.demo.window;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.mobile.LoginPathHandler;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.mobile.model.LoginPathHandler;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.RequestDialog;
 import com.yanry.driver.mobile.expectation.Toast;
 import com.yanry.driver.mobile.property.*;
-import com.yanry.driver.mobile.sample.debug.NetworkState;
-import com.yanry.driver.mobile.sample.debug.TestApp;
+import com.yanry.driver.mobile.sample.demo.NetworkState;
+import com.yanry.driver.mobile.sample.demo.TestApp;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.selector.ByDesc;
 import com.yanry.driver.mobile.view.selector.ByText;
@@ -17,17 +18,17 @@ import com.yanry.driver.mobile.view.selector.ByText;
 /**
  * Created by rongyu.yan on 5/8/2017.
  */
-public abstract class LoginPage extends WindowManager.Window {
+public abstract class LoginPage extends Window {
     public static String DESC_USER;
     public static String DESC_PWD;
 
     public LoginPage(WindowManager manager) {
-        manager.super();
+        super(manager);
     }
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).put(new LoginState(graph, getCurrentUser()), false);
+        showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).addInitState(new LoginState(graph, getCurrentUser()), false);
         View etUser = new View(graph, this, new ByDesc(DESC_USER));
         Text txtUser = new EditableText(etUser);
         TextValidity userValidity = new TextValidity(etUser, txtUser);

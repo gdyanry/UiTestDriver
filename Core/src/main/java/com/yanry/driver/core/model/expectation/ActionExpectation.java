@@ -1,6 +1,7 @@
 package com.yanry.driver.core.model.expectation;
 
-import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.base.Expectation;
+import com.yanry.driver.core.model.base.Path;
 
 public abstract class ActionExpectation extends Expectation {
 

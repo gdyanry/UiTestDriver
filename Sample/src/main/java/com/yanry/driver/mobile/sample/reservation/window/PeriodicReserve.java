@@ -1,10 +1,11 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.property.CacheProperty;
-import com.yanry.driver.core.model.property.Property;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.Toast;
 import com.yanry.driver.mobile.property.EditableText;
@@ -18,7 +19,7 @@ import com.yanry.driver.mobile.view.selector.ByDesc;
 /**
  * Created by rongyu.yan on 5/12/2017.
  */
-public class PeriodicReserve extends WindowManager.Window {
+public class PeriodicReserve extends Window {
     public static String DESC_IC_QUIT;
     public static String DESC_ET_TOPIC;
     public static String DESC_V_SUBMIT;
@@ -43,7 +44,7 @@ public class PeriodicReserve extends WindowManager.Window {
     private DayOfWeekValidity dayOfWeekValidity;
 
     public PeriodicReserve(WindowManager manager) {
-        manager.super();
+        super(manager);
         View tvRoom = new View(getGraph(), this, new ByDesc(TV_ROOM));
         this.txtRoom = new Text(tvRoom);
         roomValidity = new Validity(tvRoom);

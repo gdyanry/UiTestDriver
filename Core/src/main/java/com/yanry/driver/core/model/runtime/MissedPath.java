@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.runtime;
 
-import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.base.Path;
 
 /**
  * Created by rongyu.yan on 2/18/2017.

@@ -1,22 +1,23 @@
-package com.yanry.driver.mobile.sample.debug.window;
+package com.yanry.driver.mobile.sample.demo.window;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.CurrentUser;
 import com.yanry.driver.mobile.property.LoginState;
-import com.yanry.driver.mobile.sample.debug.TestApp;
+import com.yanry.driver.mobile.sample.demo.TestApp;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.selector.ByText;
 
 /**
  * Created by rongyu.yan on 5/10/2017.
  */
-public abstract class MainPage extends WindowManager.Window {
+public abstract class MainPage extends Window {
 
     public MainPage(WindowManager manager) {
-        manager.super();
+        super(manager);
     }
 
     @Override

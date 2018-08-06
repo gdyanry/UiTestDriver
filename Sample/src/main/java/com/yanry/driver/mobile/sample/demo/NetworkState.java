@@ -1,9 +1,8 @@
-package com.yanry.driver.mobile.sample.debug;
+package com.yanry.driver.mobile.sample.demo;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.event.SwitchStateAction;
-import com.yanry.driver.core.model.property.CacheProperty;
-import com.yanry.driver.core.model.property.Property;
+import com.yanry.driver.core.model.base.CacheProperty;
 import com.yanry.driver.core.model.runtime.StateToCheck;
 
 /**

@@ -1,6 +1,4 @@
-package com.yanry.driver.core.model.property;
-
-import com.yanry.driver.core.model.Graph;
+package com.yanry.driver.core.model.base;
 
 /**
  * state property that is supposed to be used as expectation of a path.
@@ -27,20 +25,20 @@ public abstract class CacheProperty<V> extends Property<V> {
         if (expectedValue != null && needCheck) {
             if (!getGraph().isValueFresh(this)) {
                 // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
-                getGraph().setCacheValue(this, null);
+                getGraph().cacheProperties.put(this, null);
             }
         } else {
             // 不查询客户端，直接通过验证并更新状态值
-            getGraph().setCacheValue(this, expectedValue);
+            getGraph().cacheProperties.put(this, expectedValue);
         }
     }
 
     @Override
     public final V getCurrentValue() {
-        V cacheValue = getGraph().getCacheValue(this);
+        V cacheValue = (V) getGraph().cacheProperties.get(this);
         if (cacheValue == null) {
             cacheValue = checkValue();
-            getGraph().setCacheValue(this, cacheValue);
+            getGraph().cacheProperties.put(this, cacheValue);
         }
         return cacheValue;
     }

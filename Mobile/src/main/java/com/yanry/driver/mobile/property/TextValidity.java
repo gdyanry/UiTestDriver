@@ -1,9 +1,10 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.base.Expectation;
+import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.Event;
-import com.yanry.driver.core.model.expectation.Expectation;
-import com.yanry.driver.core.model.property.Property;
+import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.mobile.view.View;
 
 import java.util.HashSet;
@@ -40,12 +41,17 @@ public class TextValidity extends Property<Boolean> {
         return path;
     }
 
+    public Set<String> getValidContents() {
+        return validContents;
+    }
+
     public Text getText() {
         return text;
     }
 
-    public Set<String> getValidContents() {
-        return validContents;
+    @Presentable
+    public View getView() {
+        return view;
     }
 
     @Override

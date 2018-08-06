@@ -1,20 +1,20 @@
 package com.yanry.driver.mobile.sample.interest.window;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.mobile.WindowManager;
-import com.yanry.driver.mobile.WindowManager.Window;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.container.ListView;
 import com.yanry.driver.mobile.view.container.ListViewItem;
 import com.yanry.driver.mobile.view.selector.ById;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 
-public class Main extends Window {
+public class MainPage extends Window {
     private ListView listView;
 
-    public Main(WindowManager manager) {
-        manager.super();
+    public MainPage(WindowManager manager) {
+        super(manager);
         listView = new ListView(getGraph(), this, new ById("lv"));
     }
 
@@ -23,9 +23,9 @@ public class Main extends Window {
         Click<ListViewItem, ItemData> clickItem = new Click<>(listView.getRandomItem());
         clickItem.setPreAction(listViewItem -> {
             ItemData itemData = new ItemData(graph, listViewItem);
-            itemData.tvFinishDate.getCurrentValue();
             return itemData;
         });
+
     }
 
     public class ItemData {
@@ -37,6 +37,18 @@ public class Main extends Window {
             tvFinishDate = new Text(new View(graph, listViewItem, new ById("tv_finishDate")));
             tvMoney = new Text(new View(graph, listViewItem, new ById("tv_money")));
             tvTotalRate = new Text(new View(graph, listViewItem, new ById("tv_bonus_interest_rate")));
+        }
+
+        public Text getTvFinishDate() {
+            return tvFinishDate;
+        }
+
+        public Text getTvMoney() {
+            return tvMoney;
+        }
+
+        public Text getTvTotalRate() {
+            return tvTotalRate;
         }
     }
 

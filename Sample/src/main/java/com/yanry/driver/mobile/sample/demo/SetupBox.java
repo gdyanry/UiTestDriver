@@ -1,11 +1,12 @@
-package com.yanry.driver.mobile.sample.debug.window;
+package com.yanry.driver.mobile.sample.demo;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.core.model.Path;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.property.CurrentUser;
-import com.yanry.driver.mobile.sample.debug.NetworkState;
-import com.yanry.driver.mobile.sample.debug.ShowSplash;
+import com.yanry.driver.mobile.sample.demo.window.AboutPage;
+import com.yanry.driver.mobile.sample.demo.window.LoginPage;
+import com.yanry.driver.mobile.sample.demo.window.MainPage;
 
 public class SetupBox extends WindowManager {
     private LoginPage loginPage;

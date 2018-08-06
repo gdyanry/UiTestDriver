@@ -1,6 +1,6 @@
-package com.yanry.driver.mobile;
+package com.yanry.driver.mobile.model;
 
-import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.expectation.AbstractStaticPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.property.CurrentUser;

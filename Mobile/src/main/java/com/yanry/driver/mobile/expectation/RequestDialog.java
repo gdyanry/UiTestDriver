@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.expectation;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.expectation.TransientExpectation;
 

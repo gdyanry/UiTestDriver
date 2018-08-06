@@ -2,7 +2,7 @@ package com.yanry.driver.server.springboot;
 
 import com.yanry.driver.core.distribute.Const;
 import com.yanry.driver.core.distribute.ServerReception;
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import lib.common.model.Singletons;
 import lib.common.model.cache.TimerCache;
 import lib.common.model.json.JSONArray;

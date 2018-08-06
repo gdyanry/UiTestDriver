@@ -1,17 +1,13 @@
 /**
  *
  */
-package com.yanry.driver.core.model;
+package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.StateEvent;
-import com.yanry.driver.core.model.expectation.Expectation;
-import com.yanry.driver.core.model.expectation.PropertyExpectation;
-import com.yanry.driver.core.model.property.CacheProperty;
-import com.yanry.driver.core.model.property.Property;
 import com.yanry.driver.core.model.runtime.*;
 import lib.common.interfaces.Loggable;
 import lib.common.model.json.JSONArray;
@@ -39,7 +35,7 @@ public class Graph {
     private boolean isTraversing;
     private List<Communicator> communicators;
     private List<Path> optionalPaths;
-    private Map<CacheProperty, Object> cacheProperties;
+    Map<CacheProperty, Object> cacheProperties;
     private GraphWatcher watcher;
     private long actionTimeFrame;
     private Set<Path> successTemp;
@@ -82,6 +78,13 @@ public class Graph {
                 jsonArray.put(getPresentation(item));
             }
             return jsonArray;
+        } else if (obj instanceof Map) {
+            JSONArray jsonArray = new JSONArray();
+            Map map = (Map) obj;
+            for (Object key : map.keySet()) {
+                jsonArray.put(new JSONArray().put(getPresentation(key)).put(getPresentation(map.get(key))));
+            }
+            return jsonArray;
         }
         Class<?> clazz = obj.getClass();
         if (clazz.isAnnotationPresent(Presentable.class)) {
@@ -101,14 +104,6 @@ public class Graph {
                     }
                 }
             }
-            if (obj instanceof Map) {
-                JSONArray jsonArray = new JSONArray();
-                Map map = (Map) obj;
-                for (Object key : map.keySet()) {
-                    jsonArray.put(new JSONArray().put(getPresentation(key)).put(getPresentation(map.get(key))));
-                }
-                jsonObject.put("{}", jsonArray);
-            }
             return jsonObject;
         }
         return obj;
@@ -120,18 +115,6 @@ public class Graph {
 
     public void addPath(Path path) {
         allPaths.add(path);
-    }
-
-    public <V> V getCacheValue(CacheProperty<V> property) {
-        return (V) cacheProperties.get(property);
-    }
-
-    public <V> void setCacheValue(CacheProperty<V> property, V value) {
-        cacheProperties.put(property, value);
-    }
-
-    public boolean isValueFresh(Property property) {
-        return actionTimeFrame > 0 && property.getCommunicateTimeFrame() == actionTimeFrame;
     }
 
     /**
@@ -237,11 +220,11 @@ public class Graph {
             return false;
         }
         // make sure environment states are satisfied.
-        Optional<Property> any = path.keySet().stream().filter(property -> !path.get(property).equals(property.getCurrentValue())).findAny();
+        Optional<Property> any = path.initState.keySet().stream().filter(property -> !path.initState.get(property).equals(property.getCurrentValue())).findAny();
         if (any.isPresent()) {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
-            Object toValue = path.get(property);
+            Object toValue = path.initState.get(property);
             String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toValue));
             debug(msg);
             if (!property.switchTo(toValue)) {
@@ -332,7 +315,7 @@ public class Graph {
         exitStack(depth, !isPass, msg);
     }
 
-    public <V> void verifySuperPaths(Property<V> property, V from, V to) {
+    <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
             allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .forEach(path -> {
@@ -347,7 +330,7 @@ public class Graph {
      * @param endStatePredicate
      * @return 是否触发ActionEvent
      */
-    public <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate) {
+    <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStatePredicate) {
         String msg = "find path to roll";
         int depth = enterStack(msg);
         if (!allPaths.stream().filter(p -> {
@@ -373,11 +356,15 @@ public class Graph {
     private <V> boolean isSatisfied(Expectation expectation, BiPredicate<Property<V>, V> endStatePredicate) {
         if (expectation instanceof PropertyExpectation) {
             PropertyExpectation<V> exp = (PropertyExpectation<V>) expectation;
-            if (exp.isSatisfied(endStatePredicate)) {
+            if (endStatePredicate.test(exp.getProperty(), exp.getExpectedValue())) {
                 return true;
             }
         }
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStatePredicate));
+    }
+
+    boolean isValueFresh(Property property) {
+        return actionTimeFrame > 0 && property.communicateTimeFrame == actionTimeFrame;
     }
 
     public <V> V checkState(StateToCheck<V> stateToCheck) {
@@ -388,7 +375,7 @@ public class Graph {
         for (Communicator communicator : communicators) {
             V value = communicator.checkState(stateToCheck);
             if (value != null) {
-                property.setCommunicateTimeFrame(actionTimeFrame);
+                property.communicateTimeFrame = actionTimeFrame;
                 return value;
             }
         }
@@ -402,7 +389,7 @@ public class Graph {
         for (Communicator communicator : communicators) {
             String value = communicator.fetchValue(property);
             if (value != null) {
-                property.setCommunicateTimeFrame(actionTimeFrame);
+                property.communicateTimeFrame = actionTimeFrame;
                 return value;
             }
         }

@@ -3,7 +3,7 @@
  */
 package com.yanry.driver.core.model.event;
 
-import com.yanry.driver.core.model.property.Property;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
 
 import java.util.function.Function;

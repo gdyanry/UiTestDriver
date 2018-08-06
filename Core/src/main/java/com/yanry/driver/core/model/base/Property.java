@@ -1,16 +1,15 @@
 /**
  *
  */
-package com.yanry.driver.core.model.property;
+package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.expectation.Timing;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -24,7 +23,7 @@ public abstract class Property<V> {
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
-    private long communicateTimeFrame;
+    long communicateTimeFrame;
 
     public Property(Graph graph) {
         this.graph = graph;
@@ -64,14 +63,6 @@ public abstract class Property<V> {
 
     public SDPropertyExpectation<V> getDynamicExpectation(Timing timing, boolean needCheck, Supplier<V> valueSupplier) {
         return new SDPropertyExpectation<>(timing, needCheck, this, valueSupplier);
-    }
-
-    public long getCommunicateTimeFrame() {
-        return communicateTimeFrame;
-    }
-
-    public void setCommunicateTimeFrame(long communicateTimeFrame) {
-        this.communicateTimeFrame = communicateTimeFrame;
     }
 
     public abstract void handleExpectation(V expectedValue, boolean needCheck);

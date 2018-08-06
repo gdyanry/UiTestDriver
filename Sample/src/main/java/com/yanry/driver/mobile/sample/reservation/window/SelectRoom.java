@@ -1,14 +1,15 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 
 /**
  * Created by rongyu.yan on 5/12/2017.
  */
-public class SelectRoom extends WindowManager.Window {
+public class SelectRoom extends Window {
     public SelectRoom(WindowManager manager) {
-        manager.super();
+        super(manager);
     }
 
     @Override

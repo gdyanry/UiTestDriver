@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.runtime;
 
-import com.yanry.driver.core.model.property.CacheProperty;
+import com.yanry.driver.core.model.base.CacheProperty;
 
 /**
  * Created by rongyu.yan on 3/13/2017.

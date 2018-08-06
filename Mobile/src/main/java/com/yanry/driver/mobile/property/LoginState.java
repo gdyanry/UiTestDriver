@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.core.model.property.Property;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Property;
 
 /**
  * Created by rongyu.yan on 5/11/2017.

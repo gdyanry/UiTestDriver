@@ -1,12 +1,11 @@
-package com.yanry.driver.mobile.sample.debug;
+package com.yanry.driver.mobile.sample.demo;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.ConsoleCommunicator;
 import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.MissedPath;
-import com.yanry.driver.mobile.sample.debug.window.SetupBox;
 import com.yanry.driver.mobile.sample.model.ConsoleGraphWatcher;
 import com.yanry.driver.mobile.sample.model.ConsoleLoggable;
 import lib.common.util.ConsoleUtil;
@@ -44,9 +43,9 @@ public class TestApp {
         int passCount = 0;
         int failCount = 0;
         int missCount = 0;
-        System.out.println("-----------------------------------------------------");
-        System.out.println("-----------------------------------------------------");
+        System.out.println("-------------------------------------RECORD----------------------------------");
         for (Object record : records) {
+            boolean fail = false;
             if (record instanceof Assertion) {
                 Assertion assertion = (Assertion) record;
                 if (assertion.getExpectation().isNeedCheck()) {
@@ -54,12 +53,18 @@ public class TestApp {
                         passCount++;
                     } else {
                         failCount++;
+                        fail = true;
                     }
                 }
             } else if (record instanceof MissedPath) {
+                fail = true;
                 missCount++;
             }
-            System.out.println(Graph.getPresentation(record));
+            if (fail) {
+                System.err.println(Graph.getPresentation(record));
+            } else {
+                System.out.println(Graph.getPresentation(record));
+            }
         }
         System.out.printf("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);
     }

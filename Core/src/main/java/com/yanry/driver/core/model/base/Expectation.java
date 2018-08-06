@@ -1,6 +1,6 @@
-package com.yanry.driver.core.model.expectation;
+package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 
 import java.util.LinkedList;
@@ -32,7 +32,7 @@ public abstract class Expectation {
         return followingExpectations;
     }
 
-    public final int getTotalMatchDegree(Path path) {
+    final int getTotalMatchDegree(Path path) {
         int degree = getMatchDegree(path);
         for (Expectation expectation : followingExpectations) {
             degree += expectation.getTotalMatchDegree(path);
@@ -40,12 +40,12 @@ public abstract class Expectation {
         return degree;
     }
 
-    public void beforeVerify() {
+    void beforeVerify() {
         onVerify();
         followingExpectations.forEach(e -> e.beforeVerify());
     }
 
-    public final boolean verify() {
+    final boolean verify() {
         if (doVerify()) {
             followingExpectations.forEach(e -> e.verify());
             return true;

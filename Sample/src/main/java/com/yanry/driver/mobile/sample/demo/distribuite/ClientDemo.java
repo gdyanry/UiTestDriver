@@ -1,4 +1,4 @@
-package com.yanry.driver.mobile.sample.debug.distribuite;
+package com.yanry.driver.mobile.sample.demo.distribuite;
 
 import com.yanry.driver.core.distribute.HttpClientReception;
 import lib.common.model.json.JSONArray;

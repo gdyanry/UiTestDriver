@@ -1,4 +1,4 @@
-package com.yanry.driver.mobile.sample.debug.distribuite;
+package com.yanry.driver.mobile.sample.demo.distribuite;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

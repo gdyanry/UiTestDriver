@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.runtime;
 
-import com.yanry.driver.core.model.Path;
-import com.yanry.driver.core.model.property.CacheProperty;
+import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.CacheProperty;
 
 import java.util.Map;
 import java.util.Set;

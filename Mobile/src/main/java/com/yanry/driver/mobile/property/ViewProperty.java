@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.property.CacheProperty;
+import com.yanry.driver.core.model.base.CacheProperty;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.mobile.view.View;
 

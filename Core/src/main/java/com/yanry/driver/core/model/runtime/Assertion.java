@@ -3,7 +3,7 @@
  */
 package com.yanry.driver.core.model.runtime;
 
-import com.yanry.driver.core.model.expectation.Expectation;
+import com.yanry.driver.core.model.base.Expectation;
 
 /**
  * @author yanry

@@ -1,8 +1,9 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.view.View;
@@ -12,11 +13,11 @@ import com.yanry.driver.mobile.view.selector.ByText;
 /**
  * Created by rongyu.yan on 5/12/2017.
  */
-public class Main extends WindowManager.Window {
+public class Main extends Window {
     private Text txtDate;
 
     public Main(WindowManager manager) {
-        manager.super();
+        super(manager);
         View tvDate = new View(getGraph(), this, new ByDesc("日期标签"));
         txtDate = new Text(tvDate);
     }

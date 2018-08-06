@@ -1,9 +1,8 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.event.SwitchStateAction;
-import com.yanry.driver.core.model.property.CacheProperty;
-import com.yanry.driver.core.model.property.Property;
+import com.yanry.driver.core.model.base.CacheProperty;
 
 /**
  * Created by rongyu.yan on 3/9/2017.

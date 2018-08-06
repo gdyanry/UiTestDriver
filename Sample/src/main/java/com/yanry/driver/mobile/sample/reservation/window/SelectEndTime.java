@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.sample.reservation.window.PeriodicReserve.Validity;
 

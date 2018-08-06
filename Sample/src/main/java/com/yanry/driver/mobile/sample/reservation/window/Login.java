@@ -1,10 +1,11 @@
 package com.yanry.driver.mobile.sample.reservation.window;
 
-import com.yanry.driver.core.model.Graph;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.mobile.LoginPathHandler;
-import com.yanry.driver.mobile.WindowManager;
+import com.yanry.driver.mobile.model.LoginPathHandler;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.Toast;
 import com.yanry.driver.mobile.property.CurrentUser;
@@ -20,14 +21,14 @@ import static com.yanry.driver.mobile.sample.reservation.server.Config.*;
 /**
  * Created by rongyu.yan on 5/12/2017.
  */
-public class Login extends WindowManager.Window {
+public class Login extends Window {
     public static String ET_USER;
     public static String ET_PWD;
     public static String USER_VALIDATION;
     public static String PWD_VALIDATION;
 
     public Login(WindowManager manager) {
-        manager.super();
+        super(manager);
     }
 
     @Override

@@ -1,8 +1,7 @@
-package com.yanry.driver.core.model.expectation;
+package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.event.StateEvent;
-import com.yanry.driver.core.model.property.Property;
-import com.yanry.driver.core.model.Path;
+import com.yanry.driver.core.model.expectation.Timing;
 
 import java.util.function.BiPredicate;
 
@@ -15,10 +14,6 @@ public abstract class PropertyExpectation<V> extends Expectation {
 
     public PropertyExpectation(Timing timing, boolean needCheck) {
         super(timing, needCheck);
-    }
-
-    public boolean isSatisfied(BiPredicate<Property<V>, V> predicate) {
-        return predicate.test(getProperty(), getExpectedValue());
     }
 
     public abstract Property<V> getProperty();
@@ -51,7 +46,7 @@ public abstract class PropertyExpectation<V> extends Expectation {
                 return 1;
             }
         }
-        Object value = path.get(property);
+        Object value = path.initState.get(property);
         return isMatch(property, value) ? 1 : 0;
     }
 

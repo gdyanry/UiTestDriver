@@ -1,8 +1,7 @@
-package com.yanry.driver.mobile.sample.debug.distribuite;
+package com.yanry.driver.mobile.sample.demo.distribuite;
 
-import com.yanry.driver.core.model.Graph;
-import com.yanry.driver.mobile.sample.debug.TestApp;
-import com.yanry.driver.mobile.sample.debug.window.SetupBox;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.mobile.sample.demo.SetupBox;
 import com.yanry.driver.server.springboot.CommunicatorController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
