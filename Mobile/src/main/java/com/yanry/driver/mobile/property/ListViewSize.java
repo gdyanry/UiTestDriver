@@ -1,21 +1,11 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.runtime.StateToCheck;
-import com.yanry.driver.mobile.view.View;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.mobile.view.ListView;
 
-public class ListViewSize extends ViewProperty<Integer> {
+public class ListViewSize extends ViewIntProperty {
 
-    public ListViewSize(View view) {
-        super(view);
-    }
-
-    @Override
-    protected Integer doCheckValue() {
-        return getGraph().checkState(new StateToCheck<>(this));
-    }
-
-    @Override
-    protected boolean doSelfSwitch(Integer to) {
-        return false;
+    public ListViewSize(Graph graph, ListView view) {
+        super(graph, view);
     }
 }

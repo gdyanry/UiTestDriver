@@ -5,8 +5,8 @@ import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.action.Click;
-import com.yanry.driver.mobile.view.container.ListView;
-import com.yanry.driver.mobile.view.container.ListViewItem;
+import com.yanry.driver.mobile.view.ListView;
+import com.yanry.driver.mobile.view.ListViewItem;
 
 /**
  * Created by rongyu.yan on 5/12/2017.

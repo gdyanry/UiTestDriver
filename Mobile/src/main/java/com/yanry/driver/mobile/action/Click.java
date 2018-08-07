@@ -12,11 +12,11 @@ import java.util.function.Supplier;
 @Presentable
 public class Click<V extends View, R> extends ActionEvent<V, R> {
 
-    public Click(Supplier<V> dataSupplier) {
-        super(dataSupplier);
+    public Click(Supplier<V> targetSupplier) {
+        super(targetSupplier);
     }
 
-    public Click(V data) {
-        super(data);
+    public Click(V target) {
+        super(target);
     }
 }

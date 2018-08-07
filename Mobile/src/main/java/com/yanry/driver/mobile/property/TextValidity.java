@@ -30,8 +30,7 @@ public class TextValidity extends Property<Boolean> {
         }
     }
 
-    public Path addNegativeCase(String content, Event event, Expectation expectation, Property<Boolean>...
-            preValidity) {
+    public Path addNegativeCase(String content, Event event, Expectation expectation, Property<Boolean>... preValidity) {
         invalidContents.add(content);
         Path path = view.getWindow().createPath(event, expectation)
                 .addInitState(text, content);
@@ -67,8 +66,8 @@ public class TextValidity extends Property<Boolean> {
     @Override
     protected boolean selfSwitch(Boolean to) {
         if (to) {
-            return view.switchToVisible() || validContents.stream().anyMatch(c -> text.switchTo(c));
+            return view.switchToVisible() || validContents.stream().anyMatch(c -> text.switchToValue(c));
         }
-        return view.switchToVisible() || invalidContents.stream().anyMatch(c -> text.switchTo(c));
+        return view.switchToVisible() || invalidContents.stream().anyMatch(c -> text.switchToValue(c));
     }
 }

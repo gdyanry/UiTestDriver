@@ -9,6 +9,7 @@ import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.runtime.*;
+import com.yanry.driver.core.model.state.StatePredicate;
 import lib.common.interfaces.Loggable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
@@ -221,15 +222,15 @@ public class Graph {
             return false;
         }
         // make sure environment states are satisfied.
-        Optional<Property> any = path.initState.keySet().stream().filter(property -> !path.initState.get(property).equals(property.getCurrentValue())).findAny();
+        Optional<Property> any = path.initState.keySet().stream().filter(property -> !path.initState.get(property).test(property.getCurrentValue())).findAny();
         if (any.isPresent()) {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
-            Object toValue = path.initState.get(property);
-            String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toValue));
+            StatePredicate toState = path.initState.get(property);
+            String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toState));
             debug(msg);
-            if (!property.switchTo(toValue)) {
-                records.add(new MissedPath(path, new StateEvent<>(property, oldValue, toValue)));
+            if (!property.switchTo(toState)) {
+                records.add(new MissedPath(path, new StateEvent<>(property, oldValue, toState)));
                 rollingPath.remove(path);
                 exitStack(depth, true, msg);
                 return false;
@@ -249,7 +250,7 @@ public class Graph {
             if (event.getFrom() != null && !event.getFrom().equals(oldValue)) {
                 String msg = String.format("switch state event(from): %s", getPresentation(event));
                 debug(msg);
-                if (!property.switchTo(event.getFrom())) {
+                if (!property.switchToValue(event.getFrom())) {
                     records.add(new MissedPath(path, event));
                     rollingPath.remove(path);
                     exitStack(depth, true, msg);
@@ -261,7 +262,7 @@ public class Graph {
             }
             String msg = String.format("switch state event(to): %s", getPresentation(event));
             debug(msg);
-            if (!property.switchTo(event.getTo())) {
+            if (!property.switchToValue(event.getTo())) {
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
                 exitStack(depth, true, msg);

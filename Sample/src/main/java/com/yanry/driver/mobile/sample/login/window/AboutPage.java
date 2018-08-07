@@ -1,4 +1,4 @@
-package com.yanry.driver.mobile.sample.demo.window;
+package com.yanry.driver.mobile.sample.login.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;

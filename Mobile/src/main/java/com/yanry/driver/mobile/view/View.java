@@ -16,7 +16,7 @@ import com.yanry.driver.mobile.window.Window;
  * Jan 10, 2017
  */
 @Presentable
-public class View implements Visible {
+public class View extends ViewContainer {
     private ViewContainer parent;
     private ViewSelector selector;
     private IndependentVisibility independentVisibility;
@@ -63,7 +63,7 @@ public class View implements Visible {
 
     @Override
     public final boolean switchToVisible() {
-        return parent.switchToVisible() || independentVisibility.switchTo(true);
+        return parent.switchToVisible() || independentVisibility.switchToValue(true);
     }
 
     public class IndependentVisibility extends CacheProperty<Boolean> {

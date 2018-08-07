@@ -8,8 +8,8 @@ import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.sample.reservation.window.PeriodicReserve.Validity;
 import com.yanry.driver.mobile.view.View;
-import com.yanry.driver.mobile.view.container.ListView;
-import com.yanry.driver.mobile.view.container.ListViewItem;
+import com.yanry.driver.mobile.view.ListView;
+import com.yanry.driver.mobile.view.ListViewItem;
 import com.yanry.driver.mobile.view.selector.ById;
 
 /**

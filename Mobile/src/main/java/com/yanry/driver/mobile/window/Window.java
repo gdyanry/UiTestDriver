@@ -13,11 +13,13 @@ import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
+import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ViewContainer;
+import com.yanry.driver.mobile.view.selector.ById;
 import lib.common.util.ReflectionUtil;
 
 @Presentable
-public abstract class Window implements ViewContainer {
+public abstract class Window extends ViewContainer {
     private VisibilityState visibility;
     private StateEvent<Visibility> createEvent;
     private StateEvent<Visibility> closeEvent;
@@ -154,7 +156,7 @@ public abstract class Window implements ViewContainer {
 
     @Override
     public boolean switchToVisible() {
-        return manager.currentWindow.switchTo(this);
+        return manager.currentWindow.switchToValue(this);
     }
 
     protected abstract void addCases(Graph graph, WindowManager manager);

@@ -1,4 +1,4 @@
-package com.yanry.driver.mobile.sample.demo.distribuite;
+package com.yanry.driver.mobile.sample.login.distribuite;
 
 import com.yanry.driver.core.distribute.HttpClientReception;
 import lib.common.model.json.JSONArray;
@@ -9,7 +9,7 @@ import lib.common.util.ConsoleUtil;
  * Created by rongyu.yan on 3/27/2017.
  */
 public class ClientDemo extends HttpClientReception {
-    private static final String BASE_URL = "http://localhost:8080/demo/";
+    private static final String BASE_URL = "http://localhost:8080/login/";
     private static final String CHARSET = "utf-8";
 
     public ClientDemo() {

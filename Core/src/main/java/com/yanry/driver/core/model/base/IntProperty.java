@@ -2,9 +2,8 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.runtime.StateToCheck;
 
-public class IntProperty extends CacheProperty<Integer> {
+public abstract class IntProperty extends CacheProperty<Integer> {
 
     public IntProperty(Graph graph) {
         super(graph);
@@ -12,11 +11,6 @@ public class IntProperty extends CacheProperty<Integer> {
 
     public ShiftExpectation getShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
         return new ShiftExpectation(timing, needCheck, upward, step);
-    }
-
-    @Override
-    protected Integer checkValue() {
-        return getGraph().checkState(new StateToCheck<>(this));
     }
 
     @Override

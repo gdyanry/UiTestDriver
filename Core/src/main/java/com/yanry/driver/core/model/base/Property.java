@@ -6,9 +6,10 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
-import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.expectation.Timing;
+import com.yanry.driver.core.model.runtime.Presentable;
+import com.yanry.driver.core.model.state.StateEquals;
+import com.yanry.driver.core.model.state.StatePredicate;
 
 import java.util.function.Supplier;
 
@@ -20,6 +21,7 @@ import java.util.function.Supplier;
 @Presentable
 public abstract class Property<V> {
     private Graph graph;
+
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
@@ -34,23 +36,31 @@ public abstract class Property<V> {
     }
 
     /**
-     *
-     * @param to
+     * @param toState
      * @return 是否触发ActionEvent
      */
-    public final boolean switchTo(V to) {
-        return !to.equals(getCurrentValue())
+    public final boolean switchTo(StatePredicate<V> toState) {
+        return !toState.test(getCurrentValue()) &&
                 // 先尝试自转化再搜索是否存在可用路径
-                && (verifySuperPaths(to) || graph.findPathToRoll((prop, val) -> equals(prop) && to.equals(val)));
+                (verifySuperPaths(toState) || graph.findPathToRoll((prop, val) -> equals(prop) && toState.test((V) val)));
     }
 
-    private boolean verifySuperPaths(V to) {
-        V currentValue = getCurrentValue();
-        if (selfSwitch(to)) {
-            graph.verifySuperPaths(this, currentValue, to);
-            return true;
-        }
-        return false;
+    public final boolean switchToValue(V toState) {
+        return switchTo(new StateEquals<>(toState));
+    }
+
+    private boolean verifySuperPaths(StatePredicate<V> toState) {
+        V oldValue = getCurrentValue();
+        return toState.getValidValue().anyMatch(v -> {
+            if (selfSwitch(v)) {
+                V newValue = getCurrentValue();
+                if (!newValue.equals(oldValue)) {
+                    graph.verifySuperPaths(this, oldValue, newValue);
+                }
+                return true;
+            }
+            return false;
+        });
     }
 
     public StateEvent<V> getStateEvent(V from, V to) {
@@ -70,7 +80,6 @@ public abstract class Property<V> {
     public abstract V getCurrentValue();
 
     /**
-     *
      * @param to
      * @return 是否触发ActionEvent
      */
