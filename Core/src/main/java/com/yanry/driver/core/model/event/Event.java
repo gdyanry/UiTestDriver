@@ -10,6 +10,6 @@ import com.yanry.driver.core.model.base.Property;
  *         <p>
  *         Jan 5, 2017
  */
-public interface Event<V> {
-    boolean matches(Property<V> property, V fromValue, V toValue);
+public interface Event {
+    <V> boolean matches(Property<V> property, V fromValue, V toValue);
 }

@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * Jan 6, 2017
  */
 @Presentable
-public class ActionEvent<T, R> implements Event<Object> {
+public class ActionEvent<T, R> implements Event {
     private T target;
     private R preActionResult;
     private Supplier<T> targetSupplier;
@@ -52,7 +52,7 @@ public class ActionEvent<T, R> implements Event<Object> {
     }
 
     @Override
-    public boolean matches(Property<Object> property, Object fromValue, Object toValue) {
+    public <V> boolean matches(Property<V> property, V fromValue, V toValue) {
         return false;
     }
 }

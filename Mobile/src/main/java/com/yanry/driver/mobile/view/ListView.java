@@ -34,7 +34,7 @@ public class ListView extends View {
         return size;
     }
 
-    public Supplier<ListViewItem> getItemBySize(IntFunction<Integer> index) {
+    public Supplier<View> getItemBySize(IntFunction<Integer> index) {
         return () -> {
             int iSize = size.getCurrentValue();
             if (iSize > 0) {
@@ -44,11 +44,11 @@ public class ListView extends View {
         };
     }
 
-    public Supplier<ListViewItem> getRandomItem() {
+    public Supplier<View> getRandomItem() {
         return getItemBySize(size -> Singletons.get(Random.class).nextInt(size));
     }
 
-    public Supplier<ListViewItem> getItemByFilter(Predicate<ListViewItem> filter) {
+    public Supplier<View> getItemByFilter(Predicate<View> filter) {
         return () -> {
             int iSize = size.getCurrentValue();
             for (int i = 0; i < iSize; i++) {

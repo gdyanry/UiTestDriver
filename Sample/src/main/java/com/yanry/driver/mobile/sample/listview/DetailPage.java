@@ -22,12 +22,13 @@ public abstract class DetailPage extends Window {
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
         closeOnPressBack();
-        createPath(getCreateEvent(), tvPrincipal.getDynamicExpectation(Timing.IMMEDIATELY, true, () -> getMainPage().getClickItem().getPreActionResult().getTvMoney().getCurrentValue()));
-        createPath(getCreateEvent(), tvFinishDate.getDynamicExpectation(Timing.IMMEDIATELY, true, () -> getMainPage().getClickItem().getPreActionResult().getTvFinishDate().getCurrentValue()));
-        createPath(getCreateEvent(), tvTotalRate.getDynamicExpectation(Timing.IMMEDIATELY, true, () -> getMainPage().getClickItem().getPreActionResult().getTvTotalRate().getCurrentValue()));
+        createPath(getCreateEvent(), tvPrincipal.getDynamicExpectation(Timing.IMMEDIATELY, true, () -> getMainPage().getClickItem().getPreActionResult().getMoney()));
+        createPath(getCreateEvent(), tvFinishDate.getDynamicExpectation(Timing.IMMEDIATELY, true, () -> getMainPage().getClickItem().getPreActionResult().getFinishDate()));
+        createPath(getCreateEvent(), tvTotalRate.getDynamicExpectation(Timing.IMMEDIATELY, true, () -> getMainPage().getClickItem().getPreActionResult().getTotalRate()));
 
         // 编辑
-        popWindow(getEditPage(), new Click(getViewById("tv_edit")), Timing.IMMEDIATELY, false);
+        Click clickEdit = new Click(getViewById("tv_edit"));
+        popWindow(getEditPage(), clickEdit, Timing.IMMEDIATELY, false);
         // 删除
         close(new Click(getViewById("tv_delete")), Timing.IMMEDIATELY, getMainPage().getListView().getSize().getShiftExpectation(Timing.IMMEDIATELY, true, false, 1));
     }

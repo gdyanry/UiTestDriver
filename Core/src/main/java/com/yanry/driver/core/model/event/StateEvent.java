@@ -9,7 +9,7 @@ import java.util.Objects;
  * Created by rongyu.yan on 5/17/2017.
  */
 @Presentable
-public class StateEvent<V> implements Event<V> {
+public class StateEvent<V> implements Event {
     private Property<V> property;
     private V from;
     private V to;
@@ -53,7 +53,7 @@ public class StateEvent<V> implements Event<V> {
     }
 
     @Override
-    public boolean matches(Property<V> property, V fromValue, V toValue) {
+    public <V> boolean matches(Property<V> property, V fromValue, V toValue) {
         return this.property.equals(property) && this.to.equals(toValue) && (from == null || this.from.equals(fromValue));
     }
 }

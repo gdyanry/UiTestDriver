@@ -20,7 +20,7 @@ public class SelectDateOnMain extends Window {
     protected void addCases(Graph graph, WindowManager manager) {
         ListView lvDate = new ListView(graph, this, null);
         // 随机点击一个item返回主页
-        Click<ListViewItem, String[]> clickItem = new Click<>(lvDate.getRandomItem());
+        Click<String[]> clickItem = new Click<>(lvDate.getRandomItem());
 //        clickItem.setPreAction(item -> {
 //            TextView dateView = new TextView(item, null);
 //            QueryableProperty month = new QueryableProperty(getGraph(), "所选月份");

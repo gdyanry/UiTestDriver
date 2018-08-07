@@ -5,16 +5,15 @@ import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.UnaryIntPredicate;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
-import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ListView;
-import com.yanry.driver.mobile.view.ListViewItem;
+import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.selector.ById;
 import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 
 public abstract class MainPage extends Window {
     private ListView listView;
-    private Click<ListViewItem, ItemData> clickItem;
+    private Click<ItemData> clickItem;
 
     public MainPage(WindowManager manager) {
         super(manager);
@@ -25,21 +24,18 @@ public abstract class MainPage extends Window {
     protected void addCases(Graph graph, WindowManager manager) {
         closeOnPressBack();
         clickItem = new Click<>(listView.getRandomItem());
-        clickItem.setPreAction(listViewItem -> {
-            ItemData itemData = new ItemData(graph, listViewItem);
-            return itemData;
-        });
+        clickItem.setPreAction(listViewItem -> new ItemData(listViewItem));
         // 点击列表项进入详情页
-        popWindow(getDetailPage(), clickItem, Timing.IMMEDIATELY, false).addInitState(listView.getSize(), 1)
+        popWindow(getDetailPage(), clickItem, Timing.IMMEDIATELY, false)
+                .addInitState(listView.getSize(), 1)
                 .addStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
         // 筛选
         popWindow(getFilterPage(), new Click(new View(graph, this, new ById("tv_filter"))), Timing.IMMEDIATELY, false);
         // 添加
         popWindow(getAddPage(), new Click(new View(graph, this, new ById("tv_add"))), Timing.IMMEDIATELY, false);
-
     }
 
-    public Click<ListViewItem, ItemData> getClickItem() {
+    public Click<ItemData> getClickItem() {
         return clickItem;
     }
 
@@ -51,29 +47,29 @@ public abstract class MainPage extends Window {
 
     protected abstract FilterPage getFilterPage();
 
-    protected abstract AddPage getAddPage();
+    protected abstract EditPage getAddPage();
 
     public class ItemData {
-        private Text tvFinishDate;
-        private Text tvMoney;
-        private Text tvTotalRate;
+        private String finishDate;
+        private String money;
+        private String totalRate;
 
-        private ItemData(Graph graph, ListViewItem listViewItem) {
-            tvFinishDate = new Text(new View(graph, listViewItem, new ById("tv_finish_date")));
-            tvMoney = new Text(new View(graph, listViewItem, new ById("tv_money")));
-            tvTotalRate = new Text(new View(graph, listViewItem, new ById("tv_bonus_interest_rate")));
+        private ItemData(View listViewItem) {
+            finishDate = new Text(listViewItem.getViewById("tv_finish_date")).getCurrentValue();
+            money = new Text(listViewItem.getViewById("tv_money")).getCurrentValue();
+            totalRate = new Text(listViewItem.getViewById("tv_bonus_interest_rate")).getCurrentValue();
         }
 
-        public Text getTvFinishDate() {
-            return tvFinishDate;
+        public String getFinishDate() {
+            return finishDate;
         }
 
-        public Text getTvMoney() {
-            return tvMoney;
+        public String getMoney() {
+            return money;
         }
 
-        public Text getTvTotalRate() {
-            return tvTotalRate;
+        public String getTotalRate() {
+            return totalRate;
         }
     }
 }

@@ -10,13 +10,13 @@ import java.util.function.Supplier;
  * Created by rongyu.yan on 2/18/2017.
  */
 @Presentable
-public class Click<V extends View, R> extends ActionEvent<V, R> {
+public class Click<R> extends ActionEvent<View, R> {
 
-    public Click(Supplier<V> targetSupplier) {
+    public Click(Supplier<View> targetSupplier) {
         super(targetSupplier);
     }
 
-    public Click(V target) {
+    public Click(View target) {
         super(target);
     }
 }
