@@ -28,7 +28,7 @@ public abstract class MainPage extends Window {
         // 点击列表项进入详情页
         popWindow(getDetailPage(), clickItem, Timing.IMMEDIATELY, false)
                 .addInitState(listView.getSize(), 1)
-                .addStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
+                .addInitStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
         // 筛选
         popWindow(getFilterPage(), new Click(new View(graph, this, new ById("tv_filter"))), Timing.IMMEDIATELY, false);
         // 添加

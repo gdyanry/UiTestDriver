@@ -31,12 +31,12 @@ import java.util.stream.Collectors;
  */
 public class Graph {
     private List<Path> allPaths;
-    private Set<Path> unprocessedPaths;
+    private Set<Case> unprocessedCases;
     private Set<Path> failedPaths;
     private List<Object> records;
     private boolean isTraversing;
     private List<Communicator> communicators;
-    private List<Path> optionalPaths;
+    private List<Case> optionalPaths;
     Map<CacheProperty, Object> cacheProperties;
     private GraphWatcher watcher;
     private long actionTimeFrame;
@@ -52,7 +52,7 @@ public class Graph {
         allPaths = new LinkedList<>();
         records = new LinkedList<>();
         failedPaths = new HashSet<>();
-        unprocessedPaths = new HashSet<>();
+        unprocessedCases = new HashSet<>();
         cacheProperties = new HashMap<>();
         successTemp = new HashSet<>();
         rollingPath = new HashSet<>();
@@ -122,7 +122,7 @@ public class Graph {
     /**
      * @return 得到可供用户选择的测试用例（路径）列表。
      */
-    public List<Path> prepare() {
+    public List<Case> prepare() {
         if (optionalPaths == null) {
             synchronized (this) {
                 if (optionalPaths == null) {
@@ -139,7 +139,7 @@ public class Graph {
 
     /**
      * @param pathIndexes null indicates traversing all paths.
-     * @return return null if traversing is currently processing.
+     * @return 返回测试记录。return null if traversing is currently processing.
      */
     public List<Object> traverse(int[] pathIndexes) {
         if (isTraversing) {
@@ -151,20 +151,20 @@ public class Graph {
         }
         records.clear();
         failedPaths.clear();
-        unprocessedPaths.clear();
+        unprocessedCases.clear();
         if (pathIndexes == null) {
-            unprocessedPaths.addAll(optionalPaths);
+            unprocessedCases.addAll(optionalPaths);
         } else if (pathIndexes.length >= optionalPaths.size()) {
             return Collections.EMPTY_LIST;
         } else {
             for (int index : pathIndexes) {
-                unprocessedPaths.add(optionalPaths.get(index));
+                unprocessedCases.add(optionalPaths.get(index));
             }
         }
-        while (!unprocessedPaths.isEmpty() && isTraversing) {
-            Path path = unprocessedPaths.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true))).findFirst().get();
-            debug("traverse: %s", getPresentation(path));
-            deepRoll(path);
+        while (!unprocessedCases.isEmpty() && isTraversing) {
+            Case aCase = unprocessedCases.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame))).findFirst().get();
+            debug("execute: %s", getPresentation(aCase));
+            aCase.execute(this);
         }
         List<Object> result = new ArrayList<>(records);
         isTraversing = false;
@@ -182,7 +182,7 @@ public class Graph {
      * @param path
      * @return 是否成功
      */
-    private boolean deepRoll(Path path) {
+    boolean deepRoll(Path path) {
         // 状态变化回调事件只能被动触发，即成为其他路径的父路径
         if (path.getEvent() instanceof StateChangeCallback) {
             return false;
@@ -200,14 +200,14 @@ public class Graph {
         }
         // 未执行verify()
         successTemp.clear();
-        unprocessedPaths.remove(path);
+        unprocessedCases.remove(path);
         failedPaths.add(path);
         return false;
     }
 
     private void notifyStandBy(Path path) {
         if (watcher != null) {
-            watcher.onStandby(cacheProperties, unprocessedPaths, successTemp, failedPaths, path);
+            watcher.onStandby(cacheProperties, unprocessedCases, successTemp, failedPaths, path);
         }
     }
 
@@ -222,11 +222,11 @@ public class Graph {
             return false;
         }
         // make sure environment states are satisfied.
-        Optional<Property> any = path.initState.keySet().stream().filter(property -> !path.initState.get(property).test(property.getCurrentValue())).findAny();
+        Optional<Property> any = path.getInitState().keySet().stream().filter(property -> !path.getInitState().get(property).test(property.getCurrentValue())).findAny();
         if (any.isPresent()) {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
-            StatePredicate toState = path.initState.get(property);
+            StatePredicate toState = path.getInitState().get(property);
             String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toState));
             debug(msg);
             if (!property.switchTo(toState)) {
@@ -313,7 +313,7 @@ public class Graph {
         } else {
             failedPaths.add(path);
         }
-        unprocessedPaths.remove(path);
+        unprocessedCases.remove(path);
         exitStack(depth, !isPass, msg);
     }
 

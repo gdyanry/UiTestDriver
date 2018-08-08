@@ -26,7 +26,7 @@ public class TestApp {
         GraphWatcher watcher = new ConsoleGraphWatcher();
         Graph graph = new Graph(loggable, watcher);
         graph.registerCommunicator(communicator);
-        new SetupBox(graph).setup();
+        new SetupBox(graph).addWindow();
         List<Path> options = graph.prepare();
         int i = 0;
         for (Path option : options) {

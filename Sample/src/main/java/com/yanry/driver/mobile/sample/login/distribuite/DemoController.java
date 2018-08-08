@@ -18,6 +18,6 @@ public class DemoController extends CommunicatorController {
 
     @Override
     protected void populateGraph(Graph graph) {
-        new SetupBox(graph).setup();
+        new SetupBox(graph).addWindow();
     }
 }

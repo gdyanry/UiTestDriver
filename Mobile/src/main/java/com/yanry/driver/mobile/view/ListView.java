@@ -38,7 +38,7 @@ public class ListView extends View {
         return () -> {
             int iSize = size.getCurrentValue();
             if (iSize > 0) {
-                return new ListViewItem(getGraph(), this, index.apply(iSize));
+                return new View(getGraph(), this, new ByIndex(index.apply(iSize)));
             }
             return null;
         };
@@ -52,7 +52,7 @@ public class ListView extends View {
         return () -> {
             int iSize = size.getCurrentValue();
             for (int i = 0; i < iSize; i++) {
-                ListViewItem item = new ListViewItem(getGraph(), this, i);
+                View item = new View(getGraph(), this, new ByIndex(i));
                 if (filter.test(item)) {
                     return item;
                 }

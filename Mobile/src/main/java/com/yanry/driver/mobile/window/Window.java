@@ -38,7 +38,6 @@ public abstract class Window extends ViewContainer {
         closeEvent = new StateEvent<>(visibility, Visibility.Foreground, Visibility.NotCreated);
         resumeEvent = new StateEvent<>(visibility, Visibility.Background, Visibility.Foreground);
         pauseEvent = new StateEvent<>(visibility, Visibility.Foreground, Visibility.Background);
-        manager.windowInstances.add(this);
         ReflectionUtil.initStaticStringFields(getClass());
         if (!getClass().equals(NoWindow.class)) {
             StateEvent<Boolean> exitProcess = manager.getProcessState().getStateEvent(true, false);
@@ -54,7 +53,8 @@ public abstract class Window extends ViewContainer {
                 .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
     }
 
-    public Path popWindow(Window newWindow, Event inputEvent, Timing timing, boolean closeCurrent) {
+    public Path popWindow(Class<? extends Window> windowCls, Event inputEvent, Timing timing, boolean closeCurrent) {
+        Window newWindow = getWindow(windowCls);
         return createPath(inputEvent, manager.currentWindow.getStaticExpectation(timing, true, newWindow).addFollowingExpectation(new ActionExpectation() {
             @Override
             protected void run() {
@@ -115,6 +115,10 @@ public abstract class Window extends ViewContainer {
         }
         manager.graph.addPath(path);
         return path;
+    }
+
+    public <W extends Window> W getWindow(Class<W> windowCls) {
+        return (W) manager.windowInstances.get(windowCls);
     }
 
     public WindowManager getManager() {
