@@ -4,7 +4,7 @@ import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.Event;
+import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.DDPropertyExpectation;
@@ -13,9 +13,7 @@ import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
-import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ViewContainer;
-import com.yanry.driver.mobile.view.selector.ById;
 import lib.common.util.ReflectionUtil;
 
 @Presentable

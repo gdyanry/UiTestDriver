@@ -3,9 +3,11 @@
  */
 package com.yanry.driver.core.model.event;
 
+import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -15,7 +17,7 @@ import java.util.function.Supplier;
  * Jan 6, 2017
  */
 @Presentable
-public class ActionEvent<T, R> implements Event {
+public class ActionEvent<T, R> extends Event {
     private T target;
     private R preActionResult;
     private Supplier<T> targetSupplier;
@@ -54,5 +56,16 @@ public class ActionEvent<T, R> implements Event {
     @Override
     public <V> boolean matches(Property<V> property, V fromValue, V toValue) {
         return false;
+    }
+
+    @Override
+    protected void addHashFields(ArrayList<Object> hashFields) {
+        hashFields.add(target);
+    }
+
+    @Override
+    protected boolean equalsWithSameClass(Object object) {
+        ActionEvent that = (ActionEvent) object;
+        return getTarget() != null ? getTarget().equals(that.getTarget()) : that.getTarget() == null;
     }
 }

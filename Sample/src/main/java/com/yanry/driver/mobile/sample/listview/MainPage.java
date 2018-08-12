@@ -18,36 +18,30 @@ public abstract class MainPage extends Window {
     public MainPage(WindowManager manager) {
         super(manager);
         listView = new ListView(getGraph(), this, new ById("lv"));
-    }
-
-    @Override
-    protected void addCases(Graph graph, WindowManager manager) {
-        closeOnPressBack();
         clickItem = new Click<>(listView.getRandomItem());
-        clickItem.setPreAction(listViewItem -> new ItemData(listViewItem));
-        // 点击列表项进入详情页
-        popWindow(getDetailPage(), clickItem, Timing.IMMEDIATELY, false)
-                .addInitState(listView.getSize(), 1)
-                .addInitStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
-        // 筛选
-        popWindow(getFilterPage(), new Click(new View(graph, this, new ById("tv_filter"))), Timing.IMMEDIATELY, false);
-        // 添加
-        popWindow(getAddPage(), new Click(new View(graph, this, new ById("tv_add"))), Timing.IMMEDIATELY, false);
-    }
-
-    public Click<ItemData> getClickItem() {
-        return clickItem;
     }
 
     public ListView getListView() {
         return listView;
     }
 
-    protected abstract DetailPage getDetailPage();
+    public Click<ItemData> getClickItem() {
+        return clickItem;
+    }
 
-    protected abstract FilterPage getFilterPage();
-
-    protected abstract EditPage getAddPage();
+    @Override
+    protected void addCases(Graph graph, WindowManager manager) {
+        closeOnPressBack();
+        clickItem.setPreAction(listViewItem -> new ItemData(listViewItem));
+        // 点击列表项进入详情页
+        popWindow(DetailPage.class, clickItem, Timing.IMMEDIATELY, false)
+                .addInitState(listView.getSize(), 1)
+                .addInitStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
+        // 筛选
+        popWindow(FilterPage.class, new Click(new View(graph, this, new ById("tv_filter"))), Timing.IMMEDIATELY, false);
+        // 添加
+        popWindow(EditPage.class, new Click(new View(graph, this, new ById("tv_add"))), Timing.IMMEDIATELY, false);
+    }
 
     public class ItemData {
         private String finishDate;
