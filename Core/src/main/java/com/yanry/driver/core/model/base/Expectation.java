@@ -2,6 +2,8 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
+import com.yanry.driver.core.model.state.State;
+import com.yanry.driver.core.model.state.ValuePredicate;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +17,7 @@ public abstract class Expectation {
     private Timing timing;
     private List<Expectation> followingExpectations;
     private boolean needCheck;
+    private State<?> trigger;
 
     public Expectation(Timing timing, boolean needCheck) {
         this.timing = timing;
@@ -27,9 +30,19 @@ public abstract class Expectation {
         return this;
     }
 
+    public <V> Expectation setTrigger(Property<V> property, ValuePredicate<V> valuePredicate) {
+        trigger = new State<>(property, valuePredicate);
+        return this;
+    }
+
     @Presentable
     public List<Expectation> getFollowingExpectations() {
         return followingExpectations;
+    }
+
+    @Presentable
+    public State<?> getTrigger() {
+        return trigger;
     }
 
     void beforeVerify() {

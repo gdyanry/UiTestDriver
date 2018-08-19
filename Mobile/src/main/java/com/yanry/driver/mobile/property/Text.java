@@ -13,7 +13,7 @@ public class Text extends ViewProperty<String> {
     }
 
     @Override
-    protected boolean doSelfSwitch(String to) {
-        return false;
+    protected SwitchResult doSelfSwitch(String to) {
+        return SwitchResult.NoAction;
     }
 }

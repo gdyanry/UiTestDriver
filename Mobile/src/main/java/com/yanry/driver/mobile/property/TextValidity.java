@@ -1,10 +1,13 @@
 package com.yanry.driver.mobile.property;
 
+import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.base.Event;
+import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
+import com.yanry.driver.core.model.state.ValueWithin;
 import com.yanry.driver.mobile.view.View;
 
 import java.util.HashSet;
@@ -22,6 +25,14 @@ public class TextValidity extends Property<Boolean> {
         this.text = text;
         validContents = new HashSet<>();
         invalidContents = new HashSet<>();
+        ValueWithin<String> valid = new ValueWithin<>(validContents);
+        ValueWithin<String> invalid = new ValueWithin<>(invalidContents);
+        // to valid
+        view.getWindow().createPath(new StateEvent<>(text, invalid, valid), getStaticExpectation(Timing.IMMEDIATELY, false, true))
+                .addInitState(view, true);
+        // to invalid
+        view.getWindow().createPath(new StateEvent<>(text, valid, invalid), getStaticExpectation(Timing.IMMEDIATELY, false, false))
+                .addInitState(view, true);
     }
 
     public void addPositiveCases(String... contents) {
@@ -65,9 +76,6 @@ public class TextValidity extends Property<Boolean> {
 
     @Override
     protected boolean selfSwitch(Boolean to) {
-        if (to) {
-            return view.switchToVisible() || validContents.stream().anyMatch(c -> text.switchToValue(c));
-        }
-        return view.switchToVisible() || invalidContents.stream().anyMatch(c -> text.switchToValue(c));
+        return false;
     }
 }

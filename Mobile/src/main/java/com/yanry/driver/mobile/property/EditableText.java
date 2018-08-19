@@ -9,7 +9,13 @@ public class EditableText extends Text {
     }
 
     @Override
-    protected boolean doSelfSwitch(String to) {
-        return getView().switchToVisible() || getGraph().performAction(new EnterText(getView(), to));
+    protected SwitchResult doSelfSwitch(String to) {
+        if (getView().switchToValue(true)) {
+            return SwitchResult.ActionNeedCheck;
+        }
+        if (getGraph().performAction(new EnterText(getView(), to))) {
+            return SwitchResult.ActionNoCheck;
+        }
+        return SwitchResult.NoAction;
     }
 }

@@ -5,10 +5,12 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.runtime.*;
-import com.yanry.driver.core.model.state.StatePredicate;
+import com.yanry.driver.core.model.state.State;
+import com.yanry.driver.core.model.state.ValuePredicate;
 import lib.common.interfaces.Loggable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
@@ -43,6 +45,7 @@ public class Graph {
     private Set<Path> rollingPath;
     private Loggable loggable;
     private AtomicInteger stackDepth;
+    private Map<State, Expectation> pendingExpectations;
 
     public Graph(Loggable loggable, GraphWatcher watcher) {
         this.loggable = loggable;
@@ -56,6 +59,7 @@ public class Graph {
         successTemp = new HashSet<>();
         rollingPath = new HashSet<>();
         stackDepth = new AtomicInteger();
+        pendingExpectations = new HashMap<>();
     }
 
     public static Object getPresentation(Object obj) {
@@ -151,6 +155,9 @@ public class Graph {
         records.clear();
         failedPaths.clear();
         unprocessedPaths.clear();
+        successTemp.clear();
+        rollingPath.clear();
+        pendingExpectations.clear();
         if (pathIndexes == null) {
             unprocessedPaths.addAll(optionalPaths);
         } else if (pathIndexes.length >= optionalPaths.size()) {
@@ -197,7 +204,7 @@ public class Graph {
             }
             notifyStandBy(path);
         }
-        // 未执行verify()
+        // 还未执行到verify()便在shallowRoll()中返回false，说明没有可到达该path可执行环境且可用的路径
         successTemp.clear();
         unprocessedPaths.remove(path);
         failedPaths.add(path);
@@ -225,11 +232,11 @@ public class Graph {
         if (any.isPresent()) {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
-            StatePredicate toState = path.initState.get(property);
+            ValuePredicate toState = path.initState.get(property);
             String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toState));
             debug(msg);
             if (!property.switchTo(toState)) {
-                records.add(new MissedPath(path, new StateEvent<>(property, oldValue, toState)));
+                records.add(new MissedPath(path, new StateSwitch<>(property, oldValue, toState)));
                 rollingPath.remove(path);
                 exitStack(depth, true, msg);
                 return false;
@@ -246,10 +253,10 @@ public class Graph {
             // roll path for this switch event.
             Property property = event.getProperty();
             Object oldValue = property.getCurrentValue();
-            if (event.getFrom() != null && !event.getFrom().equals(oldValue)) {
+            if (event.getFrom() != null && !event.getFrom().test(oldValue)) {
                 String msg = String.format("switch state event(from): %s", getPresentation(event));
                 debug(msg);
-                if (!property.switchToValue(event.getFrom())) {
+                if (!property.switchTo(event.getFrom())) {
                     records.add(new MissedPath(path, event));
                     rollingPath.remove(path);
                     exitStack(depth, true, msg);
@@ -261,7 +268,7 @@ public class Graph {
             }
             String msg = String.format("switch state event(to): %s", getPresentation(event));
             debug(msg);
-            if (!property.switchToValue(event.getTo())) {
+            if (!property.switchTo(event.getTo())) {
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
                 exitStack(depth, true, msg);
@@ -280,28 +287,29 @@ public class Graph {
                 exitStack(depth, true, String.format("perform action fail: %s", getPresentation(event)));
                 return false;
             }
+            // collect paths that share the same environment states and event
+            // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
+            allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                    .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
+                debug("verify path: %s", getPresentation(p));
+                verify(p, false);
+            });
+            rollingPath.remove(path);
+            exitStack(depth, false, "perform action success");
+            return true;
         } else {
             records.add(new MissedPath(path, inputEvent));
             rollingPath.remove(path);
             exitStack(depth, true, String.format("unprocessed event: %s", getPresentation(inputEvent)));
             return false;
         }
-        // collect paths that share the same environment states and event
-        // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-        allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
-            debug("verify path: %s", getPresentation(p));
-            verify(p, false);
-        });
-        rollingPath.remove(path);
-        exitStack(depth, false, "perform action success");
-        return true;
     }
 
     private void verify(Path path, boolean isSuper) {
         String msg = String.format("%s: %s", isSuper ? "verify super" : "verify", getPresentation(path));
         int depth = enterStack(msg);
         Expectation expectation = path.getExpectation();
+
         expectation.beforeVerify();
         boolean isPass = expectation.verify();
         if (expectation.isNeedCheck()) {
@@ -334,7 +342,7 @@ public class Graph {
     boolean findPathToRoll(Predicate<Path> pathFilter) {
         String msg = "find path to roll";
         int depth = enterStack(msg);
-        if (!allPaths.stream().filter(p -> {
+        if (allPaths.stream().filter(p -> {
             if (!failedPaths.contains(p)) {
                 return pathFilter.test(p);
             }
@@ -347,11 +355,11 @@ public class Graph {
             debug("try to roll: %s", getPresentation(p));
             return shallowRoll(p);
         }).findFirst().isPresent()) {
-            exitStack(depth, true, msg);
-            return false;
+            exitStack(depth, false, msg);
+            return true;
         }
-        exitStack(depth, false, msg);
-        return true;
+        exitStack(depth, true, msg);
+        return false;
     }
 
     <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStateFilter) {

@@ -1,24 +1,27 @@
 package com.yanry.driver.core.model.event;
 
-import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
-
-import java.util.ArrayList;
+import com.yanry.driver.core.model.state.ValueEquals;
+import com.yanry.driver.core.model.state.ValuePredicate;
 
 /**
  * Created by rongyu.yan on 5/17/2017.
  */
 @Presentable
-public class StateEvent<V> extends Event {
+public class StateEvent<V> implements Event {
     private Property<V> property;
-    private V from;
-    private V to;
+    private ValuePredicate<V> from;
+    private ValuePredicate<V> to;
 
-    public StateEvent(Property<V> property, V from, V to) {
+    public StateEvent(Property<V> property, ValuePredicate<V> from, ValuePredicate<V> to) {
         this.property = property;
         this.from = from;
         this.to = to;
+    }
+
+    public StateEvent(Property<V> property, V from, V to) {
+        this(property, new ValueEquals<>(from), new ValueEquals<>(to));
     }
 
     @Presentable
@@ -27,30 +30,17 @@ public class StateEvent<V> extends Event {
     }
 
     @Presentable
-    public V getFrom() {
+    public ValuePredicate<V> getFrom() {
         return from;
     }
 
     @Presentable
-    public V getTo() {
+    public ValuePredicate<V> getTo() {
         return to;
     }
 
     @Override
-    public <V> boolean matches(Property<V> property, V fromValue, V toValue) {
-        return this.property.equals(property) && this.to.equals(toValue) && (from == null || this.from.equals(fromValue));
-    }
-
-    @Override
-    protected void addHashFields(ArrayList<Object> hashFields) {
-        hashFields.add(property);
-        hashFields.add(from);
-        hashFields.add(to);
-    }
-
-    @Override
-    protected boolean equalsWithSameClass(Object object) {
-        StateEvent event = (StateEvent) object;
-        return property.equals(event.getProperty()) && (from == null ? event.from == null : from.equals(event.getFrom())) && to.equals(event.getTo());
+    public boolean matches(Property property, Object fromValue, Object toValue) {
+        return this.property.equals(property) && this.to.test((V) toValue) && (from == null || this.from.test((V) fromValue));
     }
 }

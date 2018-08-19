@@ -36,12 +36,19 @@ public abstract class CacheProperty<V> extends Property<V> {
 
     @Override
     protected final boolean selfSwitch(V to) {
-        if (doSelfSwitch(to)) {
-            // 注意此时不是通过搜寻路径来实现状态变迁的，故触发动作后需要处理缓存值。
-            handleExpectation(to, needCheckAfterSelfSwitch());
-            return true;
+        SwitchResult switchResult = doSelfSwitch(to);
+        // 注意此时不是通过搜寻路径来实现状态变迁的，故触发动作后需要处理缓存值。
+        switch (switchResult) {
+            case NoAction:
+                return false;
+            case ActionNoCheck:
+                handleExpectation(to, false);
+                break;
+            case ActionNeedCheck:
+                handleExpectation(to, true);
+                break;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -59,5 +66,9 @@ public abstract class CacheProperty<V> extends Property<V> {
      * @param to
      * @return 是否触发ActionEvent
      */
-    protected abstract boolean doSelfSwitch(V to);
+    protected abstract SwitchResult doSelfSwitch(V to);
+
+    public enum SwitchResult {
+        NoAction, ActionNoCheck, ActionNeedCheck
+    }
 }

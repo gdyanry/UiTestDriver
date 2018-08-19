@@ -2,33 +2,38 @@ package com.yanry.driver.mobile.sample.login.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.mobile.model.LoginPathHandler;
-import com.yanry.driver.mobile.window.Window;
-import com.yanry.driver.mobile.window.WindowManager;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.RequestDialog;
 import com.yanry.driver.mobile.expectation.Toast;
+import com.yanry.driver.mobile.model.LoginPathHandler;
 import com.yanry.driver.mobile.property.*;
 import com.yanry.driver.mobile.sample.login.NetworkState;
 import com.yanry.driver.mobile.sample.login.TestApp;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.selector.ByDesc;
 import com.yanry.driver.mobile.view.selector.ByText;
+import com.yanry.driver.mobile.window.Window;
+import com.yanry.driver.mobile.window.WindowManager;
 
 /**
  * Created by rongyu.yan on 5/8/2017.
  */
-public abstract class LoginPage extends Window {
+public class LoginPage extends Window {
     public static String DESC_USER;
     public static String DESC_PWD;
+    
+    private CurrentUser currentUser;
+    private NetworkState networkState;
 
-    public LoginPage(WindowManager manager) {
-        super(manager);
+    public LoginPage(Graph graph, WindowManager manager, CurrentUser currentUser, NetworkState networkState) {
+        super(graph, manager);
+        this.currentUser = currentUser;
+        this.networkState = networkState;
     }
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).addInitState(new LoginState(graph, getCurrentUser()), false);
+        showOnStartUp(new Timing(false, TestApp.PLASH_DURATION)).addInitState(new LoginState(graph, currentUser), false);
         View etUser = new View(graph, this, new ByDesc(DESC_USER));
         Text txtUser = new EditableText(etUser);
         TextValidity userValidity = new TextValidity(etUser, txtUser);
@@ -49,42 +54,36 @@ public abstract class LoginPage extends Window {
         pwdValidity.addPositiveCases("123456");
         // 无网络连接
         createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, TestApp.TOAST_DURATION, "无网络连接"))
-                .addInitState(getNetworkState(), NetworkState.Network.Disconnected)
+                .addInitState(networkState, NetworkState.Network.Disconnected)
                 .addInitState(userValidity, true)
                 .addInitState(pwdValidity, true);
         // 请求对话框
         createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, TestApp.HTTP_TIMEOUT))
-                .addInitState(getNetworkState(), NetworkState.Network.Abnormal)
+                .addInitState(networkState, NetworkState.Network.Abnormal)
                 .addInitState(userValidity, true)
                 .addInitState(pwdValidity, true);
         createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, TestApp.HTTP_TIMEOUT))
-                .addInitState(getNetworkState(), NetworkState.Network.Normal)
+                .addInitState(networkState, NetworkState.Network.Normal)
                 .addInitState(userValidity, true)
                 .addInitState(pwdValidity, true);
         // 连接超时
         Timing withinTimeout = new Timing(true, TestApp.HTTP_TIMEOUT);
         createPath(clickLogin, new Toast(withinTimeout, graph, TestApp.TOAST_DURATION, "网络错误"))
-                .addInitState(getNetworkState(), NetworkState.Network.Abnormal)
+                .addInitState(networkState, NetworkState.Network.Abnormal)
                 .addInitState(userValidity, true)
                 .addInitState(pwdValidity, true);
         // 请求成功
-        LoginPathHandler loginPathHandler = new LoginPathHandler(getCurrentUser(), userValidity, pwdValidity);
+        LoginPathHandler loginPathHandler = new LoginPathHandler(currentUser, userValidity, pwdValidity);
         // login state
         loginPathHandler.handleCurrentUserOnSuccessLogin(withinTimeout, e -> createPath(clickLogin, e)
-                .addInitState(getNetworkState(), NetworkState.Network.Normal));
+                .addInitState(networkState, NetworkState.Network.Normal));
         // pop main page
-        loginPathHandler.initStateToSuccessLogin(() -> popWindow(getMainPage(), clickLogin, withinTimeout, true)
-                .addInitState(getNetworkState(), NetworkState.Network.Normal));
+        loginPathHandler.initStateToSuccessLogin(() -> popWindow(MainPage.class, clickLogin, withinTimeout, true)
+                .addInitState(networkState, NetworkState.Network.Normal));
         // business error
         loginPathHandler.initStateToInvalidUser(() -> createPath(clickLogin, new Toast(withinTimeout, graph, TestApp.TOAST_DURATION, "用户不存在"))
-                .addInitState(getNetworkState(), NetworkState.Network.Normal));
+                .addInitState(networkState, NetworkState.Network.Normal));
         loginPathHandler.initStateToInvalidPassword(() -> createPath(clickLogin, new Toast(withinTimeout, graph, TestApp.TOAST_DURATION, "密码错误"))
-                .addInitState(getNetworkState(), NetworkState.Network.Normal));
+                .addInitState(networkState, NetworkState.Network.Normal));
     }
-
-    protected abstract CurrentUser getCurrentUser();
-
-    protected abstract NetworkState getNetworkState();
-
-    protected abstract MainPage getMainPage();
 }

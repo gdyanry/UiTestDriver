@@ -2,29 +2,35 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.property.ProcessState;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by rongyu.yan on 4/17/2017.
  */
 public class WindowManager {
-    Graph graph;
-    HashMap<Class<? extends Window>, Window> windowInstances;
+    Map<Class<? extends Window>, Window> windowInstances;
     CurrentWindow currentWindow;
     private ProcessState processState;
     final NoWindow noWindow;
 
     public WindowManager(Graph graph) {
-        this.graph = graph;
-        windowInstances = new HashMap<>();
+        windowInstances = new LinkedHashMap<>();
         currentWindow = new CurrentWindow(graph, this);
         processState = new ProcessState(graph);
-        noWindow = new NoWindow(this);
+        // 开启进程
+        graph.addPath(new SwitchStateAction<>(processState, true).createPath().addInitState(processState, false));
+        // 退出进程
+        graph.addPath(new SwitchStateAction<>(processState, false).createPath().addInitState(processState, true));
+        noWindow = new NoWindow(graph, this);
         currentWindow.handleExpectation(noWindow, false);
-        graph.addPath(new Path(processState.getStateEvent(true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow)));
+        // 退出进程时清理当前窗口
+        graph.addPath(new Path(new StateEvent<>(processState, true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow)));
     }
 
     public void addWindow(Window... windows) {
@@ -35,7 +41,7 @@ public class WindowManager {
             windowInstances.put(window.getClass(), window);
         }
         for (Window window : windowInstances.values()) {
-            window.addCases(graph, this);
+            window.addCases(window.getGraph(), this);
         }
     }
 

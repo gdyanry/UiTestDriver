@@ -3,8 +3,11 @@
  */
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
+import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.runtime.StateToCheck;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
@@ -20,13 +23,24 @@ public class View extends ViewContainer {
     private ViewContainer parent;
     private ViewSelector selector;
     private IndependentVisibility independentVisibility;
-    private Graph graph;
 
     public View(Graph graph, ViewContainer parent, ViewSelector selector) {
-        this.graph = graph;
+        super(graph);
         this.parent = parent;
         this.selector = selector;
         independentVisibility = new IndependentVisibility(graph);
+        // 默认可见
+        independentVisibility.handleExpectation(true, false);
+        SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
+        getWindow().createPath(parent.getShowEvent(), showExpectation)
+                .addInitState(independentVisibility, true);
+        getWindow().createPath(new StateEvent<>(independentVisibility, false, true), showExpectation)
+                .addInitState(parent, true);
+        SSPropertyExpectation<Boolean> dismissExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, false);
+        getWindow().createPath(parent.getDismissEvent(), dismissExpectation)
+                .addInitState(independentVisibility, true);
+        getWindow().createPath(new StateEvent<>(independentVisibility, true, false), dismissExpectation)
+                .addInitState(parent, true);
     }
 
     public Window getWindow() {
@@ -35,15 +49,11 @@ public class View extends ViewContainer {
         } else if (parent instanceof View) {
             return ((View) parent).getWindow();
         }
-        return null;
+        throw new IllegalStateException("view is not contained in a window.");
     }
 
     public IndependentVisibility getIndependentVisibility() {
         return independentVisibility;
-    }
-
-    public Graph getGraph() {
-        return graph;
     }
 
     @Presentable
@@ -57,13 +67,18 @@ public class View extends ViewContainer {
     }
 
     @Override
-    public final boolean isVisible() {
-        return parent.isVisible() && independentVisibility.getCurrentValue();
+    public void handleExpectation(Boolean expectedValue, boolean needCheck) {
+
     }
 
     @Override
-    public final boolean switchToVisible() {
-        return parent.switchToVisible() || independentVisibility.switchToValue(true);
+    public Boolean getCurrentValue() {
+        return parent.getCurrentValue() && independentVisibility.getCurrentValue();
+    }
+
+    @Override
+    protected boolean selfSwitch(Boolean to) {
+        return false;
     }
 
     public class IndependentVisibility extends CacheProperty<Boolean> {
@@ -79,12 +94,12 @@ public class View extends ViewContainer {
 
         @Override
         protected Boolean checkValue() {
-            return parent.isVisible() && getGraph().checkState(new StateToCheck<>(this, false, true));
+            return getGraph().checkState(new StateToCheck<>(this, false, true));
         }
 
         @Override
-        protected boolean doSelfSwitch(Boolean to) {
-            return false;
+        protected SwitchResult doSelfSwitch(Boolean to) {
+            return SwitchResult.NoAction;
         }
     }
 }

@@ -5,8 +5,8 @@ import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 
 public class FilterPage extends Window {
-    public FilterPage(WindowManager manager) {
-        super(manager);
+    public FilterPage(Graph graph, WindowManager manager) {
+        super(graph, manager);
     }
 
     @Override

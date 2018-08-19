@@ -19,7 +19,7 @@ public abstract class ViewProperty<V> extends CacheProperty<V> {
 
     @Override
     protected final V checkValue() {
-        if (view.isVisible()) {
+        if (view.getCurrentValue()) {
             return doCheckValue();
         }
         return null;

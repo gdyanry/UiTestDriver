@@ -8,7 +8,7 @@ import com.yanry.driver.mobile.window.Window;
  * Created by rongyu.yan on 4/19/2017.
  */
 @Presentable
-public class ClickOutside<R> extends ActionEvent<Window, R> {
+public class ClickOutside<R> extends ActionEvent<ClickOutside<R>, Window, R> {
 
     public ClickOutside(Window data) {
         super(data);

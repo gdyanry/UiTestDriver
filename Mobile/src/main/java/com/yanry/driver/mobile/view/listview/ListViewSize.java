@@ -1,7 +1,7 @@
-package com.yanry.driver.mobile.property;
+package com.yanry.driver.mobile.view.listview;
 
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.mobile.view.ListView;
+import com.yanry.driver.mobile.property.ViewIntProperty;
 
 public class ListViewSize extends ViewIntProperty {
 

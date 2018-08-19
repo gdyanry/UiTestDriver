@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.runtime.Presentable;
 
 public class PreviousWindow extends CacheProperty<Window> {
@@ -23,7 +23,7 @@ public class PreviousWindow extends CacheProperty<Window> {
     }
 
     @Override
-    protected boolean doSelfSwitch(Window to) {
-        return false;
+    protected SwitchResult doSelfSwitch(Window to) {
+        return SwitchResult.NoAction;
     }
 }

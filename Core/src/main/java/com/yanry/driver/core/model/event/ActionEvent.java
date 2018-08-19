@@ -3,9 +3,9 @@
  */
 package com.yanry.driver.core.model.event;
 
-import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.entity.HashAndEquals;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -17,21 +17,21 @@ import java.util.function.Supplier;
  * Jan 6, 2017
  */
 @Presentable
-public class ActionEvent<T, R> extends Event {
-    private T target;
-    private R preActionResult;
-    private Supplier<T> targetSupplier;
-    private Function<T, R> preAction;
+public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends HashAndEquals<T> implements Event {
+    private TAR target;
+    private RET preActionResult;
+    private Supplier<TAR> targetSupplier;
+    private Function<TAR, RET> preAction;
 
-    public ActionEvent(Supplier<T> targetSupplier) {
+    public ActionEvent(Supplier<TAR> targetSupplier) {
         this.targetSupplier = targetSupplier;
     }
 
-    public ActionEvent(T target) {
+    public ActionEvent(TAR target) {
         this.target = target;
     }
 
-    public void setPreAction(Function<T, R> preAction) {
+    public void setPreAction(Function<TAR, RET> preAction) {
         this.preAction = preAction;
     }
 
@@ -45,17 +45,12 @@ public class ActionEvent<T, R> extends Event {
     }
 
     @Presentable
-    public T getTarget() {
+    public TAR getTarget() {
         return target;
     }
 
-    public R getPreActionResult() {
+    public RET getPreActionResult() {
         return preActionResult;
-    }
-
-    @Override
-    public <V> boolean matches(Property<V> property, V fromValue, V toValue) {
-        return false;
     }
 
     @Override
@@ -64,8 +59,12 @@ public class ActionEvent<T, R> extends Event {
     }
 
     @Override
-    protected boolean equalsWithSameClass(Object object) {
-        ActionEvent that = (ActionEvent) object;
-        return getTarget() != null ? getTarget().equals(that.getTarget()) : that.getTarget() == null;
+    protected boolean equalsWithSameClass(T t) {
+        return getTarget() != null ? getTarget().equals(t.getTarget()) : t.getTarget() == null;
+    }
+
+    @Override
+    public boolean matches(Property property, Object fromValue, Object toValue) {
+        return false;
     }
 }

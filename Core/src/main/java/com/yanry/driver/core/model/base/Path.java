@@ -3,10 +3,11 @@
  */
 package com.yanry.driver.core.model.base;
 
+import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.state.StateEquals;
-import com.yanry.driver.core.model.state.StatePredicate;
+import com.yanry.driver.core.model.state.ValueEquals;
+import com.yanry.driver.core.model.state.ValuePredicate;
 
 import java.util.HashMap;
 
@@ -21,7 +22,7 @@ public class Path {
     private Expectation expectation;
     private long timeFrame;
     private int unsatisfiedDegree;
-    HashMap<Property, StatePredicate> initState;
+    HashMap<Property, ValuePredicate> initState;
 
     public Path(Event event, Expectation expectation) {
         this.event = event;
@@ -30,11 +31,11 @@ public class Path {
     }
 
     public <V> Path addInitState(Property<V> property, V value) {
-        initState.put(property, new StateEquals(value));
+        initState.put(property, new ValueEquals(value));
         return this;
     }
 
-    public <V> Path addInitStatePredicate(Property<V> property, StatePredicate<V> predicate) {
+    public <V> Path addInitStatePredicate(Property<V> property, ValuePredicate<V> predicate) {
         initState.put(property, predicate);
         return this;
     }
@@ -45,8 +46,8 @@ public class Path {
         if (event instanceof StateEvent) {
             StateEvent stateEvent = (StateEvent) event;
             if (isToRoll) {
-                Object from = stateEvent.getFrom();
-                if (from != null && !from.equals(stateEvent.getProperty().getCurrentValue())) {
+                ValuePredicate from = stateEvent.getFrom();
+                if (from != null && !from.test(stateEvent.getProperty().getCurrentValue())) {
                     addOne = true;
                 }
             } else {
@@ -64,7 +65,7 @@ public class Path {
     }
 
     @Presentable
-    public HashMap<Property, StatePredicate> getInitState() {
+    public HashMap<Property, ValuePredicate> getInitState() {
         return initState;
     }
 

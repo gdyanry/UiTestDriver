@@ -21,7 +21,7 @@ public class ViewIntProperty extends IntProperty {
 
     @Override
     protected final Integer checkValue() {
-        if (view.isVisible()) {
+        if (view.getCurrentValue()) {
             return getGraph().checkState(new StateToCheck<>(this));
         }
         return null;

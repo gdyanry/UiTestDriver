@@ -4,13 +4,13 @@ import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.base.Event;
+import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.DDPropertyExpectation;
-import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
+import com.yanry.driver.core.model.state.ValueEquals;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
@@ -26,11 +26,12 @@ public abstract class Window extends ViewContainer {
     PreviousWindow previousWindow;
     private WindowManager manager;
 
-    public Window(WindowManager manager) {
+    public Window(Graph graph, WindowManager manager) {
+        super(graph);
         this.manager = manager;
-        previousWindow = new PreviousWindow(manager.graph, this);
+        previousWindow = new PreviousWindow(graph, this);
         previousWindow.handleExpectation(manager.noWindow, false);
-        visibility = new VisibilityState(manager.graph, this);
+        visibility = new VisibilityState(graph, this);
         visibility.handleExpectation(Visibility.NotCreated, false);
         createEvent = new StateEvent<>(visibility, Visibility.NotCreated, Visibility.Foreground);
         closeEvent = new StateEvent<>(visibility, Visibility.Foreground, Visibility.NotCreated);
@@ -38,41 +39,46 @@ public abstract class Window extends ViewContainer {
         pauseEvent = new StateEvent<>(visibility, Visibility.Foreground, Visibility.Background);
         ReflectionUtil.initStaticStringFields(getClass());
         if (!getClass().equals(NoWindow.class)) {
-            StateEvent<Boolean> exitProcess = manager.getProcessState().getStateEvent(true, false);
-            SSPropertyExpectation<Visibility> notCreated = visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated);
-            createPath(exitProcess, notCreated).addInitState(visibility, Visibility.Background);
-            createPath(exitProcess, notCreated).addInitState(visibility, Visibility.Foreground);
+            // 退出进程时visibility->NotCreated
+            createPath(new StateEvent<>(manager.getProcessState(), true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated))
+                    .addInitStatePredicate(visibility, new VisibilityNotEquals(Visibility.NotCreated));
+            // 进入前台时visible->true
+            createPath(new StateEvent<>(visibility, new VisibilityNotEquals(Visibility.Foreground), new ValueEquals<>(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, true));
+            // 退出前台时visible->false
+            createPath(new StateEvent<>(visibility, new ValueEquals<>(Visibility.Foreground), new VisibilityNotEquals(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, false));
         }
     }
 
     public Path showOnStartUp(Timing timing) {
-        return createPath(manager.getProcessState().getStateEvent(false, true), manager.currentWindow.getStaticExpectation(timing, true, this)
+        return createPath(new StateEvent<>(manager.getProcessState(), false, true), manager.currentWindow.getStaticExpectation(timing, true, this)
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow))
                 .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
     }
 
     public Path popWindow(Class<? extends Window> windowCls, Event inputEvent, Timing timing, boolean closeCurrent) {
         Window newWindow = getWindow(windowCls);
-        return createPath(inputEvent, manager.currentWindow.getStaticExpectation(timing, true, newWindow).addFollowingExpectation(new ActionExpectation() {
-            @Override
-            protected void run() {
-                handleSingleInstance(newWindow.previousWindow.getCurrentValue(), newWindow);
-            }
-
-            private void handleSingleInstance(Window queriedWindow, Window kickWindow) {
-                if (queriedWindow != null && !queriedWindow.equals(manager.noWindow) && queriedWindow.previousWindow != null) {
-                    Window previous = queriedWindow.previousWindow.getCurrentValue();
-                    if (previous.equals(manager.noWindow)) {
-                        return;
-                    } else if (previous.equals(kickWindow)) {
-                        queriedWindow.previousWindow.handleExpectation(previous.previousWindow.getCurrentValue(), false);
-                    } else {
-                        handleSingleInstance(previous, kickWindow);
+        return createPath(inputEvent, manager.currentWindow.getStaticExpectation(timing, true, newWindow)
+                .addFollowingExpectation(new ActionExpectation() {
+                    @Override
+                    protected void run() {
+                        handleSingleInstance(newWindow.previousWindow.getCurrentValue(), newWindow);
                     }
-                }
-            }
-            // TODO 处理相同页面多个实例的情况
-        }).addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this))
+
+                    private void handleSingleInstance(Window queriedWindow, Window kickWindow) {
+                        if (queriedWindow != null && !queriedWindow.equals(manager.noWindow) && queriedWindow.previousWindow != null) {
+                            Window previous = queriedWindow.previousWindow.getCurrentValue();
+                            if (previous.equals(manager.noWindow)) {
+                                return;
+                            } else if (previous.equals(kickWindow)) {
+                                queriedWindow.previousWindow.handleExpectation(previous.previousWindow.getCurrentValue(), false);
+                            } else {
+                                handleSingleInstance(previous, kickWindow);
+                            }
+                        }
+                    }
+                })
+                // TODO 处理相同页面多个实例的情况
+                .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this))
                 .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background))
                 .addFollowingExpectation(newWindow.visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
     }
@@ -111,7 +117,7 @@ public abstract class Window extends ViewContainer {
             path.addInitState(visibility, Visibility.Foreground);
             path.addInitState(manager.getProcessState(), true);
         }
-        manager.graph.addPath(path);
+        getGraph().addPath(path);
         return path;
     }
 
@@ -131,10 +137,6 @@ public abstract class Window extends ViewContainer {
         return previousWindow;
     }
 
-    public Graph getGraph() {
-        return manager.graph;
-    }
-
     public StateEvent<Visibility> getCreateEvent() {
         return createEvent;
     }
@@ -151,15 +153,23 @@ public abstract class Window extends ViewContainer {
         return pauseEvent;
     }
 
+    protected abstract void addCases(Graph graph, WindowManager manager);
+
     @Override
-    public boolean isVisible() {
+    public void handleExpectation(Boolean expectedValue, boolean needCheck) {
+
+    }
+
+    @Override
+    public Boolean getCurrentValue() {
         return visibility.getCurrentValue() == Visibility.Foreground;
     }
 
     @Override
-    public boolean switchToVisible() {
-        return manager.currentWindow.switchToValue(this);
+    protected boolean selfSwitch(Boolean to) {
+        if (to) {
+            return visibility.switchToValue(Visibility.Foreground);
+        }
+        return visibility.switchTo(new VisibilityNotEquals(Visibility.Foreground));
     }
-
-    protected abstract void addCases(Graph graph, WindowManager manager);
 }

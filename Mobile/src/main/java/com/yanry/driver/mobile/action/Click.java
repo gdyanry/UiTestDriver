@@ -11,7 +11,7 @@ import java.util.function.Supplier;
  * Created by rongyu.yan on 2/18/2017.
  */
 @Presentable
-public class Click<R> extends ActionEvent<View, R> {
+public class Click<R> extends ActionEvent<Click<R>, View, R> {
 
     public Click(Supplier<View> targetSupplier) {
         super(targetSupplier);

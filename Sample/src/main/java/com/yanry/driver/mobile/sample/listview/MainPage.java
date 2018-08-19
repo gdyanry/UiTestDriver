@@ -5,65 +5,67 @@ import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.UnaryIntPredicate;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
-import com.yanry.driver.mobile.view.ListView;
 import com.yanry.driver.mobile.view.View;
+import com.yanry.driver.mobile.view.listview.ListView;
+import com.yanry.driver.mobile.view.listview.ListViewItem;
 import com.yanry.driver.mobile.view.selector.ById;
 import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 
 public abstract class MainPage extends Window {
-    private ListView listView;
-    private Click<ItemData> clickItem;
+    private ListView<MainListItem> listView;
 
-    public MainPage(WindowManager manager) {
-        super(manager);
-        listView = new ListView(getGraph(), this, new ById("lv"));
-        clickItem = new Click<>(listView.getRandomItem());
+    public MainPage(Graph graph, WindowManager manager) {
+        super(graph, manager);
+        listView = new ListView<>(graph, this, new ById("lv"), (g, l, i) -> new MainListItem(g, l, i));
     }
 
-    public ListView getListView() {
+    public ListView<MainListItem> getListView() {
         return listView;
-    }
-
-    public Click<ItemData> getClickItem() {
-        return clickItem;
     }
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
         closeOnPressBack();
-        clickItem.setPreAction(listViewItem -> new ItemData(listViewItem));
         // 点击列表项进入详情页
-        popWindow(DetailPage.class, clickItem, Timing.IMMEDIATELY, false)
+        popWindow(DetailPage.class, listView.getClickItemEvent(), Timing.IMMEDIATELY, false)
                 .addInitState(listView.getSize(), 1)
                 .addInitStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
         // 筛选
-        popWindow(FilterPage.class, new Click(new View(graph, this, new ById("tv_filter"))), Timing.IMMEDIATELY, false);
+        popWindow(FilterPage.class, new Click(new View(graph, this, new ById("filter"))), Timing.IMMEDIATELY, false);
         // 添加
-        popWindow(EditPage.class, new Click(new View(graph, this, new ById("tv_add"))), Timing.IMMEDIATELY, false);
+        popWindow(EditPage.class, new Click(new View(graph, this, new ById("add"))), Timing.IMMEDIATELY, false);
     }
 
-    public class ItemData {
-        private String finishDate;
-        private String money;
-        private String totalRate;
+    public class MainListItem extends ListViewItem<MainListItem> {
+        private Text tvFinishDate;
+        private Text tvMoney;
+        private Text tvTotalRate;
 
-        private ItemData(View listViewItem) {
-            finishDate = new Text(listViewItem.getViewById("tv_finish_date")).getCurrentValue();
-            money = new Text(listViewItem.getViewById("tv_money")).getCurrentValue();
-            totalRate = new Text(listViewItem.getViewById("tv_bonus_interest_rate")).getCurrentValue();
+        public MainListItem(Graph graph, ListView<MainListItem> parent, int index) {
+            super(graph, parent, index);
+            tvFinishDate = new Text(getViewById("tv_finish_date"));
+            tvMoney = new Text(getViewById("tv_money"));
+            tvTotalRate = new Text(getViewById("tv_bonus_interest_rate"));
         }
 
-        public String getFinishDate() {
-            return finishDate;
+        public Text getTvFinishDate() {
+            return tvFinishDate;
         }
 
-        public String getMoney() {
-            return money;
+        public Text getTvMoney() {
+            return tvMoney;
         }
 
-        public String getTotalRate() {
-            return totalRate;
+        public Text getTvTotalRate() {
+            return tvTotalRate;
+        }
+
+        @Override
+        protected void fetchViewPropertyValues() {
+            tvFinishDate.getCurrentValue();
+            tvMoney.getCurrentValue();
+            tvTotalRate.getCurrentValue();
         }
     }
 }

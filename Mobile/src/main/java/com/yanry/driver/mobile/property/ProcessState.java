@@ -1,8 +1,7 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Graph;
 
 /**
  * Created by rongyu.yan on 3/9/2017.
@@ -19,7 +18,7 @@ public class ProcessState extends CacheProperty<Boolean> {
     }
 
     @Override
-    protected boolean doSelfSwitch(Boolean to) {
-        return getGraph().performAction(new SwitchStateAction(this, to));
+    protected SwitchResult doSelfSwitch(Boolean to) {
+        return SwitchResult.NoAction;
     }
 }

@@ -12,8 +12,8 @@ import com.yanry.driver.mobile.view.selector.ByText;
  * Created by rongyu.yan on 5/11/2017.
  */
 public class AboutPage extends Window {
-    public AboutPage(WindowManager manager) {
-        super(manager);
+    public AboutPage(Graph graph, WindowManager manager) {
+        super(graph, manager);
     }
 
     @Override

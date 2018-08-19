@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.sample.login.distribuite;
 
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.mobile.sample.login.SetupBox;
+import com.yanry.driver.mobile.sample.login.TestApp;
 import com.yanry.driver.server.springboot.CommunicatorController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +18,6 @@ public class DemoController extends CommunicatorController {
 
     @Override
     protected void populateGraph(Graph graph) {
-        new SetupBox(graph).addWindow();
+        TestApp.setupWindow(graph);
     }
 }

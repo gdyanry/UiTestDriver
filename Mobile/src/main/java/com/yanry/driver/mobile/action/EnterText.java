@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Created by rongyu.yan on 2/28/2017.
  */
 @Presentable
-public class EnterText extends ActionEvent<View, Object> {
+public class EnterText extends ActionEvent<EnterText, View, Object> {
     private String text;
 
     public EnterText(View view, String text) {
@@ -25,13 +25,12 @@ public class EnterText extends ActionEvent<View, Object> {
 
     @Override
     protected void addHashFields(ArrayList<Object> hashFields) {
-        hashFields.add(getTarget());
+        super.addHashFields(hashFields);
         hashFields.add(text);
     }
 
     @Override
-    protected boolean equalsWithSameClass(Object object) {
-        EnterText that = (EnterText) object;
-        return getTarget().equals(that.getTarget()) && text.equals(that.text);
+    protected boolean equalsWithSameClass(EnterText object) {
+        return super.equalsWithSameClass(object) && text.equals(object.text);
     }
 }
