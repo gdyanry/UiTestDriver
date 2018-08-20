@@ -17,7 +17,7 @@ public abstract class Expectation {
     private Timing timing;
     private List<Expectation> followingExpectations;
     private boolean needCheck;
-    private State<?> trigger;
+    private State trigger;
 
     public Expectation(Timing timing, boolean needCheck) {
         this.timing = timing;
@@ -41,21 +41,30 @@ public abstract class Expectation {
     }
 
     @Presentable
-    public State<?> getTrigger() {
+    public State getTrigger() {
         return trigger;
     }
 
-    void beforeVerify() {
+    private void recursiveOnVerify() {
         onVerify();
-        followingExpectations.forEach(e -> e.beforeVerify());
+        followingExpectations.forEach(e -> e.recursiveOnVerify());
     }
 
-    final boolean verify() {
-        if (doVerify()) {
-            followingExpectations.forEach(e -> e.verify());
-            return true;
+    private VerifyResult recursiveDoVerify(Graph graph) {
+        if (trigger == null || trigger.getValuePredicate().test(trigger.getProperty())) {
+            if (doVerify()) {
+                followingExpectations.forEach(e -> e.recursiveDoVerify(graph));
+                return VerifyResult.Success;
+            }
+            return VerifyResult.Failed;
         }
-        return false;
+        graph.addPendingExpectation(this);
+        return VerifyResult.Pending;
+    }
+
+    final VerifyResult verify(Graph graph) {
+        recursiveOnVerify();
+        return recursiveDoVerify(graph);
     }
 
     /**
@@ -74,4 +83,7 @@ public abstract class Expectation {
 
     protected abstract boolean doVerify();
 
+    public enum VerifyResult {
+        Success, Failed, Pending
+    }
 }

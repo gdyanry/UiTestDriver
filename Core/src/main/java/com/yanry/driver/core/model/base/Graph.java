@@ -3,13 +3,13 @@
  */
 package com.yanry.driver.core.model.base;
 
+import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.runtime.*;
-import com.yanry.driver.core.model.state.State;
 import com.yanry.driver.core.model.state.ValuePredicate;
 import lib.common.interfaces.Loggable;
 import lib.common.model.json.JSONArray;
@@ -41,11 +41,12 @@ public class Graph {
     Map<CacheProperty, Object> cacheProperties;
     private GraphWatcher watcher;
     private long actionTimeFrame;
-    private Set<Path> successTemp;
+    private Set<Path> temp;
     private Set<Path> rollingPath;
     private Loggable loggable;
     private AtomicInteger stackDepth;
-    private Map<State, Expectation> pendingExpectations;
+    private Set<Expectation> pendingExpectations;
+    private Set<Expectation> failedExpectation;
 
     public Graph(Loggable loggable, GraphWatcher watcher) {
         this.loggable = loggable;
@@ -56,10 +57,11 @@ public class Graph {
         failedPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
         cacheProperties = new HashMap<>();
-        successTemp = new HashSet<>();
+        temp = new HashSet<>();
         rollingPath = new HashSet<>();
         stackDepth = new AtomicInteger();
-        pendingExpectations = new HashMap<>();
+        pendingExpectations = new HashSet<>();
+        failedExpectation = new HashSet<>();
     }
 
     public static Object getPresentation(Object obj) {
@@ -122,6 +124,10 @@ public class Graph {
         allPaths.add(path);
     }
 
+    void addPendingExpectation(Expectation expectation) {
+        pendingExpectations.add(expectation);
+    }
+
     /**
      * @return 得到可供用户选择的测试用例（路径）列表。
      */
@@ -155,9 +161,10 @@ public class Graph {
         records.clear();
         failedPaths.clear();
         unprocessedPaths.clear();
-        successTemp.clear();
+        temp.clear();
         rollingPath.clear();
         pendingExpectations.clear();
+        failedExpectation.clear();
         if (pathIndexes == null) {
             unprocessedPaths.addAll(optionalPaths);
         } else if (pathIndexes.length >= optionalPaths.size()) {
@@ -186,7 +193,7 @@ public class Graph {
 
     /**
      * @param path
-     * @return 是否成功
+     * @return 是否执行到verify()
      */
     private boolean deepRoll(Path path) {
         // 状态变化回调事件只能被动触发，即成为其他路径的父路径
@@ -195,17 +202,15 @@ public class Graph {
         }
         notifyStandBy(path);
         while (shallowRoll(path)) {
-            if (successTemp.contains(path)) {
-                successTemp.clear();
+            // 添加到temp里面说明已经执行到verify()了
+            if (temp.contains(path)) {
+                temp.clear();
                 return true;
-            } else if (failedPaths.contains(path)) {
-                successTemp.clear();
-                return false;
             }
             notifyStandBy(path);
         }
         // 还未执行到verify()便在shallowRoll()中返回false，说明没有可到达该path可执行环境且可用的路径
-        successTemp.clear();
+        temp.clear();
         unprocessedPaths.remove(path);
         failedPaths.add(path);
         return false;
@@ -213,7 +218,7 @@ public class Graph {
 
     private void notifyStandBy(Path path) {
         if (watcher != null) {
-            watcher.onStandby(cacheProperties, unprocessedPaths, successTemp, failedPaths, path);
+            watcher.onStandby(cacheProperties, unprocessedPaths, temp, failedPaths, path);
         }
     }
 
@@ -309,52 +314,62 @@ public class Graph {
         String msg = String.format("%s: %s", isSuper ? "verify super" : "verify", getPresentation(path));
         int depth = enterStack(msg);
         Expectation expectation = path.getExpectation();
-
-        expectation.beforeVerify();
-        boolean isPass = expectation.verify();
-        if (expectation.isNeedCheck()) {
-            records.add(new Assertion(expectation, isPass));
+        VerifyResult result = expectation.verify(this);
+        if (result != VerifyResult.Pending) {
+            if (expectation.isNeedCheck()) {
+                records.add(new Assertion(expectation, result == VerifyResult.Success));
+            }
+            if (result == VerifyResult.Failed) {
+                failedExpectation.add(expectation);
+                failedPaths.add(path);
+            }
         }
-        if (isPass) {
-            successTemp.add(path);
-        } else {
-            failedPaths.add(path);
-        }
+        temp.add(path);
         unprocessedPaths.remove(path);
-        exitStack(depth, !isPass, msg);
+        exitStack(depth, result == VerifyResult.Failed, msg);
     }
 
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
+        if (pendingExpectations.size() > 0) {
+            ArrayList<Expectation> pending = new ArrayList<>(pendingExpectations);
+            for (Expectation expectation : pending) {
+                VerifyResult result = expectation.verify(this);
+                if (result != VerifyResult.Pending) {
+                    if (expectation.isNeedCheck()) {
+                        records.add(new Assertion(expectation, result == VerifyResult.Success));
+                    }
+                    if (result == VerifyResult.Failed) {
+                        failedExpectation.add(expectation);
+                        allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation() == expectation).forEach(p -> failedPaths.add(p));
+                    }
+                    pendingExpectations.remove(expectation);
+                }
+            }
+        }
         if (!to.equals(from)) {
             allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                    .forEach(path -> {
-                        verify(path, true);
-                    });
+                    .forEach(path -> verify(path, true));
         }
     }
 
     /**
      * try paths that satisfy the given predicates until an action event is triggered.
      *
-     * @param pathFilter
+     * @param expectationFilter
      * @return 是否触发ActionEvent
      */
-    boolean findPathToRoll(Predicate<Path> pathFilter) {
+    boolean findPathToRoll(Predicate<Expectation> expectationFilter) {
         String msg = "find path to roll";
         int depth = enterStack(msg);
-        if (allPaths.stream().filter(p -> {
-            if (!failedPaths.contains(p)) {
-                return pathFilter.test(p);
-            }
-            return false;
-        }).sorted(Comparator.comparingInt(p -> {
-            int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
-            debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, getPresentation(p));
-            return unsatisfiedDegree;
-        })).filter(p -> {
-            debug("try to roll: %s", getPresentation(p));
-            return shallowRoll(p);
-        }).findFirst().isPresent()) {
+        if (allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
+                .sorted(Comparator.comparingInt(p -> {
+                    int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
+                    debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, getPresentation(p));
+                    return unsatisfiedDegree;
+                })).filter(p -> {
+                    debug("try to roll: %s", getPresentation(p));
+                    return shallowRoll(p);
+                }).findFirst().isPresent()) {
             exitStack(depth, false, msg);
             return true;
         }
@@ -362,18 +377,26 @@ public class Graph {
         return false;
     }
 
-    <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStateFilter) {
-        return findPathToRoll(p -> isSatisfied(p.getExpectation(), endStateFilter));
+    private boolean isSatisfied(Expectation expectation, Predicate<Expectation> expectationFilter) {
+        if (failedExpectation.contains(expectation)) {
+            return false;
+        }
+        if (expectationFilter.test(expectation)) {
+            return true;
+        }
+        return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, expectationFilter));
     }
 
-    private <V> boolean isSatisfied(Expectation expectation, BiPredicate<Property<V>, V> endStateFilter) {
-        if (expectation instanceof PropertyExpectation) {
-            PropertyExpectation<V> exp = (PropertyExpectation<V>) expectation;
-            if (endStateFilter.test(exp.getProperty(), exp.getExpectedValue())) {
-                return true;
+    <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStateFilter) {
+        return findPathToRoll(e -> {
+            if (e instanceof PropertyExpectation) {
+                PropertyExpectation<V> exp = (PropertyExpectation<V>) e;
+                if (endStateFilter.test(exp.getProperty(), exp.getExpectedValue())) {
+                    return true;
+                }
             }
-        }
-        return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, endStateFilter));
+            return false;
+        });
     }
 
     boolean isValueFresh(Property property) {

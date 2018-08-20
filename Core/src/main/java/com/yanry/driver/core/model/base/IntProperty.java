@@ -16,9 +16,9 @@ public abstract class IntProperty extends CacheProperty<Integer> {
     @Override
     protected final SwitchResult doSelfSwitch(Integer to) {
         int currentValue = getCurrentValue();
-        if (getGraph().findPathToRoll(path -> {
-            if (path.getExpectation() instanceof ShiftExpectation) {
-                ShiftExpectation expectation = (ShiftExpectation) path.getExpectation();
+        if (getGraph().findPathToRoll(exp -> {
+            if (exp instanceof ShiftExpectation) {
+                ShiftExpectation expectation = (ShiftExpectation) exp;
                 if (expectation.getProperty() == this) {
                     return expectation.upward == currentValue < to;
                 }
