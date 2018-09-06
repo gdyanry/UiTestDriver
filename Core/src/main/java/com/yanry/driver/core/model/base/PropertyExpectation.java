@@ -1,9 +1,7 @@
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.Timing;
-
-import java.util.function.BiPredicate;
+import com.yanry.driver.core.model.runtime.Presentable;
 
 /**
  * A key-value pair (aka state) expectation
@@ -16,12 +14,22 @@ public abstract class PropertyExpectation<V> extends Expectation {
         super(timing, needCheck);
     }
 
+    @Presentable
+    public final V getExpectedValue() {
+        try {
+            return doGetExpectedValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    protected abstract V doGetExpectedValue();
+
     public abstract Property<V> getProperty();
 
-    public abstract V getExpectedValue();
-
     @Override
-    protected void onVerify() {
+    protected final void onVerify() {
         oldValue = getProperty().getCurrentValue();
     }
 
@@ -34,6 +42,6 @@ public abstract class PropertyExpectation<V> extends Expectation {
         if (actualValue != null && !actualValue.equals(oldValue)) {
             property.getGraph().verifySuperPaths(property, oldValue, actualValue);
         }
-        return expectedValue.equals(actualValue);
+        return expectedValue != null && expectedValue.equals(actualValue);
     }
 }

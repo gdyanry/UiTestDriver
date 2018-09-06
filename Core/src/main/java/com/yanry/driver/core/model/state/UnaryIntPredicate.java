@@ -22,7 +22,7 @@ public class UnaryIntPredicate extends UnaryPredicate<Integer> implements Suppli
 
     @Override
     public boolean test(Integer value) {
-        return isLargerThan ? value > getOperand() : value < getOperand();
+        return value == null ? false : isLargerThan ? value > getOperand() : value < getOperand();
     }
 
     @Override

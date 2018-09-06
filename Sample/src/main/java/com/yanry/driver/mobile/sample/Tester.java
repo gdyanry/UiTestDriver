@@ -1,38 +1,30 @@
-package com.yanry.driver.mobile.sample.login;
+package com.yanry.driver.mobile.sample;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.ConsoleCommunicator;
-import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.MissedPath;
-import com.yanry.driver.mobile.property.CurrentUser;
-import com.yanry.driver.mobile.sample.login.window.AboutPage;
-import com.yanry.driver.mobile.sample.login.window.LoginPage;
-import com.yanry.driver.mobile.sample.login.window.MainPage;
 import com.yanry.driver.mobile.sample.model.ConsoleGraphWatcher;
 import com.yanry.driver.mobile.sample.model.ConsoleLoggable;
-import com.yanry.driver.mobile.window.WindowManager;
 import lib.common.util.ConsoleUtil;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by rongyu.yan on 2/17/2017.
  */
-public class TestApp {
-    public static final int HTTP_TIMEOUT = 10000;
-    public static final int TOAST_DURATION = 2000;
-    public static final int PLASH_DURATION = 3000;
+public class Tester {
 
-    public static void main(String[] args) {
+    public static void test(Consumer<Graph> setupGraph) {
         ConsoleLoggable loggable = new ConsoleLoggable();
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         GraphWatcher watcher = new ConsoleGraphWatcher();
         Graph graph = new Graph(loggable, watcher);
         graph.registerCommunicator(communicator);
-        setupWindow(graph);
+        setupGraph.accept(graph);
         List<Path> options = graph.prepare();
         int i = 0;
         for (Path option : options) {
@@ -73,17 +65,5 @@ public class TestApp {
             }
         }
         System.out.printf("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);
-    }
-
-    public static void setupWindow(Graph graph) {
-        WindowManager manager = new WindowManager(graph);
-        CurrentUser currentUser = new CurrentUser(graph);
-        currentUser.addUserPassword("xiaoming.wang", "aaa111");
-        NetworkState networkState = new NetworkState(graph);
-        graph.addPath(new Path(new StateEvent<>(manager.getProcessState(), false, true), new ShowSplash(graph)));
-        LoginPage loginPage = new LoginPage(graph, manager, currentUser, networkState);
-        MainPage mainPage = new MainPage(graph, manager, currentUser);
-        AboutPage aboutPage = new AboutPage(graph, manager);
-        manager.addWindow(loginPage, mainPage, aboutPage);
     }
 }

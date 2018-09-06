@@ -22,9 +22,8 @@ public class DDPropertyExpectation<V> extends PropertyExpectation<V> {
         return propertySupplier.get();
     }
 
-    @Presentable
     @Override
-    public V getExpectedValue() {
+    protected V doGetExpectedValue() {
         return valueSupplier.get();
     }
 }

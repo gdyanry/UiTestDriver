@@ -7,7 +7,7 @@ import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 
-public abstract class DetailPage extends Window {
+public class DetailPage extends Window {
     private Text tvPrincipal;
     private Text tvFinishDate;
     private Text tvTotalRate;
@@ -32,6 +32,7 @@ public abstract class DetailPage extends Window {
         Click clickEdit = new Click(getViewById("edit"));
         popWindow(EditPage.class, clickEdit, Timing.IMMEDIATELY, false);
         // 删除
-        close(new Click(getViewById("delete")), Timing.IMMEDIATELY, getWindow(MainPage.class).getListView().getSize().getShiftExpectation(Timing.IMMEDIATELY, true, false, 1));
+        Click clickDel = new Click(getViewById("delete"));
+        close(clickDel, Timing.IMMEDIATELY, getWindow(MainPage.class).getListView().getSize().getShiftExpectation(Timing.IMMEDIATELY, true, false, 1));
     }
 }

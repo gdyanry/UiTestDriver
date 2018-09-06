@@ -26,7 +26,7 @@ public class EditPage extends Window {
         TextValidity etRawInterestRate = getTextValidity("et_raw_interest_rate");
         TextValidity etPassDays = getTextValidity("et_pass_days");
         TextValidity etTotalDays = getTextValidity("et_total_days");
-        EditableText etRemark = new EditableText(getViewById("et_remark"));
+//        EditableText etRemark = new EditableText(getViewById("et_remark"));
         Click click = new Click(new View(graph, this, new ById("finish")));
         // 添加
         ListView<MainListItem> listView = getWindow(MainPage.class).getListView();
@@ -38,7 +38,6 @@ public class EditPage extends Window {
                 .addInitState(etPassDays, true)
                 .addInitState(etTotalDays, true);
         close(click, Timing.IMMEDIATELY);
-
     }
 
     private TextValidity getTextValidity(String viewId) {

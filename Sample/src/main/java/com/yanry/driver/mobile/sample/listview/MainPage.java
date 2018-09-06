@@ -12,7 +12,7 @@ import com.yanry.driver.mobile.view.selector.ById;
 import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 
-public abstract class MainPage extends Window {
+public class MainPage extends Window {
     private ListView<MainListItem> listView;
 
     public MainPage(Graph graph, WindowManager manager) {
@@ -26,6 +26,7 @@ public abstract class MainPage extends Window {
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
+        showOnStartUp(Timing.IMMEDIATELY);
         closeOnPressBack();
         // 点击列表项进入详情页
         popWindow(DetailPage.class, listView.getClickItemEvent(), Timing.IMMEDIATELY, false)

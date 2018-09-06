@@ -16,9 +16,8 @@ public class SDPropertyExpectation<V> extends StaticPropertyExpectation<V> {
         this.valueSupplier = valueSupplier;
     }
 
-    @Presentable
     @Override
-    public V getExpectedValue() {
+    protected V doGetExpectedValue() {
         return valueSupplier.get();
     }
 }
