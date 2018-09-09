@@ -16,15 +16,17 @@ import com.yanry.driver.mobile.window.WindowManager;
  */
 public class MainPage extends Window {
     private CurrentUser currentUser;
+    private LoginState loginState;
 
-    public MainPage(Graph graph, WindowManager manager, CurrentUser currentUser) {
+    public MainPage(Graph graph, WindowManager manager, CurrentUser currentUser, LoginState loginState) {
         super(graph, manager);
         this.currentUser = currentUser;
+        this.loginState = loginState;
     }
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        showOnStartUp(new Timing(false, Const.PLASH_DURATION)).addInitState(new LoginState(graph, currentUser), true);
+        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addInitState(loginState, true);
         Click clickLogout = new Click(new View(graph, this, new ByText("退出登录")));
         popWindow(LoginPage.class, clickLogout, Timing.IMMEDIATELY, true);
         createPath(clickLogout, currentUser.getStaticExpectation(Timing.IMMEDIATELY, false, ""));

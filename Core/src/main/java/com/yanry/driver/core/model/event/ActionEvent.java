@@ -23,6 +23,9 @@ public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends H
     private Supplier<TAR> targetSupplier;
     private Function<TAR, RET> preAction;
 
+    public ActionEvent() {
+    }
+
     public ActionEvent(Supplier<TAR> targetSupplier) {
         this.targetSupplier = targetSupplier;
     }

@@ -5,6 +5,7 @@ import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
+import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.property.ProcessState;
 
 import java.util.LinkedHashMap;
@@ -24,7 +25,7 @@ public class WindowManager {
         currentWindow = new CurrentWindow(graph, this);
         processState = new ProcessState(graph);
         // 开启进程
-        graph.addPath(new SwitchStateAction<>(processState, true).createPath().addInitState(processState, false));
+        graph.addPath(new Path(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addInitState(processState, false));
         // 退出进程
         graph.addPath(new SwitchStateAction<>(processState, false).createPath().addInitState(processState, true));
         noWindow = new NoWindow(graph, this);

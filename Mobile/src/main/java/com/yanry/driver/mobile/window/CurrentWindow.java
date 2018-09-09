@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.CacheProperty;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.core.model.runtime.fetch.Select;
 
 public class CurrentWindow extends CacheProperty<Window> {
     private WindowManager manager;
@@ -20,7 +20,7 @@ public class CurrentWindow extends CacheProperty<Window> {
         for (Window window : manager.windowInstances.values()) {
             options[++i] = window;
         }
-        return getGraph().checkState(new StateToCheck<>(this, options));
+        return getGraph().obtainValue(new Select<>(this, options));
     }
 
     @Override

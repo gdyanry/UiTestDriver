@@ -1,10 +1,10 @@
 package com.yanry.driver.core.model.communicator;
 
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.util.ConsoleUtil;
 
 /**
@@ -12,7 +12,7 @@ import lib.common.util.ConsoleUtil;
  */
 public class ConsoleCommunicator extends SerializedCommunicator {
     private String getInput(int repeat, String type, Object content, Runnable showHint) {
-        String prompt = String.format("----%s: %s", type, Graph.getPresentation(content));
+        String prompt = String.format("----%s: %s", type, Utils.getPresentation(content));
         if (repeat == 0) {
             return ConsoleUtil.readLine(prompt);
         } else {
@@ -26,18 +26,8 @@ public class ConsoleCommunicator extends SerializedCommunicator {
     }
 
     @Override
-    protected <V> String checkState(int repeat, StateToCheck<V> stateToCheck) {
-        return getInput(repeat, "select", stateToCheck, () -> {
-            for (int i = 0; i < stateToCheck.getOptions().length; i++) {
-                V v = stateToCheck.getOptions()[i];
-                System.out.printf("%s - %s%n", i, Graph.getPresentation(v));
-            }
-        });
-    }
-
-    @Override
-    public String fetchValue(Property<String> property) {
-        return getInput(0, "check", property, null);
+    protected <V> String checkState(int repeat, Obtainable<V> stateToCheck) {
+        return getInput(repeat, "obtain", stateToCheck, null);
     }
 
     @Override

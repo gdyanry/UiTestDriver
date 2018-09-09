@@ -19,7 +19,6 @@ public abstract class PropertyExpectation<V> extends Expectation {
         try {
             return doGetExpectedValue();
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }

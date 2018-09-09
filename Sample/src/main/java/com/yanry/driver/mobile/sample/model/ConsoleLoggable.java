@@ -11,6 +11,6 @@ public class ConsoleLoggable implements Loggable {
 
     @Override
     public void error(String s, Object... objects) {
-        ConsoleUtil.error(2, s, objects);
+        ConsoleUtil.debug(2, "!! " + s, objects);
     }
 }

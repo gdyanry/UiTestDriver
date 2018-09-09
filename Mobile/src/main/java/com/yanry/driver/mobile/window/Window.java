@@ -11,6 +11,7 @@ import com.yanry.driver.core.model.expectation.DDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.ValueEquals;
+import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
@@ -49,10 +50,13 @@ public abstract class Window extends ViewContainer {
         }
     }
 
-    public Path showOnStartUp(Timing timing) {
-        return createPath(new StateEvent<>(manager.getProcessState(), false, true), manager.currentWindow.getStaticExpectation(timing, true, this)
+    public Path showOnLaunch(Timing timing) {
+        Path path = new Path(ClickLauncher.get(), manager.currentWindow.getStaticExpectation(timing, true, this)
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow))
-                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
+                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)))
+                .addInitState(manager.currentWindow, manager.noWindow);
+        getGraph().addPath(path);
+        return path;
     }
 
     public Path popWindow(Class<? extends Window> windowCls, Event inputEvent, Timing timing, boolean closeCurrent) {

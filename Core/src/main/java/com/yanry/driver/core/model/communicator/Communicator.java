@@ -3,7 +3,7 @@ package com.yanry.driver.core.model.communicator;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.ActionEvent;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 /**
  * Created by rongyu.yan on 3/2/2017.
@@ -14,9 +14,7 @@ public interface Communicator {
      * @param <V>
      * @return 返回null表示无法确定状态值。
      */
-    <V> V checkState(StateToCheck<V> stateToCheck);
-
-    String fetchValue(Property<String> property);
+    <V> V checkState(Obtainable<V> stateToCheck);
 
     /**
      *

@@ -1,6 +1,5 @@
 package com.yanry.driver.mobile.client.appium;
 
-import com.yanry.driver.core.model.runtime.StateToCheck;
 import com.yanry.driver.core.distribute.HttpClientReception;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.action.EnterText;

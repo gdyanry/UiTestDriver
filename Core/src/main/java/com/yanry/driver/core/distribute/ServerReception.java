@@ -1,12 +1,13 @@
 package com.yanry.driver.core.distribute;
 
+import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.SerializedCommunicator;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
 
@@ -37,7 +38,7 @@ public class ServerReception extends SerializedCommunicator {
         List<Path> paths = graph.prepare();
         JSONArray jsonArray = new JSONArray();
         for (Path path : paths) {
-            jsonArray.put(Graph.getPresentation(path));
+            jsonArray.put(Utils.getPresentation(path));
         }
         return jsonArray;
     }
@@ -62,7 +63,7 @@ public class ServerReception extends SerializedCommunicator {
             List<Object> result = graph.traverse(finalIndexes);
             JSONArray ja = new JSONArray();
             for (Object o : result) {
-                ja.put(Graph.getPresentation(o));
+                ja.put(Utils.getPresentation(o));
             }
             lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_RECORD, ja);
             try {
@@ -119,7 +120,7 @@ public class ServerReception extends SerializedCommunicator {
             return "0";
         }
         try {
-            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(Graph.getPresentation(presentable)));
+            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(Utils.getPresentation(presentable)));
             instructionQueue.put(lastInstruction);
             return feedbackQueue.take();
         } catch (InterruptedException e) {
@@ -129,7 +130,7 @@ public class ServerReception extends SerializedCommunicator {
     }
 
     @Override
-    protected <V> String checkState(int repeat, StateToCheck<V> stateToCheck) {
+    protected <V> String checkState(int repeat, Obtainable<V> stateToCheck) {
         return carryOut(repeat, stateToCheck);
     }
 
@@ -141,10 +142,5 @@ public class ServerReception extends SerializedCommunicator {
     @Override
     protected String verifyExpectation(int repeat, Expectation expectation) {
         return carryOut(repeat, expectation);
-    }
-
-    @Override
-    public String fetchValue(Property<String> property) {
-        return carryOut(0, property);
     }
 }

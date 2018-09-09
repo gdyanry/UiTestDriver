@@ -9,7 +9,7 @@ import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 import com.yanry.driver.mobile.window.Window;
 
@@ -94,7 +94,7 @@ public class View extends ViewContainer {
 
         @Override
         protected Boolean checkValue() {
-            return getGraph().checkState(new StateToCheck<>(this, false, true));
+            return getGraph().obtainValue(new BooleanQuery(this));
         }
 
         @Override

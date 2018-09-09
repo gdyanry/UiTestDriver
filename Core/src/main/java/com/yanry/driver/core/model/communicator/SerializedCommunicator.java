@@ -1,8 +1,8 @@
 package com.yanry.driver.core.model.communicator;
 
-import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 /**
  * Created by rongyu.yan on 3/13/2017.
@@ -14,10 +14,9 @@ public abstract class SerializedCommunicator implements Communicator {
      * @param <V>
      * @return 返回所选项的序号。返回null表示无法确定。
      */
-    protected abstract <V> String checkState(int repeat, StateToCheck<V> stateToCheck);
+    protected abstract <V> String checkState(int repeat, Obtainable<V> stateToCheck);
 
     /**
-     *
      * @param repeat
      * @param actionEvent
      * @return 返回1（已执行）或者0（未执行）。
@@ -25,7 +24,6 @@ public abstract class SerializedCommunicator implements Communicator {
     protected abstract String performAction(int repeat, ActionEvent actionEvent);
 
     /**
-     *
      * @param repeat
      * @param expectation
      * @return 返回1（校验成功）、0（校验失败）或-1（无法校验）。
@@ -33,22 +31,20 @@ public abstract class SerializedCommunicator implements Communicator {
     protected abstract String verifyExpectation(int repeat, Expectation expectation);
 
     @Override
-    public <V> V checkState(StateToCheck<V> stateToCheck) {
+    public <V> V checkState(Obtainable<V> stateToCheck) {
         return _checkState(0, stateToCheck);
     }
 
-    private <V> V _checkState(int repeat, StateToCheck<V> req) {
+    private <V> V _checkState(int repeat, Obtainable<V> req) {
         String resp = checkState(repeat, req);
         if (resp == null) {
             return null;
         }
-        if (resp.matches("^([1-9]\\d*)|0$")) {
-            int index = Integer.parseInt(resp);
-            if (index < req.getOptions().length) {
-                return req.getOptions()[index];
-            }
+        V convert = req.convert(resp);
+        if (convert == null) {
+            return _checkState(++repeat, req);
         }
-        return _checkState(++repeat, req);
+        return convert;
     }
 
     @Override

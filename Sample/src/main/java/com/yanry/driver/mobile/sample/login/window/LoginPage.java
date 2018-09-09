@@ -23,17 +23,19 @@ public class LoginPage extends Window {
     public static String DESC_PWD;
     
     private CurrentUser currentUser;
+    private LoginState loginState;
     private NetworkState networkState;
 
-    public LoginPage(Graph graph, WindowManager manager, CurrentUser currentUser, NetworkState networkState) {
+    public LoginPage(Graph graph, WindowManager manager, CurrentUser currentUser, LoginState loginState, NetworkState networkState) {
         super(graph, manager);
         this.currentUser = currentUser;
+        this.loginState = loginState;
         this.networkState = networkState;
     }
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        showOnStartUp(new Timing(false, Const.PLASH_DURATION)).addInitState(new LoginState(graph, currentUser), false);
+        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addInitState(loginState, false);
         View etUser = new View(graph, this, new ByDesc(DESC_USER));
         Text txtUser = new EditableText(etUser);
         TextValidity userValidity = new TextValidity(etUser, txtUser);

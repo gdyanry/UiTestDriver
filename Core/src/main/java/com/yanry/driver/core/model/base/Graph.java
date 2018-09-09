@@ -3,22 +3,21 @@
  */
 package com.yanry.driver.core.model.base;
 
+import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.StateEvent;
-import com.yanry.driver.core.model.runtime.*;
+import com.yanry.driver.core.model.runtime.Assertion;
+import com.yanry.driver.core.model.runtime.GraphWatcher;
+import com.yanry.driver.core.model.runtime.MissedPath;
+import com.yanry.driver.core.model.runtime.StateSwitch;
+import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.state.ValuePredicate;
 import lib.common.interfaces.Loggable;
-import lib.common.model.json.JSONArray;
-import lib.common.model.json.JSONObject;
-import lib.common.util.StringUtil;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
@@ -62,58 +61,6 @@ public class Graph {
         stackDepth = new AtomicInteger();
         pendingExpectations = new HashSet<>();
         failedExpectation = new HashSet<>();
-    }
-
-    public static Object getPresentation(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-        if (obj instanceof Enum) {
-            return ((Enum) obj).name();
-        }
-        if (obj.getClass().isArray()) {
-            JSONArray jsonArray = new JSONArray();
-            int len = Array.getLength(obj);
-            for (int i = 0; i < len; i++) {
-                jsonArray.put(getPresentation(Array.get(obj, i)));
-            }
-            return jsonArray;
-        } else if (obj instanceof List) {
-            JSONArray jsonArray = new JSONArray();
-            List list = (List) obj;
-            for (Object item : list) {
-                jsonArray.put(getPresentation(item));
-            }
-            return jsonArray;
-        } else if (obj instanceof Map) {
-            JSONArray jsonArray = new JSONArray();
-            Map map = (Map) obj;
-            for (Object key : map.keySet()) {
-                jsonArray.put(new JSONArray().put(getPresentation(key)).put(getPresentation(map.get(key))));
-            }
-            return jsonArray;
-        }
-        Class<?> clazz = obj.getClass();
-        if (clazz.isAnnotationPresent(Presentable.class)) {
-            JSONObject jsonObject = new JSONObject().put(".", StringUtil.getClassName(obj));
-            for (Method method : clazz.getMethods()) {
-                if (method.isAnnotationPresent(Presentable.class)) {
-                    String key = StringUtil.setFirstLetterCase(method.getName().replaceFirst("^get", ""), false);
-                    try {
-                        Object value = method.invoke(obj);
-                        if (value != null) {
-                            jsonObject.put(key, getPresentation(value));
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return jsonObject;
-        }
-        return obj;
     }
 
     public void registerCommunicator(Communicator communicator) {
@@ -176,7 +123,7 @@ public class Graph {
         }
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = unprocessedPaths.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true))).findFirst().get();
-            debug("traverse: %s", getPresentation(path));
+            debug("traverse: %s", Utils.getPresentation(path));
             deepRoll(path);
         }
         List<Object> result = new ArrayList<>(records);
@@ -227,7 +174,7 @@ public class Graph {
      * @return 是否触发ActionEvent
      */
     private boolean shallowRoll(Path path) {
-        int depth = enterStack(String.format("roll: %s", getPresentation(path)));
+        int depth = enterStack(String.format("roll: %s", Utils.getPresentation(path)));
         if (!rollingPath.add(path)) {
             exitStack(depth, true, "fail for repeating rolling");
             return false;
@@ -238,7 +185,7 @@ public class Graph {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
             ValuePredicate toState = path.initState.get(property);
-            String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toState));
+            String msg = String.format("switch init state: %s, %s", Utils.getPresentation(property), Utils.getPresentation(toState));
             debug(msg);
             if (!property.switchTo(toState)) {
                 records.add(new MissedPath(path, new StateSwitch<>(property, oldValue, toState)));
@@ -259,7 +206,7 @@ public class Graph {
             Property property = event.getProperty();
             Object oldValue = property.getCurrentValue();
             if (event.getFrom() != null && !event.getFrom().test(oldValue)) {
-                String msg = String.format("switch state event(from): %s", getPresentation(event));
+                String msg = String.format("switch state event(from): %s", Utils.getPresentation(event));
                 debug(msg);
                 if (!property.switchTo(event.getFrom())) {
                     records.add(new MissedPath(path, event));
@@ -271,7 +218,7 @@ public class Graph {
                 exitStack(depth, false, msg);
                 return true;
             }
-            String msg = String.format("switch state event(to): %s", getPresentation(event));
+            String msg = String.format("switch state event(to): %s", Utils.getPresentation(event));
             debug(msg);
             if (!property.switchTo(event.getTo())) {
                 records.add(new MissedPath(path, event));
@@ -289,14 +236,14 @@ public class Graph {
             if (!performAction(event)) {
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
-                exitStack(depth, true, String.format("perform action fail: %s", getPresentation(event)));
+                exitStack(depth, true, String.format("perform action fail: %s", Utils.getPresentation(event)));
                 return false;
             }
             // collect paths that share the same environment states and event
             // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
             allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
-                debug("verify path: %s", getPresentation(p));
+                debug("verify path: %s", Utils.getPresentation(p));
                 verify(p, false);
             });
             rollingPath.remove(path);
@@ -305,13 +252,13 @@ public class Graph {
         } else {
             records.add(new MissedPath(path, inputEvent));
             rollingPath.remove(path);
-            exitStack(depth, true, String.format("unprocessed event: %s", getPresentation(inputEvent)));
+            exitStack(depth, true, String.format("unprocessed event: %s", Utils.getPresentation(inputEvent)));
             return false;
         }
     }
 
     private void verify(Path path, boolean isSuper) {
-        String msg = String.format("%s: %s", isSuper ? "verify super" : "verify", getPresentation(path));
+        String msg = String.format("%s: %s", isSuper ? "verify super" : "verify", Utils.getPresentation(path));
         int depth = enterStack(msg);
         Expectation expectation = path.getExpectation();
         VerifyResult result = expectation.verify(this);
@@ -364,10 +311,10 @@ public class Graph {
         if (allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
                     int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
-                    debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, getPresentation(p));
+                    debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, Utils.getPresentation(p));
                     return unsatisfiedDegree;
                 })).filter(p -> {
-                    debug("try to roll: %s", getPresentation(p));
+                    debug("try to roll: %s", Utils.getPresentation(p));
                     return shallowRoll(p);
                 }).findFirst().isPresent()) {
             exitStack(depth, false, msg);
@@ -403,33 +350,19 @@ public class Graph {
         return actionTimeFrame > 0 && property.communicateTimeFrame == actionTimeFrame;
     }
 
-    public <V> V checkState(StateToCheck<V> stateToCheck) {
-        CacheProperty<V> property = stateToCheck.getProperty();
+    public <V> V obtainValue(Obtainable<V> obtainable) {
+        Property<V> property = obtainable.getProperty();
         if (isValueFresh(property)) {
             return property.getCurrentValue();
         }
         for (Communicator communicator : communicators) {
-            V value = communicator.checkState(stateToCheck);
+            V value = communicator.checkState(obtainable);
             if (value != null) {
                 property.communicateTimeFrame = actionTimeFrame;
                 return value;
             }
         }
-        throw new NullPointerException(String.format("unable to check state: %s", getPresentation(stateToCheck)));
-    }
-
-    public String fetchValue(Property<String> property) {
-        if (isValueFresh(property)) {
-            return property.getCurrentValue();
-        }
-        for (Communicator communicator : communicators) {
-            String value = communicator.fetchValue(property);
-            if (value != null) {
-                property.communicateTimeFrame = actionTimeFrame;
-                return value;
-            }
-        }
-        throw new NullPointerException(String.format("unable to fetch value: %s", getPresentation(property)));
+        throw new NullPointerException(String.format("unable to check state: %s", Utils.getPresentation(obtainable)));
     }
 
     public boolean performAction(ActionEvent actionEvent) {

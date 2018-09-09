@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.sample;
 
+import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.ConsoleCommunicator;
@@ -28,7 +29,7 @@ public class Tester {
         List<Path> options = graph.prepare();
         int i = 0;
         for (Path option : options) {
-            System.out.println(String.format("%05d - %s", i++, Graph.getPresentation(option)));
+            System.out.println(String.format("%05d - %s", i++, Utils.getPresentation(option)));
         }
         String input = ConsoleUtil.readLine("请选择需要测试的path：").trim();
         int[] pathIndexes = null;
@@ -59,9 +60,9 @@ public class Tester {
                 missCount++;
             }
             if (fail) {
-                System.err.println(Graph.getPresentation(record));
+                System.err.println(Utils.getPresentation(record));
             } else {
-                System.out.println(Graph.getPresentation(record));
+                System.out.println(Utils.getPresentation(record));
             }
         }
         System.out.printf("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);

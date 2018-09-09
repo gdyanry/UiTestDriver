@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.property;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.runtime.StateToCheck;
+import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
 
@@ -21,7 +21,7 @@ public class CheckState extends ViewProperty<Boolean> {
 
     @Override
     protected Boolean doCheckValue() {
-        return getGraph().checkState(new StateToCheck<>(this, false, true));
+        return getGraph().obtainValue(new BooleanQuery(this));
     }
 
     @Override

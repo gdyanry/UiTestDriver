@@ -26,7 +26,7 @@ public class MainPage extends Window {
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        showOnStartUp(Timing.IMMEDIATELY);
+        showOnLaunch(Timing.IMMEDIATELY);
         closeOnPressBack();
         // 点击列表项进入详情页
         popWindow(DetailPage.class, listView.getClickItemEvent(), Timing.IMMEDIATELY, false)
