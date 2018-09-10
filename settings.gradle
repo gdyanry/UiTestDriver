@@ -1,7 +1,6 @@
-rootProject.name = 'UiTestDriver'
 include 'Core'
-include 'SpringServer'
-include 'Sample'
-include 'AppiumClient'
 include 'Mobile'
+include 'SpringServer'
+include 'AppiumClient'
+include 'Sample'
 

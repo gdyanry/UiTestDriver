@@ -30,8 +30,8 @@ public class MainPage extends Window {
         closeOnPressBack();
         // 点击列表项进入详情页
         popWindow(DetailPage.class, listView.getClickItemEvent(), Timing.IMMEDIATELY, false)
-                .addInitState(listView.getSize(), 1)
-                .addInitStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
+                .addContextState(listView.getSize(), 1)
+                .addContextStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
         // 筛选
         popWindow(FilterPage.class, new Click(new View(graph, this, new ById("filter"))), Timing.IMMEDIATELY, false);
         // 添加

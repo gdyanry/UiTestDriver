@@ -6,8 +6,8 @@ import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.ValueEquals;
-import com.yanry.driver.core.model.state.ValueNotEquals;
+import com.yanry.driver.core.model.state.Equals;
+import com.yanry.driver.core.model.state.NotEquals;
 import com.yanry.driver.core.model.state.UnaryIntPredicate;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
@@ -40,21 +40,21 @@ public class ListView<I extends ListViewItem<I>> extends View {
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
         itemNone = itemCreator.create(graph, this, -1);
-        clickItemEvent = new StateEvent<>(clickedItem, new ValueEquals<>(itemNone), new ValueNotEquals<I>(itemNone) {
+        clickItemEvent = new StateEvent<>(clickedItem, new Equals<>(itemNone), new NotEquals<I>(itemNone) {
             @Override
             protected Stream<I> getAllValues() {
                 return items.keySet().stream().filter(key -> key < size.getCurrentValue()).map(key -> items.get(key));
             }
         });
         // 变为可见时清除clickedItem缓存
-        getWindow().createPath(getShowEvent(), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, itemNone));
+        getWindow().createForegroundPath(getShowEvent(), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, itemNone));
         // size变化时重新初始化item
-        getWindow().createPath(new StateChangeCallback<>(size, null, s -> s != null), new ActionExpectation() {
+        getWindow().createForegroundPath(new StateChangeCallback<>(size, null, s -> s != null), new ActionExpectation() {
             @Override
             protected void run() {
                 initItems();
             }
-        }).addInitState(this, true);
+        }).addContextState(this, true);
     }
 
     public void initItems() {
@@ -70,9 +70,9 @@ public class ListView<I extends ListViewItem<I>> extends View {
         I child = items.get(index);
         if (child == null) {
             child = itemCreator.create(getGraph(), this, index);
-            getWindow().createPath(new Click<>(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
-                    .addInitState(this, true)
-                    .addInitStatePredicate(size, new UnaryIntPredicate(index, true));
+            getWindow().createForegroundPath(new Click<>(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
+                    .addContextState(this, true)
+                    .addContextStatePredicate(size, new UnaryIntPredicate(index, true));
             items.put(index, child);
         }
         return child;

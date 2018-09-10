@@ -2,7 +2,7 @@ package com.yanry.driver.core.model.event;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.state.ValueEquals;
+import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.ValuePredicate;
 
 /**
@@ -21,7 +21,7 @@ public class StateEvent<V> implements Event {
     }
 
     public StateEvent(Property<V> property, V from, V to) {
-        this(property, new ValueEquals<>(from), new ValueEquals<>(to));
+        this(property, new Equals<>(from), new Equals<>(to));
     }
 
     @Presentable

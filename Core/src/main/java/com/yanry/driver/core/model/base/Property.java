@@ -7,7 +7,7 @@ import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.state.ValueEquals;
+import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.ValuePredicate;
 
 import java.util.function.Supplier;
@@ -45,7 +45,7 @@ public abstract class Property<V> {
     }
 
     public final boolean switchToValue(V toState) {
-        return switchTo(new ValueEquals<>(toState));
+        return switchTo(new Equals<>(toState));
     }
 
     private boolean verifySuperPaths(ValuePredicate<V> toState) {

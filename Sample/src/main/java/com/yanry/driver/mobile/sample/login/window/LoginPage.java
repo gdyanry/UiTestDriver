@@ -35,7 +35,7 @@ public class LoginPage extends Window {
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addInitState(loginState, false);
+        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextState(loginState, false);
         View etUser = new View(graph, this, new ByDesc(DESC_USER));
         Text txtUser = new EditableText(etUser);
         TextValidity userValidity = new TextValidity(etUser, txtUser);
@@ -43,8 +43,8 @@ public class LoginPage extends Window {
         Text txtPwd = new EditableText(etPwd);
         TextValidity pwdValidity = new TextValidity(etPwd, txtPwd);
         // 页面打开时输入框内容为空
-        createPath(getCreateEvent(), txtUser.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
-        createPath(getCreateEvent(), txtPwd.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
+        createForegroundPath(getCreateEvent(), txtUser.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
+        createForegroundPath(getCreateEvent(), txtPwd.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
 
         Click clickLogin = new Click(new View(graph, this, new ByText("登录")));
         // 添加输入框用例
@@ -55,37 +55,37 @@ public class LoginPage extends Window {
         pwdValidity.addNegativeCase("124", clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "密码长度不能小于6"), userValidity);
         pwdValidity.addPositiveCases("123456");
         // 无网络连接
-        createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "无网络连接"))
-                .addInitState(networkState, NetworkState.Network.Disconnected)
-                .addInitState(userValidity, true)
-                .addInitState(pwdValidity, true);
+        createForegroundPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "无网络连接"))
+                .addContextState(networkState, NetworkState.Network.Disconnected)
+                .addContextState(userValidity, true)
+                .addContextState(pwdValidity, true);
         // 请求对话框
-        createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
-                .addInitState(networkState, NetworkState.Network.Abnormal)
-                .addInitState(userValidity, true)
-                .addInitState(pwdValidity, true);
-        createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
-                .addInitState(networkState, NetworkState.Network.Normal)
-                .addInitState(userValidity, true)
-                .addInitState(pwdValidity, true);
+        createForegroundPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
+                .addContextState(networkState, NetworkState.Network.Abnormal)
+                .addContextState(userValidity, true)
+                .addContextState(pwdValidity, true);
+        createForegroundPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
+                .addContextState(networkState, NetworkState.Network.Normal)
+                .addContextState(userValidity, true)
+                .addContextState(pwdValidity, true);
         // 连接超时
         Timing withinTimeout = new Timing(true, Const.HTTP_TIMEOUT);
-        createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "网络错误"))
-                .addInitState(networkState, NetworkState.Network.Abnormal)
-                .addInitState(userValidity, true)
-                .addInitState(pwdValidity, true);
+        createForegroundPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "网络错误"))
+                .addContextState(networkState, NetworkState.Network.Abnormal)
+                .addContextState(userValidity, true)
+                .addContextState(pwdValidity, true);
         // 请求成功
         LoginPathHandler loginPathHandler = new LoginPathHandler(currentUser, userValidity, pwdValidity);
         // login state
-        loginPathHandler.handleCurrentUserOnSuccessLogin(withinTimeout, e -> createPath(clickLogin, e)
-                .addInitState(networkState, NetworkState.Network.Normal));
+        loginPathHandler.handleCurrentUserOnSuccessLogin(withinTimeout, e -> createForegroundPath(clickLogin, e)
+                .addContextState(networkState, NetworkState.Network.Normal));
         // pop main page
         loginPathHandler.initStateToSuccessLogin(() -> popWindow(MainPage.class, clickLogin, withinTimeout, true)
-                .addInitState(networkState, NetworkState.Network.Normal));
+                .addContextState(networkState, NetworkState.Network.Normal));
         // business error
-        loginPathHandler.initStateToInvalidUser(() -> createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "用户不存在"))
-                .addInitState(networkState, NetworkState.Network.Normal));
-        loginPathHandler.initStateToInvalidPassword(() -> createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "密码错误"))
-                .addInitState(networkState, NetworkState.Network.Normal));
+        loginPathHandler.initStateToInvalidUser(() -> createForegroundPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "用户不存在"))
+                .addContextState(networkState, NetworkState.Network.Normal));
+        loginPathHandler.initStateToInvalidPassword(() -> createForegroundPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "密码错误"))
+                .addContextState(networkState, NetworkState.Network.Normal));
     }
 }

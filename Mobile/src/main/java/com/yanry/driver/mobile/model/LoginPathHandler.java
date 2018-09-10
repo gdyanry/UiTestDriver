@@ -30,27 +30,27 @@ public class LoginPathHandler {
     public void handleCurrentUserOnSuccessLogin(Timing timing, Function<StaticPropertyExpectation, Path> getSuccessLoginPath) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> getSuccessLoginPath.apply(currentUser
                 .getStaticExpectation(timing, false, e.getKey()))
-                .addInitState(userValidity.getText(), e.getKey())
-                .addInitState(pwdValidity.getText(), e.getValue()));
+                .addContextState(userValidity.getText(), e.getKey())
+                .addContextState(pwdValidity.getText(), e.getValue()));
     }
 
     public void initStateToSuccessLogin(Supplier<Path> pathToAddInitState) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> pathToAddInitState.get()
-                .addInitState(userValidity.getText(), e.getKey())
-                .addInitState(pwdValidity.getText(), e.getValue()));
+                .addContextState(userValidity.getText(), e.getKey())
+                .addContextState(pwdValidity.getText(), e.getValue()));
     }
 
     public void initStateToInvalidUser(Supplier<Path> pathToAddInitState) {
         userValidity.getValidContents().stream().filter(c -> !currentUser.getUserPasswordMap().keySet().contains(c))
                 .forEach(c -> pathToAddInitState.get()
-                        .addInitState(userValidity.getText(), c)
-                        .addInitState(pwdValidity, true));
+                        .addContextState(userValidity.getText(), c)
+                        .addContextState(pwdValidity, true));
     }
 
     public void initStateToInvalidPassword(Supplier<Path> pathToAddInitState) {
         currentUser.getUserPasswordMap().entrySet().forEach(e -> pwdValidity.getValidContents().stream().filter(c -> !c.equals(e.getValue()))
                 .forEach(c -> pathToAddInitState.get()
-                        .addInitState(userValidity.getText(), e.getKey())
-                        .addInitState(pwdValidity.getText(), c)));
+                        .addContextState(userValidity.getText(), e.getKey())
+                        .addContextState(pwdValidity.getText(), c)));
     }
 }

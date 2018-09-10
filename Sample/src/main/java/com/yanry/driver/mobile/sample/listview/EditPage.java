@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.sample.listview;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.ValueEquals;
+import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.EditableText;
 import com.yanry.driver.mobile.property.TextValidity;
@@ -30,13 +30,13 @@ public class EditPage extends Window {
         Click click = new Click(new View(graph, this, new ById("finish")));
         // 添加
         ListView<MainListItem> listView = getWindow(MainPage.class).getListView();
-        createPath(click, listView.getSize().getShiftExpectation(Timing.IMMEDIATELY, true, true, 1).setTrigger(listView, new ValueEquals<>(true)))
-                .addInitState(getPreviousWindow(), getWindow(MainPage.class))
-                .addInitState(etPrincipal, true)
-                .addInitState(etBonus, true)
-                .addInitState(etRawInterestRate, true)
-                .addInitState(etPassDays, true)
-                .addInitState(etTotalDays, true);
+        createForegroundPath(click, listView.getSize().getShiftExpectation(Timing.IMMEDIATELY, true, true, 1).setTrigger(listView, new Equals<>(true)))
+                .addContextState(getPreviousWindow(), getWindow(MainPage.class))
+                .addContextState(etPrincipal, true)
+                .addContextState(etBonus, true)
+                .addContextState(etRawInterestRate, true)
+                .addContextState(etPassDays, true)
+                .addContextState(etTotalDays, true);
         close(click, Timing.IMMEDIATELY);
     }
 

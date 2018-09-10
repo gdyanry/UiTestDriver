@@ -6,7 +6,7 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.state.ValueEquals;
+import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.ValuePredicate;
 
 import java.util.HashMap;
@@ -22,21 +22,27 @@ public class Path {
     private Expectation expectation;
     private long timeFrame;
     private int unsatisfiedDegree;
-    HashMap<Property, ValuePredicate> initState;
+    private int baseUnsatisfiedDegree;
+    HashMap<Property, ValuePredicate> context;
 
     public Path(Event event, Expectation expectation) {
         this.event = event;
         this.expectation = expectation;
-        initState = new HashMap<>();
+        context = new HashMap<>();
     }
 
-    public <V> Path addInitState(Property<V> property, V value) {
-        initState.put(property, new ValueEquals(value));
+    public <V> Path addContextState(Property<V> property, V value) {
+        context.put(property, new Equals(value));
         return this;
     }
 
-    public <V> Path addInitStatePredicate(Property<V> property, ValuePredicate<V> predicate) {
-        initState.put(property, predicate);
+    public <V> Path addContextStatePredicate(Property<V> property, ValuePredicate<V> predicate) {
+        context.put(property, predicate);
+        return this;
+    }
+
+    public Path setBaseUnsatisfiedDegree(int baseUnsatisfiedDegree) {
+        this.baseUnsatisfiedDegree = baseUnsatisfiedDegree;
         return this;
     }
 
@@ -56,8 +62,8 @@ public class Path {
         }
         if (timeFrame == 0 || timeFrame != this.timeFrame) {
             Property finalExcludeProperty = excludeProperty;
-            unsatisfiedDegree = initState.keySet().stream()
-                    .filter(property -> !property.equals(finalExcludeProperty) && !initState.get(property).test(property.getCurrentValue()))
+            unsatisfiedDegree = baseUnsatisfiedDegree + context.keySet().stream()
+                    .filter(property -> !property.equals(finalExcludeProperty) && !context.get(property).test(property.getCurrentValue()))
                     .mapToInt(prop -> 1).sum();
             this.timeFrame = timeFrame;
         }
@@ -65,8 +71,8 @@ public class Path {
     }
 
     @Presentable
-    public HashMap<Property, ValuePredicate> getInitState() {
-        return initState;
+    public HashMap<Property, ValuePredicate> getContext() {
+        return context;
     }
 
     @Presentable

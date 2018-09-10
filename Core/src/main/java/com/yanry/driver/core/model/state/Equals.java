@@ -5,9 +5,9 @@ import com.yanry.driver.core.model.runtime.Presentable;
 import java.util.stream.Stream;
 
 @Presentable
-public class ValueEquals<V> extends UnaryPredicate<V> {
+public class Equals<V> extends UnaryPredicate<V> {
 
-    public ValueEquals(V operand) {
+    public Equals(V operand) {
         super(operand);
     }
 

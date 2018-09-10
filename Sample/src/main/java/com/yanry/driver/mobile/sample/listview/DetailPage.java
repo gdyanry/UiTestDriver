@@ -22,11 +22,11 @@ public class DetailPage extends Window {
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
         closeOnPressBack();
-        createPath(getCreateEvent(), tvPrincipal.getDynamicExpectation(Timing.IMMEDIATELY, true,
+        createForegroundPath(getCreateEvent(), tvPrincipal.getDynamicExpectation(Timing.IMMEDIATELY, true,
                 () -> getWindow(MainPage.class).getListView().getClickedItem().getCurrentValue().getTvMoney().getCurrentValue()));
-        createPath(getCreateEvent(), tvFinishDate.getDynamicExpectation(Timing.IMMEDIATELY, true,
+        createForegroundPath(getCreateEvent(), tvFinishDate.getDynamicExpectation(Timing.IMMEDIATELY, true,
                 () -> getWindow(MainPage.class).getListView().getClickedItem().getCurrentValue().getTvFinishDate().getCurrentValue()));
-        createPath(getCreateEvent(), tvTotalRate.getDynamicExpectation(Timing.IMMEDIATELY, true,
+        createForegroundPath(getCreateEvent(), tvTotalRate.getDynamicExpectation(Timing.IMMEDIATELY, true,
                 () -> getWindow(MainPage.class).getListView().getClickedItem().getCurrentValue().getTvTotalRate().getCurrentValue()));
         // 编辑
         Click clickEdit = new Click(getViewById("edit"));

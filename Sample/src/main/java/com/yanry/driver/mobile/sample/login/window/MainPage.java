@@ -26,10 +26,10 @@ public class MainPage extends Window {
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addInitState(loginState, true);
+        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextState(loginState, true);
         Click clickLogout = new Click(new View(graph, this, new ByText("退出登录")));
         popWindow(LoginPage.class, clickLogout, Timing.IMMEDIATELY, true);
-        createPath(clickLogout, currentUser.getStaticExpectation(Timing.IMMEDIATELY, false, ""));
+        createForegroundPath(clickLogout, currentUser.getStaticExpectation(Timing.IMMEDIATELY, false, ""));
         popWindow(AboutPage.class, new Click<>(new View(graph, this, new ByText("关于"))), Timing.IMMEDIATELY, false);
     }
 }

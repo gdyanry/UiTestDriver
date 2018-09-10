@@ -32,15 +32,15 @@ public class View extends ViewContainer {
         // 默认可见
         independentVisibility.handleExpectation(true, false);
         SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
-        getWindow().createPath(parent.getShowEvent(), showExpectation)
-                .addInitState(independentVisibility, true);
-        getWindow().createPath(new StateEvent<>(independentVisibility, false, true), showExpectation)
-                .addInitState(parent, true);
+        getWindow().createForegroundPath(parent.getShowEvent(), showExpectation)
+                .addContextState(independentVisibility, true);
+        getWindow().createForegroundPath(new StateEvent<>(independentVisibility, false, true), showExpectation)
+                .addContextState(parent, true);
         SSPropertyExpectation<Boolean> dismissExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, false);
-        getWindow().createPath(parent.getDismissEvent(), dismissExpectation)
-                .addInitState(independentVisibility, true);
-        getWindow().createPath(new StateEvent<>(independentVisibility, true, false), dismissExpectation)
-                .addInitState(parent, true);
+        getWindow().createForegroundPath(parent.getDismissEvent(), dismissExpectation)
+                .addContextState(independentVisibility, true);
+        getWindow().createForegroundPath(new StateEvent<>(independentVisibility, true, false), dismissExpectation)
+                .addContextState(parent, true);
     }
 
     public Window getWindow() {

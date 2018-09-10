@@ -2,8 +2,8 @@ package com.yanry.driver.core.model.state;
 
 import java.util.stream.Stream;
 
-public abstract class ValueNotEquals<V> extends UnaryPredicate<V> {
-    public ValueNotEquals(V operand) {
+public abstract class NotEquals<V> extends UnaryPredicate<V> {
+    public NotEquals(V operand) {
         super(operand);
     }
 

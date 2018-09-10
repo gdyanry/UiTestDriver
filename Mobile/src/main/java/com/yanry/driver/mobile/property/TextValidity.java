@@ -7,7 +7,7 @@ import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
-import com.yanry.driver.core.model.state.ValueWithin;
+import com.yanry.driver.core.model.state.Within;
 import com.yanry.driver.mobile.view.View;
 
 import java.util.HashSet;
@@ -25,14 +25,14 @@ public class TextValidity extends Property<Boolean> {
         this.text = text;
         validContents = new HashSet<>();
         invalidContents = new HashSet<>();
-        ValueWithin<String> valid = new ValueWithin<>(validContents);
-        ValueWithin<String> invalid = new ValueWithin<>(invalidContents);
+        Within<String> valid = new Within<>(validContents);
+        Within<String> invalid = new Within<>(invalidContents);
         // to valid
-        view.getWindow().createPath(new StateEvent<>(text, invalid, valid), getStaticExpectation(Timing.IMMEDIATELY, false, true))
-                .addInitState(view, true);
+        view.getWindow().createForegroundPath(new StateEvent<>(text, invalid, valid), getStaticExpectation(Timing.IMMEDIATELY, false, true))
+                .addContextState(view, true);
         // to invalid
-        view.getWindow().createPath(new StateEvent<>(text, valid, invalid), getStaticExpectation(Timing.IMMEDIATELY, false, false))
-                .addInitState(view, true);
+        view.getWindow().createForegroundPath(new StateEvent<>(text, valid, invalid), getStaticExpectation(Timing.IMMEDIATELY, false, false))
+                .addContextState(view, true);
     }
 
     public void addPositiveCases(String... contents) {
@@ -43,10 +43,10 @@ public class TextValidity extends Property<Boolean> {
 
     public Path addNegativeCase(String content, Event event, Expectation expectation, Property<Boolean>... preValidity) {
         invalidContents.add(content);
-        Path path = view.getWindow().createPath(event, expectation)
-                .addInitState(text, content);
+        Path path = view.getWindow().createForegroundPath(event, expectation)
+                .addContextState(text, content);
         for (Property<Boolean> v : preValidity) {
-            path.addInitState(v, true);
+            path.addContextState(v, true);
         }
         return path;
     }

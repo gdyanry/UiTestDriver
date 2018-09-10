@@ -3,10 +3,10 @@ package com.yanry.driver.core.model.state;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-public class ValueWithin<V> implements ValuePredicate<V> {
+public class Within<V> implements ValuePredicate<V> {
     private Collection<V> values;
 
-    public ValueWithin(Collection<V> values) {
+    public Within(Collection<V> values) {
         this.values = values;
     }
 

@@ -180,11 +180,11 @@ public class Graph {
             return false;
         }
         // make sure environment states are satisfied.
-        Optional<Property> any = path.initState.keySet().stream().filter(property -> !path.initState.get(property).test(property.getCurrentValue())).findAny();
+        Optional<Property> any = path.context.keySet().stream().filter(property -> !path.context.get(property).test(property.getCurrentValue())).findAny();
         if (any.isPresent()) {
             Property property = any.get();
             Object oldValue = property.getCurrentValue();
-            ValuePredicate toState = path.initState.get(property);
+            ValuePredicate toState = path.context.get(property);
             String msg = String.format("switch init state: %s, %s", Utils.getPresentation(property), Utils.getPresentation(toState));
             debug(msg);
             if (!property.switchTo(toState)) {

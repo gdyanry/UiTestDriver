@@ -25,9 +25,9 @@ public class WindowManager {
         currentWindow = new CurrentWindow(graph, this);
         processState = new ProcessState(graph);
         // 开启进程
-        graph.addPath(new Path(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addInitState(processState, false));
+        graph.addPath(new Path(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addContextState(processState, false));
         // 退出进程
-        graph.addPath(new SwitchStateAction<>(processState, false).createPath().addInitState(processState, true));
+        graph.addPath(new SwitchStateAction<>(processState, false).createPath().addContextState(processState, true));
         noWindow = new NoWindow(graph, this);
         currentWindow.handleExpectation(noWindow, false);
         // 退出进程时清理当前窗口

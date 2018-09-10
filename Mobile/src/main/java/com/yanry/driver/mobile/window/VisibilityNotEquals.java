@@ -1,10 +1,10 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.state.ValueNotEquals;
+import com.yanry.driver.core.model.state.NotEquals;
 
 import java.util.stream.Stream;
 
-public class VisibilityNotEquals extends ValueNotEquals<Visibility> {
+public class VisibilityNotEquals extends NotEquals<Visibility> {
     public VisibilityNotEquals(Visibility operand) {
         super(operand);
     }
