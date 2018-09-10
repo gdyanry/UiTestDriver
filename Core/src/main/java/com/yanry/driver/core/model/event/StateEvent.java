@@ -21,7 +21,7 @@ public class StateEvent<V> implements Event {
     }
 
     public StateEvent(Property<V> property, V from, V to) {
-        this(property, new Equals<>(from), new Equals<>(to));
+        this(property, from == null ? null : new Equals<>(from), new Equals<>(to));
     }
 
     @Presentable

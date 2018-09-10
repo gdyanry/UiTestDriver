@@ -11,6 +11,6 @@ public class VisibilityNotEquals extends NotEquals<Visibility> {
 
     @Override
     protected Stream<Visibility> getAllValues() {
-        return Stream.of(Visibility.values()).filter(visibility -> visibility != getOperand());
+        return Stream.of(Visibility.values());
     }
 }

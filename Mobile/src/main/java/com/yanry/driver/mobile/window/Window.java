@@ -10,14 +10,11 @@ import com.yanry.driver.core.model.expectation.DDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
-import com.yanry.driver.core.model.state.NotEquals;
 import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
-
-import java.util.stream.Stream;
 
 @Presentable
 public abstract class Window extends ViewContainer {
@@ -43,13 +40,13 @@ public abstract class Window extends ViewContainer {
         ReflectionUtil.initStaticStringFields(getClass());
         if (!getClass().equals(NoWindow.class)) {
             // visibility->Foreground
-            graph.addPath(new Path(new StateEvent<>(manager.currentWindow, null, this), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
+            graph.addPath(new Path(new StateEvent<>(manager.currentWindow, null, this),
+                    visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
             // 退出进程时visibility->NotCreated
-            graph.addPath(new Path(new StateEvent<>(manager.getProcessState(), true, false), visibility));
-            createForegroundPath(new StateEvent<>(manager.getProcessState(), true, false), visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated))
-                    .addContextStatePredicate(visibility, new VisibilityNotEquals(Visibility.NotCreated));
+            graph.addPath(new Path(new StateEvent<>(manager.getProcessState(), true, false),
+                    visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated)));
             // 进入前台时visible->true
-            createForegroundPath(new StateEvent<>(visibility, new VisibilityNotEquals(Visibility.Foreground), new Equals<>(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, true));
+            createForegroundPath(new StateEvent<>(visibility, null, new Equals<>(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, true));
             // 退出前台时visible->false
             createForegroundPath(new StateEvent<>(visibility, new Equals<>(Visibility.Foreground), new VisibilityNotEquals(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, false));
         }
@@ -57,8 +54,7 @@ public abstract class Window extends ViewContainer {
 
     public Path showOnLaunch(Timing timing) {
         Path path = new Path(ClickLauncher.get(), manager.currentWindow.getStaticExpectation(timing, true, this)
-                .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow))
-                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)))
+                .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow)))
                 .addContextState(manager.currentWindow, manager.noWindow)
                 .setBaseUnsatisfiedDegree(10000);
         getGraph().addPath(path);
@@ -89,8 +85,8 @@ public abstract class Window extends ViewContainer {
                 })
                 // TODO 处理相同页面多个实例的情况
                 .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this))
-                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background))
-                .addFollowingExpectation(newWindow.visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
+                // visibility->Background
+                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background)));
     }
 
     public Path close(Event inputEvent, Timing timing, Expectation... followingExpectations) {
@@ -165,9 +161,6 @@ public abstract class Window extends ViewContainer {
 
     @Override
     protected boolean selfSwitch(Boolean to) {
-        if (to) {
-            return visibility.switchToValue(Visibility.Foreground);
-        }
-        return visibility.switchTo(new VisibilityNotEquals(Visibility.Foreground));
+        return false;
     }
 }
