@@ -45,26 +45,21 @@ public abstract class Expectation {
         return trigger;
     }
 
-    private void recursiveOnVerify() {
+    final void preVerify() {
         onVerify();
-        followingExpectations.forEach(e -> e.recursiveOnVerify());
+        followingExpectations.forEach(e -> e.preVerify());
     }
 
-    private VerifyResult recursiveDoVerify(Graph graph) {
-        if (trigger == null || trigger.getValuePredicate().test(trigger.getProperty())) {
+    final VerifyResult verify(Graph graph) {
+        if (trigger == null || trigger.isSatisfied()) {
             if (doVerify()) {
-                followingExpectations.forEach(e -> e.recursiveDoVerify(graph));
+                followingExpectations.forEach(e -> e.verify(graph));
                 return VerifyResult.Success;
             }
             return VerifyResult.Failed;
         }
         graph.addPendingExpectation(this);
         return VerifyResult.Pending;
-    }
-
-    final VerifyResult verify(Graph graph) {
-        recursiveOnVerify();
-        return recursiveDoVerify(graph);
     }
 
     /**

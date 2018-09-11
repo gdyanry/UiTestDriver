@@ -241,11 +241,13 @@ public class Graph {
             }
             // collect paths that share the same environment states and event
             // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-            allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                    .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).forEach(p -> {
+            List<Path> pathToVerify = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                    .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).collect(Collectors.toList());
+            pathToVerify.forEach(p -> p.getExpectation().preVerify());
+            for (Path p : pathToVerify) {
                 debug("verify path: %s", Utils.getPresentation(p));
                 verify(p, false);
-            });
+            }
             rollingPath.remove(path);
             exitStack(depth, false, "perform action success");
             return true;
@@ -277,8 +279,12 @@ public class Graph {
     }
 
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
+        // 处理pending expectation
         if (pendingExpectations.size() > 0) {
             ArrayList<Expectation> pending = new ArrayList<>(pendingExpectations);
+            for (Expectation expectation : pending) {
+                expectation.preVerify();
+            }
             for (Expectation expectation : pending) {
                 VerifyResult result = expectation.verify(this);
                 if (result != VerifyResult.Pending) {
@@ -294,8 +300,11 @@ public class Graph {
             }
         }
         if (!to.equals(from)) {
-            allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                    .forEach(path -> verify(path, true));
+            List<Path> pathToVerify = allPaths.stream()
+                    .filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                    .collect(Collectors.toList());
+            pathToVerify.forEach(path -> path.getExpectation().preVerify());
+            pathToVerify.forEach(path -> verify(path, true));
         }
     }
 

@@ -13,6 +13,10 @@ public class State<V> {
         this.valuePredicate = valuePredicate;
     }
 
+    public boolean isSatisfied() {
+        return valuePredicate.test(property.getCurrentValue());
+    }
+
     @Presentable
     public Property<V> getProperty() {
         return property;

@@ -1,6 +1,7 @@
 package com.yanry.driver.mobile.sample.login.window;
 
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.RequestDialog;
@@ -21,7 +22,7 @@ import com.yanry.driver.mobile.window.WindowManager;
 public class LoginPage extends Window {
     public static String DESC_USER;
     public static String DESC_PWD;
-    
+
     private CurrentUser currentUser;
     private LoginState loginState;
     private NetworkState networkState;
@@ -43,8 +44,8 @@ public class LoginPage extends Window {
         Text txtPwd = new EditableText(etPwd);
         TextValidity pwdValidity = new TextValidity(etPwd, txtPwd);
         // 页面打开时输入框内容为空
-        createForegroundPath(getCreateEvent(), txtUser.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
-        createForegroundPath(getCreateEvent(), txtPwd.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
+        graph.addPath(new Path(getCreateEvent(), txtUser.getStaticExpectation(Timing.IMMEDIATELY, true, "")));
+        graph.addPath(new Path(getCreateEvent(), txtPwd.getStaticExpectation(Timing.IMMEDIATELY, true, "")));
 
         Click clickLogin = new Click(new View(graph, this, new ByText("登录")));
         // 添加输入框用例
