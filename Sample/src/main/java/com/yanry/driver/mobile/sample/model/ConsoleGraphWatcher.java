@@ -15,8 +15,8 @@ public class ConsoleGraphWatcher implements GraphWatcher {
     @Override
     public void onStandby(Map<CacheProperty, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> successTemp, Set<Path> failedPaths, Path rollingPath) {
         ConsoleUtil.debug("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        ConsoleUtil.debug("rolling path: %s.", Utils.getPresentation(rollingPath));
-        ConsoleUtil.debug("unprocessed paths: %s.", unprocessedPaths.size());
+        ConsoleUtil.debug("rolling path: %s", Utils.getPresentation(rollingPath));
+        ConsoleUtil.debug("unprocessed paths: %s", unprocessedPaths.size());
         for (CacheProperty property : cacheProperties.keySet()) {
             ConsoleUtil.debug(">>>>%s - %s", Utils.getPresentation(property), Utils.getPresentation(property.getCurrentValue()));
             if (property instanceof PreviousWindow) {

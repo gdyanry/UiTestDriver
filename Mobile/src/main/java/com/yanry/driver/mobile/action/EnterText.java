@@ -14,7 +14,8 @@ public class EnterText extends ActionEvent<EnterText, View, Object> {
     private String text;
 
     public EnterText(View view, String text) {
-        super(view);
+        super(a -> a.getText(), a -> a.text);
+        setTarget(view);
         this.text = text;
     }
 
@@ -23,14 +24,4 @@ public class EnterText extends ActionEvent<EnterText, View, Object> {
         return text;
     }
 
-    @Override
-    protected void addHashFields(ArrayList<Object> hashFields) {
-        super.addHashFields(hashFields);
-        hashFields.add(text);
-    }
-
-    @Override
-    protected boolean equalsWithSameClass(EnterText object) {
-        return super.equalsWithSameClass(object) && text.equals(object.text);
-    }
 }

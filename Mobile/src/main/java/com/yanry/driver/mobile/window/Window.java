@@ -6,7 +6,6 @@ import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
-import com.yanry.driver.core.model.expectation.DDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
@@ -38,18 +37,18 @@ public abstract class Window extends ViewContainer {
         resumeEvent = new StateEvent<>(visibility, Visibility.Background, Visibility.Foreground);
         pauseEvent = new StateEvent<>(visibility, Visibility.Foreground, Visibility.Background);
         ReflectionUtil.initStaticStringFields(getClass());
-        if (!getClass().equals(NoWindow.class)) {
-            // visibility->Foreground
-            graph.addPath(new Path(new StateEvent<>(manager.currentWindow, null, this),
-                    visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
-            // 退出进程时visibility->NotCreated
-            graph.addPath(new Path(new StateEvent<>(manager.getProcessState(), true, false),
-                    visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated)));
-            // 进入前台时visible->true
-            createForegroundPath(new StateEvent<>(visibility, null, new Equals<>(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, true));
-            // 退出前台时visible->false
-            createForegroundPath(new StateEvent<>(visibility, new Equals<>(Visibility.Foreground), new VisibilityNotEquals(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, false));
-        }
+        // visibility->Foreground
+        graph.addPath(new Path(new StateEvent<>(manager.currentWindow, null, this),
+                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
+        // 退出进程时visibility->NotCreated
+        graph.addPath(new Path(new StateEvent<>(manager.getProcessState(), true, false),
+                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, this == manager.noWindow ? Visibility.Foreground : Visibility.NotCreated)));
+        // 进入前台时visible->true
+        createForegroundPath(new StateEvent<>(visibility, null, new Equals<>(Visibility.Foreground)),
+                getStaticExpectation(Timing.IMMEDIATELY, false, true));
+        // 退出前台时visible->false
+        createForegroundPath(new StateEvent<>(visibility, new Equals<>(Visibility.Foreground), new VisibilityNotEquals(Visibility.Foreground)),
+                getStaticExpectation(Timing.IMMEDIATELY, false, false));
     }
 
     public Path showOnLaunch(Timing timing) {
@@ -89,15 +88,10 @@ public abstract class Window extends ViewContainer {
                 .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background)));
     }
 
-    public Path close(Event inputEvent, Timing timing, Expectation... followingExpectations) {
-        Expectation expectation = manager.currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
+    public Path close(Event inputEvent, Timing timing) {
+        return createForegroundPath(inputEvent, manager.currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow))
-                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated))
-                .addFollowingExpectation(new DDPropertyExpectation<>(Timing.IMMEDIATELY, false, () -> previousWindow.getCurrentValue().visibility, () -> Visibility.Foreground));
-        for (Expectation followingExpectation : followingExpectations) {
-            expectation.addFollowingExpectation(followingExpectation);
-        }
-        return createForegroundPath(inputEvent, expectation);
+                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated)));
     }
 
     public Path closeOnPressBack() {

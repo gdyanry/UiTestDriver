@@ -5,8 +5,6 @@ import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 
-import java.util.ArrayList;
-
 /**
  * Created by rongyu.yan on 5/12/2017.
  */
@@ -14,7 +12,8 @@ public class SwitchStateAction<V> extends ActionEvent<SwitchStateAction<V>, Prop
     private V to;
 
     public SwitchStateAction(Property<V> target, V to) {
-        super(target);
+        super(a -> a.getTarget(), a -> a.to);
+        setTarget(target);
         this.to = to;
     }
 
@@ -25,16 +24,5 @@ public class SwitchStateAction<V> extends ActionEvent<SwitchStateAction<V>, Prop
     @Presentable
     public V getTo() {
         return to;
-    }
-
-    @Override
-    protected void addHashFields(ArrayList<Object> hashFields) {
-        super.addHashFields(hashFields);
-        hashFields.add(to);
-    }
-
-    @Override
-    protected boolean equalsWithSameClass(SwitchStateAction<V> vSwitchStateAction) {
-        return super.equalsWithSameClass(vSwitchStateAction) && to.equals(vSwitchStateAction.to);
     }
 }

@@ -17,20 +17,16 @@ import java.util.function.Supplier;
  * Jan 6, 2017
  */
 @Presentable
-public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends HashAndEquals<T> implements Event {
+public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends Event<T> {
     private TAR target;
     private RET preActionResult;
-    private Supplier<TAR> targetSupplier;
     private Function<TAR, RET> preAction;
 
-    public ActionEvent() {
+    public ActionEvent(Function<T, Object>... concernedFields) {
+        super(concernedFields);
     }
 
-    public ActionEvent(Supplier<TAR> targetSupplier) {
-        this.targetSupplier = targetSupplier;
-    }
-
-    public ActionEvent(TAR target) {
+    public void setTarget(TAR target) {
         this.target = target;
     }
 
@@ -39,9 +35,6 @@ public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends H
     }
 
     public void processPreAction() {
-        if (targetSupplier != null) {
-            target = targetSupplier.get();
-        }
         if (preAction != null) {
             preActionResult = preAction.apply(target);
         }
@@ -54,16 +47,6 @@ public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends H
 
     public RET getPreActionResult() {
         return preActionResult;
-    }
-
-    @Override
-    protected void addHashFields(ArrayList<Object> hashFields) {
-        hashFields.add(target);
-    }
-
-    @Override
-    protected boolean equalsWithSameClass(T t) {
-        return getTarget() != null ? getTarget().equals(t.getTarget()) : t.getTarget() == null;
     }
 
     @Override

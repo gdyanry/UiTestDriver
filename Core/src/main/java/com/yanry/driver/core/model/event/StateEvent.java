@@ -5,16 +5,20 @@ import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.ValuePredicate;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 /**
  * Created by rongyu.yan on 5/17/2017.
  */
 @Presentable
-public class StateEvent<V> implements Event {
+public class StateEvent<V> extends Event<StateEvent<V>> {
     private Property<V> property;
     private ValuePredicate<V> from;
     private ValuePredicate<V> to;
 
     public StateEvent(Property<V> property, ValuePredicate<V> from, ValuePredicate<V> to) {
+        super(s -> s.property, s -> s.from, s -> s.to);
         this.property = property;
         this.from = from;
         this.to = to;

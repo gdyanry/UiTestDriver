@@ -62,12 +62,16 @@ public class Path {
         }
         if (timeFrame == 0 || timeFrame != this.timeFrame) {
             Property finalExcludeProperty = excludeProperty;
-            unsatisfiedDegree = baseUnsatisfiedDegree + context.keySet().stream()
+            unsatisfiedDegree = context.keySet().stream()
                     .filter(property -> !property.equals(finalExcludeProperty) && !context.get(property).test(property.getCurrentValue()))
                     .mapToInt(prop -> 1).sum();
             this.timeFrame = timeFrame;
         }
-        return unsatisfiedDegree + (addOne ? 1 : 0);
+        int result = unsatisfiedDegree + (addOne ? 1 : 0);
+        if (result > 0) {
+            result += baseUnsatisfiedDegree;
+        }
+        return result;
     }
 
     @Presentable

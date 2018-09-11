@@ -33,6 +33,7 @@ public class DetailPage extends Window {
         popWindow(EditPage.class, clickEdit, Timing.IMMEDIATELY, false);
         // 删除
         Click clickDel = new Click(getViewById("delete"));
-        close(clickDel, Timing.IMMEDIATELY, getWindow(MainPage.class).getListView().getSize().getShiftExpectation(Timing.IMMEDIATELY, true, false, 1));
+        close(clickDel, Timing.IMMEDIATELY).getExpectation()
+                .addFollowingExpectation(getWindow(MainPage.class).getListView().getSize().getShiftExpectation(Timing.IMMEDIATELY, true, false, 1));
     }
 }
