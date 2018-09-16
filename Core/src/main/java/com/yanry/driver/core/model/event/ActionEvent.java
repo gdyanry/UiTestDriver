@@ -5,11 +5,9 @@ package com.yanry.driver.core.model.event;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
-import lib.common.entity.HashAndEquals;
+import lib.common.model.EqualsProxy;
 
-import java.util.ArrayList;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author yanry
@@ -17,20 +15,18 @@ import java.util.function.Supplier;
  * Jan 6, 2017
  */
 @Presentable
-public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends Event<T> {
-    private TAR target;
-    private RET preActionResult;
-    private Function<TAR, RET> preAction;
+public class ActionEvent<T, R> implements Event {
+    private T target;
+    private R preActionResult;
+    private Function<T, R> preAction;
+    private EqualsProxy<ActionEvent<T, R>> equalsProxy;
 
-    public ActionEvent(Function<T, Object>... concernedFields) {
-        super(concernedFields);
-    }
-
-    public void setTarget(TAR target) {
+    public ActionEvent(T target) {
         this.target = target;
+        equalsProxy = new EqualsProxy<>(this, e -> e.target);
     }
 
-    public void setPreAction(Function<TAR, RET> preAction) {
+    public void setPreAction(Function<T, R> preAction) {
         this.preAction = preAction;
     }
 
@@ -41,16 +37,26 @@ public class ActionEvent<T extends ActionEvent<T, TAR, RET>, TAR, RET> extends E
     }
 
     @Presentable
-    public TAR getTarget() {
+    public T getTarget() {
         return target;
     }
 
-    public RET getPreActionResult() {
+    public R getPreActionResult() {
         return preActionResult;
     }
 
     @Override
     public boolean matches(Property property, Object fromValue, Object toValue) {
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return equalsProxy.getHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return equalsProxy.checkEquals(obj);
     }
 }

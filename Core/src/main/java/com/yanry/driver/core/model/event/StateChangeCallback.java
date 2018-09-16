@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 
 @Presentable
-public class StateChangeCallback<V> extends Event<StateChangeCallback<V>> {
+public class StateChangeCallback<V> implements Event {
     private Property<V> property;
     private Predicate<V> from;
     private Predicate<V> to;

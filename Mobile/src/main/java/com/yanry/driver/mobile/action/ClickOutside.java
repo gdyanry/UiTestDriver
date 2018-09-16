@@ -8,10 +8,9 @@ import com.yanry.driver.mobile.view.ViewContainer;
  * Created by rongyu.yan on 4/19/2017.
  */
 @Presentable
-public class ClickOutside<R> extends ActionEvent<ClickOutside<R>, ViewContainer, R> {
+public class ClickOutside<R> extends ActionEvent<ViewContainer, R> {
 
     public ClickOutside(ViewContainer view) {
-        super(a -> a.getTarget());
-        setTarget(view);
+        super(view);
     }
 }
