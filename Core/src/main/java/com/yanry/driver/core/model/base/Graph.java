@@ -16,7 +16,8 @@ import com.yanry.driver.core.model.runtime.MissedPath;
 import com.yanry.driver.core.model.runtime.StateSwitch;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.state.ValuePredicate;
-import lib.common.interfaces.Loggable;
+import lib.common.model.log.LogLevel;
+import lib.common.model.log.Logger;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,13 +43,11 @@ public class Graph {
     private long actionTimeFrame;
     private Set<Path> temp;
     private Set<Path> rollingPath;
-    private Loggable loggable;
     private AtomicInteger stackDepth;
     private Set<Expectation> pendingExpectations;
     private Set<Expectation> failedExpectation;
 
-    public Graph(Loggable loggable, GraphWatcher watcher) {
-        this.loggable = loggable;
+    public Graph(GraphWatcher watcher) {
         this.watcher = watcher;
         this.communicators = new LinkedList<>();
         allPaths = new LinkedList<>();
@@ -123,7 +122,7 @@ public class Graph {
         }
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = unprocessedPaths.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true))).findFirst().get();
-            debug("traverse: %s", Utils.getPresentation(path));
+            Logger.getDefault().d("traverse: %s", Utils.getPresentation(path));
             deepRoll(path);
         }
         List<Object> result = new ArrayList<>(records);
@@ -186,7 +185,7 @@ public class Graph {
             Object oldValue = property.getCurrentValue();
             ValuePredicate toState = path.context.get(property);
             String msg = String.format("switch init state: %s, %s", Utils.getPresentation(property), Utils.getPresentation(toState));
-            debug(msg);
+            Logger.getDefault().v(msg);
             if (!property.switchTo(toState)) {
                 records.add(new MissedPath(path, new StateSwitch<>(property, oldValue, toState)));
                 rollingPath.remove(path);
@@ -207,7 +206,7 @@ public class Graph {
             Object oldValue = property.getCurrentValue();
             if (event.getFrom() != null && !event.getFrom().test(oldValue)) {
                 String msg = String.format("switch state event(from): %s", Utils.getPresentation(event));
-                debug(msg);
+                Logger.getDefault().v(msg);
                 if (!property.switchTo(event.getFrom())) {
                     records.add(new MissedPath(path, event));
                     rollingPath.remove(path);
@@ -219,7 +218,7 @@ public class Graph {
                 return true;
             }
             String msg = String.format("switch state event(to): %s", Utils.getPresentation(event));
-            debug(msg);
+            Logger.getDefault().v(msg);
             if (!property.switchTo(event.getTo())) {
                 records.add(new MissedPath(path, event));
                 rollingPath.remove(path);
@@ -245,7 +244,7 @@ public class Graph {
                     .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).collect(Collectors.toList());
             pathToVerify.forEach(p -> p.getExpectation().preVerify());
             for (Path p : pathToVerify) {
-                debug("verify path: %s", Utils.getPresentation(p));
+                Logger.getDefault().v("verify path: %s", Utils.getPresentation(p));
                 verify(p, false);
             }
             rollingPath.remove(path);
@@ -320,10 +319,10 @@ public class Graph {
         if (allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
                     int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
-                    debug("compare unsatisfied degree: %s - %s", unsatisfiedDegree, Utils.getPresentation(p));
+                    Logger.getDefault().v("compare unsatisfied degree: %s - %s", unsatisfiedDegree, Utils.getPresentation(p));
                     return unsatisfiedDegree;
                 })).filter(p -> {
-                    debug("try to roll: %s", Utils.getPresentation(p));
+                    Logger.getDefault().v("try to roll: %s", Utils.getPresentation(p));
                     return shallowRoll(p);
                 }).findFirst().isPresent()) {
             exitStack(depth, false, msg);
@@ -395,27 +394,17 @@ public class Graph {
         return null;
     }
 
-    private void debug(String s, Object... objects) {
-        if (loggable != null) {
-            loggable.debug(s, objects);
-        }
-    }
-
     private int enterStack(String msg) {
         int depth = stackDepth.incrementAndGet();
-        if (loggable != null) {
-            loggable.debug("stack(%s) + %s", depth, msg);
-        }
+        Logger.getDefault().log(1, LogLevel.Verbose, "stack(%s) + %s", depth, msg);
         return depth;
     }
 
     private void exitStack(int depth, boolean isError, String msg) {
-        if (loggable != null) {
-            if (isError) {
-                loggable.error("stack(%s) - %s", depth, msg);
-            } else {
-                loggable.debug("stack(%s) - %s", depth, msg);
-            }
+        if (isError) {
+            Logger.getDefault().log(1, LogLevel.Error, "stack(%s) - %s", depth, msg);
+        } else {
+            Logger.getDefault().log(1, LogLevel.Verbose, "stack(%s) - %s", depth, msg);
         }
         stackDepth.decrementAndGet();
     }

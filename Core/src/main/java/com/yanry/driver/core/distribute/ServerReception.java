@@ -1,12 +1,11 @@
 package com.yanry.driver.core.distribute;
 
 import com.yanry.driver.core.Utils;
+import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.SerializedCommunicator;
 import com.yanry.driver.core.model.event.ActionEvent;
-import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;

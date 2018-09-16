@@ -3,7 +3,8 @@ package com.yanry.driver.mobile.sample.login.distribuite;
 import com.yanry.driver.core.distribute.HttpClientReception;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
-import lib.common.util.ConsoleUtil;
+
+import java.util.Scanner;
 
 /**
  * Created by rongyu.yan on 3/27/2017.
@@ -11,9 +12,11 @@ import lib.common.util.ConsoleUtil;
 public class ClientDemo extends HttpClientReception {
     private static final String BASE_URL = "http://localhost:8080/login/";
     private static final String CHARSET = "utf-8";
+    private Scanner scanner;
 
     public ClientDemo() {
         super(BASE_URL, CHARSET);
+        scanner = new Scanner(System.in);
     }
 
     @Override
@@ -26,7 +29,8 @@ public class ClientDemo extends HttpClientReception {
 
     @Override
     protected int handleInstruction(int repeat, JSONObject instruction) {
-        String readLine = ConsoleUtil.readLine(String.format("%s:%s%n", repeat, instruction));
+        System.out.println(String.format("%s:%s%n", repeat, instruction));
+        String readLine = scanner.nextLine();
         if ("abort".equals(readLine)) {
             abort();
             return -1;

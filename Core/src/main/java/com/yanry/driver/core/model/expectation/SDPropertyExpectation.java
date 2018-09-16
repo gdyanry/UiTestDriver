@@ -1,6 +1,5 @@
 package com.yanry.driver.core.model.expectation;
 
-import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.base.Property;
 
 import java.util.function.Supplier;

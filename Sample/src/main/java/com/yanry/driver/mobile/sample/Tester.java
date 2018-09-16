@@ -8,8 +8,10 @@ import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.MissedPath;
 import com.yanry.driver.mobile.sample.model.ConsoleGraphWatcher;
-import com.yanry.driver.mobile.sample.model.ConsoleLoggable;
-import lib.common.util.ConsoleUtil;
+import lib.common.model.log.ConsoleHandler;
+import lib.common.model.log.LogLevel;
+import lib.common.model.log.Logger;
+import lib.common.model.log.SimpleFormatterBuilder;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -19,19 +21,19 @@ import java.util.function.Consumer;
  */
 public class Tester {
 
-    public static void test(Consumer<Graph> setupGraph) {
-        ConsoleLoggable loggable = new ConsoleLoggable();
+    public static void test(boolean verbose, Consumer<Graph> setupGraph) {
+        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatterBuilder().sequenceNumber().build(), verbose ? LogLevel.Verbose : LogLevel.Debug));
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         GraphWatcher watcher = new ConsoleGraphWatcher();
-        Graph graph = new Graph(loggable, watcher);
+        Graph graph = new Graph(watcher);
         graph.registerCommunicator(communicator);
         setupGraph.accept(graph);
         List<Path> options = graph.prepare();
         int i = 0;
         for (Path option : options) {
-            System.out.println(String.format("%05d - %s", i++, Utils.getPresentation(option)));
+            Logger.getDefault().d("%05d - %s", i++, Utils.getPresentation(option));
         }
-        String input = ConsoleUtil.readLine("请选择需要测试的path：").trim();
+        String input = communicator.readLine("请选择需要测试的path：").trim();
         int[] pathIndexes = null;
         if (input.matches("^([1-9]\\d*)|0$")) {
             pathIndexes = new int[]{Integer.parseInt(input)};
@@ -42,7 +44,7 @@ public class Tester {
         int passCount = 0;
         int failCount = 0;
         int missCount = 0;
-        System.out.println("-------------------------------------RECORD----------------------------------");
+        Logger.getDefault().d("-------------------------------------RECORD----------------------------------");
         for (Object record : records) {
             boolean fail = false;
             if (record instanceof Assertion) {
@@ -60,11 +62,11 @@ public class Tester {
                 missCount++;
             }
             if (fail) {
-                System.err.println(Utils.getPresentation(record));
+                Logger.getDefault().e(Utils.getPresentation(record).toString());
             } else {
-                System.out.println(Utils.getPresentation(record));
+                Logger.getDefault().d(Utils.getPresentation(record).toString());
             }
         }
-        System.out.printf("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);
+        Logger.getDefault().d("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);
     }
 }
