@@ -1,27 +1,38 @@
 package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.Utils;
-import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
-import lib.common.util.ConsoleUtil;
+
+import java.util.Scanner;
 
 /**
  * Created by rongyu.yan on 3/13/2017.
  */
 public class ConsoleCommunicator extends SerializedCommunicator {
+    private Scanner scanner;
+
+    public ConsoleCommunicator() {
+        scanner = new Scanner(System.in);
+    }
+
+    public String readLine(String prompt) {
+        System.out.println(prompt);
+        return scanner.nextLine();
+    }
+
     private String getInput(int repeat, String type, Object content, Runnable showHint) {
         String prompt = String.format("----%s: %s", type, Utils.getPresentation(content));
         if (repeat == 0) {
-            return ConsoleUtil.readLine(prompt);
+            return readLine(prompt);
         } else {
             if (showHint != null) {
                 System.out.println("---------------请输入正确的数字--------------");
                 showHint.run();
                 System.out.println("---------------------------------------------");
             }
-            return ConsoleUtil.readLine(prompt);
+            return readLine(prompt);
         }
     }
 

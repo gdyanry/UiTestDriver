@@ -10,6 +10,7 @@ import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -42,7 +43,7 @@ public abstract class BaseAppiumClient extends HttpClientReception {
     protected int handleInstruction(int repeat, JSONObject instruction) {
         if (repeat == 0) {
             String type = instruction.getString(".");
-            if (type.equals(StateToCheck.class.getSimpleName())) {
+            if (type.equals(Select.class.getSimpleName())) {
                 JSONObject property = instruction.getJSONObject("property");
                 return checkState(property, instruction.getJSONArray("options"));
             }

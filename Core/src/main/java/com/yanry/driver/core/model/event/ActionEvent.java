@@ -5,11 +5,8 @@ package com.yanry.driver.core.model.event;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
-import lib.common.entity.HashAndEquals;
 
-import java.util.ArrayList;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author yanry

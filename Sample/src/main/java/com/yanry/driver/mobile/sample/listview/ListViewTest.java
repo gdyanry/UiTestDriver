@@ -15,6 +15,6 @@ public class ListViewTest extends WindowManager {
     }
 
     public static void main(String... args) {
-        Tester.test(graph -> new ListViewTest(graph));
+        Tester.test(true, graph -> new ListViewTest(graph));
     }
 }

@@ -26,6 +26,6 @@ public class LoginTest extends WindowManager {
     }
 
     public static void main(String... args) {
-        Tester.test(graph -> new LoginTest(graph));
+        Tester.test(true, graph -> new LoginTest(graph));
     }
 }

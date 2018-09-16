@@ -5,9 +5,6 @@ import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.ValuePredicate;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
 /**
  * Created by rongyu.yan on 5/17/2017.
  */
