@@ -9,7 +9,7 @@ import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
-import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.MissedPath;
@@ -199,8 +199,8 @@ public class Graph {
         // all environment states are satisfied by now.
         // trigger event
         Event inputEvent = path.getEvent();
-        if (inputEvent instanceof StateEvent) {
-            StateEvent event = (StateEvent) inputEvent;
+        if (inputEvent instanceof TransitionEvent) {
+            TransitionEvent event = (TransitionEvent) inputEvent;
             // roll path for this switch event.
             Property property = event.getProperty();
             Object oldValue = property.getCurrentValue();

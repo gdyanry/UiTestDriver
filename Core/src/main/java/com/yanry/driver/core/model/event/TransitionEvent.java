@@ -10,20 +10,20 @@ import lib.common.model.EqualsProxy;
  * Created by rongyu.yan on 5/17/2017.
  */
 @Presentable
-public class StateEvent<V> implements Event {
+public class TransitionEvent<V> implements Event {
     private Property<V> property;
     private ValuePredicate<V> from;
     private ValuePredicate<V> to;
-    private EqualsProxy<StateEvent<V>> equalsProxy;
+    private EqualsProxy<TransitionEvent<V>> equalsProxy;
 
-    public StateEvent(Property<V> property, ValuePredicate<V> from, ValuePredicate<V> to) {
+    public TransitionEvent(Property<V> property, ValuePredicate<V> from, ValuePredicate<V> to) {
         this.property = property;
         this.from = from;
         this.to = to;
         equalsProxy = new EqualsProxy<>(this, s -> s.property, s -> s.from, s -> s.to);
     }
 
-    public StateEvent(Property<V> property, V from, V to) {
+    public TransitionEvent(Property<V> property, V from, V to) {
         this(property, from == null ? null : new Equals<>(from), new Equals<>(to));
     }
 

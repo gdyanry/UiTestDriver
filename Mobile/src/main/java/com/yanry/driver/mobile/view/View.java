@@ -5,7 +5,7 @@ package com.yanry.driver.mobile.view;
 
 import com.yanry.driver.core.model.base.CacheProperty;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
@@ -34,12 +34,12 @@ public class View extends ViewContainer {
         SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
         getWindow().createForegroundPath(parent.getShowEvent(), showExpectation)
                 .addContextState(independentVisibility, true);
-        getWindow().createForegroundPath(new StateEvent<>(independentVisibility, false, true), showExpectation)
+        getWindow().createForegroundPath(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
                 .addContextState(parent, true);
         SSPropertyExpectation<Boolean> dismissExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, false);
         getWindow().createForegroundPath(parent.getDismissEvent(), dismissExpectation)
                 .addContextState(independentVisibility, true);
-        getWindow().createForegroundPath(new StateEvent<>(independentVisibility, true, false), dismissExpectation)
+        getWindow().createForegroundPath(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
                 .addContextState(parent, true);
     }
 

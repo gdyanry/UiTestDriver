@@ -4,7 +4,7 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.event.Event;
-import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.ValuePredicate;
@@ -49,15 +49,15 @@ public class Path {
     int getUnsatisfiedDegree(long timeFrame, boolean isToRoll) {
         Property excludeProperty = null;
         boolean addOne = false;
-        if (event instanceof StateEvent) {
-            StateEvent stateEvent = (StateEvent) event;
+        if (event instanceof TransitionEvent) {
+            TransitionEvent transitionEvent = (TransitionEvent) event;
             if (isToRoll) {
-                ValuePredicate from = stateEvent.getFrom();
-                if (from != null && !from.test(stateEvent.getProperty().getCurrentValue())) {
+                ValuePredicate from = transitionEvent.getFrom();
+                if (from != null && !from.test(transitionEvent.getProperty().getCurrentValue())) {
                     addOne = true;
                 }
             } else {
-                excludeProperty = stateEvent.getProperty();
+                excludeProperty = transitionEvent.getProperty();
             }
         }
         if (timeFrame == 0 || timeFrame != this.timeFrame) {

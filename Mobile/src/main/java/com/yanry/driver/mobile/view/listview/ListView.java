@@ -3,7 +3,7 @@ package com.yanry.driver.mobile.view.listview;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
-import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Equals;
@@ -40,10 +40,10 @@ public class ListView<I extends ListViewItem<I>> extends View {
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
         itemNone = itemCreator.create(graph, this, -1);
-        clickItemEvent = new StateEvent<>(clickedItem, new Equals<>(itemNone), new NotEquals<I>(itemNone) {
+        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<>(itemNone) {
             @Override
             protected Stream<I> getAllValues() {
-                return items.keySet().stream().filter(key -> key < size.getCurrentValue()).map(key -> items.get(key));
+                return items.keySet().stream().filter(pos -> pos < size.getCurrentValue()).map(pos -> items.get(pos));
             }
         });
         // 变为可见时清除clickedItem缓存

@@ -4,7 +4,7 @@ import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Within;
@@ -28,10 +28,10 @@ public class TextValidity extends Property<Boolean> {
         Within<String> valid = new Within<>(validContents);
         Within<String> invalid = new Within<>(invalidContents);
         // to valid
-        view.getWindow().createForegroundPath(new StateEvent<>(text, invalid, valid), getStaticExpectation(Timing.IMMEDIATELY, false, true))
+        view.getWindow().createForegroundPath(new TransitionEvent<>(text, invalid, valid), getStaticExpectation(Timing.IMMEDIATELY, false, true))
                 .addContextState(view, true);
         // to invalid
-        view.getWindow().createForegroundPath(new StateEvent<>(text, valid, invalid), getStaticExpectation(Timing.IMMEDIATELY, false, false))
+        view.getWindow().createForegroundPath(new TransitionEvent<>(text, valid, invalid), getStaticExpectation(Timing.IMMEDIATELY, false, false))
                 .addContextState(view, true);
     }
 

@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.action.ClickLauncher;
@@ -31,7 +31,7 @@ public class WindowManager {
         noWindow = new NoWindow(graph, this);
         currentWindow.handleExpectation(noWindow, false);
         // 退出进程时清理当前窗口
-        graph.addPath(new Path(new StateEvent<>(processState, true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow)));
+        graph.addPath(new Path(new TransitionEvent<>(processState, true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow)));
     }
 
     public void addWindow(Window... windows) {

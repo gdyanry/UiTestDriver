@@ -4,24 +4,27 @@ import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.event.Event;
-import com.yanry.driver.core.model.event.StateEvent;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
+import com.yanry.driver.core.model.state.NotEquals;
 import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
+import java.util.stream.Stream;
+
 @Presentable
 public abstract class Window extends ViewContainer {
     private VisibilityState visibility;
-    private StateEvent<Visibility> createEvent;
-    private StateEvent<Visibility> closeEvent;
-    private StateEvent<Visibility> resumeEvent;
-    private StateEvent<Visibility> pauseEvent;
+    private TransitionEvent<Visibility> createEvent;
+    private TransitionEvent<Visibility> closeEvent;
+    private TransitionEvent<Visibility> resumeEvent;
+    private TransitionEvent<Visibility> pauseEvent;
     PreviousWindow previousWindow;
     private WindowManager manager;
 
@@ -32,23 +35,27 @@ public abstract class Window extends ViewContainer {
         previousWindow.handleExpectation(manager.noWindow, false);
         visibility = new VisibilityState(graph, this);
         visibility.handleExpectation(Visibility.NotCreated, false);
-        createEvent = new StateEvent<>(visibility, Visibility.NotCreated, Visibility.Foreground);
-        closeEvent = new StateEvent<>(visibility, Visibility.Foreground, Visibility.NotCreated);
-        resumeEvent = new StateEvent<>(visibility, Visibility.Background, Visibility.Foreground);
-        pauseEvent = new StateEvent<>(visibility, Visibility.Foreground, Visibility.Background);
+        createEvent = new TransitionEvent<>(visibility, Visibility.NotCreated, Visibility.Foreground);
+        closeEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.NotCreated);
+        resumeEvent = new TransitionEvent<>(visibility, Visibility.Background, Visibility.Foreground);
+        pauseEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.Background);
         ReflectionUtil.initStaticStringFields(getClass());
         // visibility->Foreground
-        graph.addPath(new Path(new StateEvent<>(manager.currentWindow, null, this),
+        graph.addPath(new Path(new TransitionEvent<>(manager.currentWindow, null, this),
                 visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
         // 退出进程时visibility->NotCreated
-        graph.addPath(new Path(new StateEvent<>(manager.getProcessState(), true, false),
+        graph.addPath(new Path(new TransitionEvent<>(manager.getProcessState(), true, false),
                 visibility.getStaticExpectation(Timing.IMMEDIATELY, false, this == manager.noWindow ? Visibility.Foreground : Visibility.NotCreated)));
         // 进入前台时visible->true
-        createForegroundPath(new StateEvent<>(visibility, null, new Equals<>(Visibility.Foreground)),
+        createForegroundPath(new TransitionEvent<>(visibility, null, new Equals<>(Visibility.Foreground)),
                 getStaticExpectation(Timing.IMMEDIATELY, false, true));
         // 退出前台时visible->false
-        createForegroundPath(new StateEvent<>(visibility, new Equals<>(Visibility.Foreground), new VisibilityNotEquals(Visibility.Foreground)),
-                getStaticExpectation(Timing.IMMEDIATELY, false, false));
+        createForegroundPath(new TransitionEvent<>(visibility, null, new NotEquals(Visibility.Foreground) {
+            @Override
+            protected Stream getAllValues() {
+                return Stream.of(Visibility.values());
+            }
+        }), getStaticExpectation(Timing.IMMEDIATELY, false, false));
     }
 
     public Path showOnLaunch(Timing timing) {
@@ -125,19 +132,19 @@ public abstract class Window extends ViewContainer {
         return previousWindow;
     }
 
-    public StateEvent<Visibility> getCreateEvent() {
+    public TransitionEvent<Visibility> getCreateEvent() {
         return createEvent;
     }
 
-    public StateEvent<Visibility> getCloseEvent() {
+    public TransitionEvent<Visibility> getCloseEvent() {
         return closeEvent;
     }
 
-    public StateEvent<Visibility> getResumeEvent() {
+    public TransitionEvent<Visibility> getResumeEvent() {
         return resumeEvent;
     }
 
-    public StateEvent<Visibility> getPauseEvent() {
+    public TransitionEvent<Visibility> getPauseEvent() {
         return pauseEvent;
     }
 
