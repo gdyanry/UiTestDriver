@@ -1,9 +1,8 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.State;
-import com.yanry.driver.core.model.state.ValuePredicate;
+import lib.common.util.object.Presentable;
 
 import java.util.LinkedList;
 import java.util.List;

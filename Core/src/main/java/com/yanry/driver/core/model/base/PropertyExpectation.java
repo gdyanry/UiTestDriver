@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 /**
  * A key-value pair (aka state) expectation

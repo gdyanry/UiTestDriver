@@ -3,7 +3,7 @@ package com.yanry.driver.mobile.expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.expectation.TransientExpectation;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 /**
  * Created by rongyu.yan on 3/3/2017.

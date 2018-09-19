@@ -13,7 +13,7 @@ public abstract class NotEquals<V> extends UnaryPredicate<V> {
     }
 
     @Override
-    public Stream<V> getValidValue() {
+    protected Stream<V> getValidValue() {
         return getAllValues().filter(this::test);
     }
 

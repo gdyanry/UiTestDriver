@@ -2,7 +2,7 @@ package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.PropertyExpectation;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 import java.util.function.Supplier;
 

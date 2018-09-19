@@ -1,13 +1,12 @@
 package com.yanry.driver.mobile.window;
 
+import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.NotEquals;
 import com.yanry.driver.mobile.action.ClickLauncher;
@@ -15,6 +14,7 @@ import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
+import lib.common.util.object.Presentable;
 
 import java.util.stream.Stream;
 

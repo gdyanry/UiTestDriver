@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 public class VisibilityState extends Property<Visibility> {
     private Window window;

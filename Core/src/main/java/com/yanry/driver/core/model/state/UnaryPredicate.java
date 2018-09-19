@@ -1,30 +1,20 @@
 package com.yanry.driver.core.model.state;
 
-import com.yanry.driver.core.model.runtime.Presentable;
-import lib.common.model.EqualsProxy;
+import com.yanry.driver.core.model.base.ValuePredicate;
+import lib.common.util.object.HashAndEquals;
+import lib.common.util.object.Presentable;
 
 @Presentable
-public abstract class UnaryPredicate<V> implements ValuePredicate<V> {
+public abstract class UnaryPredicate<V> extends ValuePredicate<V> {
     private V operand;
-    private EqualsProxy<UnaryPredicate<V>> equalsProxy;
 
     public UnaryPredicate(V operand) {
         this.operand = operand;
-        equalsProxy = new EqualsProxy<>(this, p -> p.operand);
     }
 
+    @HashAndEquals
     @Presentable
     public V getOperand() {
         return operand;
-    }
-
-    @Override
-    public int hashCode() {
-        return equalsProxy.getHashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return equalsProxy.checkEquals(obj);
     }
 }

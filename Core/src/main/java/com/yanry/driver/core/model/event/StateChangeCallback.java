@@ -1,12 +1,13 @@
 package com.yanry.driver.core.model.event;
 
+import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 import java.util.function.Predicate;
 
 @Presentable
-public class StateChangeCallback<V> implements Event {
+public class StateChangeCallback<V> extends Event {
     private Property<V> property;
     private Predicate<V> from;
     private Predicate<V> to;

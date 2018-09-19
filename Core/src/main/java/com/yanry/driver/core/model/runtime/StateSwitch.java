@@ -1,7 +1,8 @@
 package com.yanry.driver.core.model.runtime;
 
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.state.ValuePredicate;
+import com.yanry.driver.core.model.base.ValuePredicate;
+import lib.common.util.object.Presentable;
 
 @Presentable
 public class StateSwitch<V> {

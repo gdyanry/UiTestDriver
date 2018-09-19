@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class Tester {
 
     public static void test(boolean verbose, Consumer<Graph> setupGraph) {
-        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatterBuilder().sequenceNumber().build(), verbose ? LogLevel.Verbose : LogLevel.Debug));
+        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatterBuilder().level().sequenceNumber().build(), verbose ? LogLevel.Verbose : LogLevel.Debug));
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         GraphWatcher watcher = new ConsoleGraphWatcher();
         Graph graph = new Graph(watcher);
@@ -30,7 +30,7 @@ public class Tester {
         List<Path> options = graph.prepare();
         int i = 0;
         for (Path option : options) {
-            Logger.getDefault().d("%05d - %s", i++, Utils.getPresentation(option));
+            Logger.getDefault().d("%05d - %s", i++, Graph.getPresentation(option));
         }
         String input = communicator.readLine("请选择需要测试的path：").trim();
         int[] pathIndexes = null;
@@ -61,9 +61,9 @@ public class Tester {
                 missCount++;
             }
             if (fail) {
-                Logger.getDefault().e(Utils.getPresentation(record).toString());
+                Logger.getDefault().e(Graph.getPresentation(record).toString());
             } else {
-                Logger.getDefault().d(Utils.getPresentation(record).toString());
+                Logger.getDefault().d(Graph.getPresentation(record).toString());
             }
         }
         Logger.getDefault().d("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);

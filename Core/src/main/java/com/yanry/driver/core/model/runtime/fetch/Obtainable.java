@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.runtime.fetch;
 
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 @Presentable
 public abstract class Obtainable<V> {

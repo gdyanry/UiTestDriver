@@ -3,9 +3,10 @@
  */
 package com.yanry.driver.core.model.event;
 
+import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.Presentable;
-import lib.common.model.EqualsProxy;
+import lib.common.util.object.HashAndEquals;
+import lib.common.util.object.Presentable;
 
 import java.util.function.Function;
 
@@ -15,15 +16,13 @@ import java.util.function.Function;
  * Jan 6, 2017
  */
 @Presentable
-public class ActionEvent<T, R> implements Event {
+public class ActionEvent<T, R> extends Event {
     private T target;
     private R preActionResult;
     private Function<T, R> preAction;
-    private EqualsProxy<ActionEvent<T, R>> equalsProxy;
 
     public ActionEvent(T target) {
         this.target = target;
-        equalsProxy = new EqualsProxy<>(this, e -> e.target);
     }
 
     public void setPreAction(Function<T, R> preAction) {
@@ -36,6 +35,7 @@ public class ActionEvent<T, R> implements Event {
         }
     }
 
+    @HashAndEquals
     @Presentable
     public T getTarget() {
         return target;
@@ -46,17 +46,7 @@ public class ActionEvent<T, R> implements Event {
     }
 
     @Override
-    public boolean matches(Property property, Object fromValue, Object toValue) {
+    protected boolean matches(Property property, Object fromValue, Object toValue) {
         return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return equalsProxy.getHashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return equalsProxy.checkEquals(obj);
     }
 }

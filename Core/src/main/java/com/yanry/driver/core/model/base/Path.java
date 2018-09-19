@@ -3,11 +3,9 @@
  */
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.TransitionEvent;
-import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
-import com.yanry.driver.core.model.state.ValuePredicate;
+import lib.common.util.object.Presentable;
 
 import java.util.HashMap;
 

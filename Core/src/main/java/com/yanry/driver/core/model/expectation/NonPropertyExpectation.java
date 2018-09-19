@@ -2,7 +2,7 @@ package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 /**
  * This class represents a transient expectation such as a toast or a loading dialog.

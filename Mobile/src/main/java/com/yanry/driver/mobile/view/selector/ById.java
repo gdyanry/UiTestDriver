@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.view.selector;
 
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 @Presentable
 public class ById implements ViewSelector {

@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.expectation;
 
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 /**
  * Created by rongyu.yan on 3/9/2017.

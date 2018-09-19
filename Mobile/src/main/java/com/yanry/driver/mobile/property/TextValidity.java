@@ -1,14 +1,14 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.event.Event;
+import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Within;
 import com.yanry.driver.mobile.view.View;
+import lib.common.util.object.Presentable;
 
 import java.util.HashSet;
 import java.util.Set;

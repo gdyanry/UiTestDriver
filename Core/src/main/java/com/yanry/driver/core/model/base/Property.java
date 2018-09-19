@@ -6,9 +6,8 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.runtime.Presentable;
 import com.yanry.driver.core.model.state.Equals;
-import com.yanry.driver.core.model.state.ValuePredicate;
+import lib.common.util.object.Presentable;
 
 import java.util.function.Supplier;
 

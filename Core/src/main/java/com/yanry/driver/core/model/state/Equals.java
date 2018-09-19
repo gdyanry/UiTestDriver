@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.state;
 
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 import java.util.stream.Stream;
 
@@ -17,7 +17,7 @@ public class Equals<V> extends UnaryPredicate<V> {
     }
 
     @Override
-    public Stream<V> getValidValue() {
+    protected Stream<V> getValidValue() {
         return Stream.of(getOperand());
     }
 }

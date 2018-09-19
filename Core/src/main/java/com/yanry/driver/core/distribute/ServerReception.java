@@ -36,7 +36,7 @@ public class ServerReception extends SerializedCommunicator {
         List<Path> paths = graph.prepare();
         JSONArray jsonArray = new JSONArray();
         for (Path path : paths) {
-            jsonArray.put(Utils.getPresentation(path));
+            jsonArray.put(Graph.getPresentation(path));
         }
         return jsonArray;
     }
@@ -61,7 +61,7 @@ public class ServerReception extends SerializedCommunicator {
             List<Object> result = graph.traverse(finalIndexes);
             JSONArray ja = new JSONArray();
             for (Object o : result) {
-                ja.put(Utils.getPresentation(o));
+                ja.put(Graph.getPresentation(o));
             }
             lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_RECORD, ja);
             try {
@@ -118,7 +118,7 @@ public class ServerReception extends SerializedCommunicator {
             return "0";
         }
         try {
-            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(Utils.getPresentation(presentable)));
+            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(Graph.getPresentation(presentable)));
             instructionQueue.put(lastInstruction);
             return feedbackQueue.take();
         } catch (InterruptedException e) {

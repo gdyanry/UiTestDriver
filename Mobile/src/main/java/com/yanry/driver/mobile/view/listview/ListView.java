@@ -1,12 +1,11 @@
 package com.yanry.driver.mobile.view.listview;
 
+import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.event.Event;
 import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.NotEquals;
 import com.yanry.driver.core.model.state.UnaryIntPredicate;
 import com.yanry.driver.mobile.action.Click;
@@ -40,7 +39,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
         itemNone = itemCreator.create(graph, this, -1);
-        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<>(itemNone) {
+        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<I>(itemNone) {
             @Override
             protected Stream<I> getAllValues() {
                 return items.keySet().stream().filter(pos -> pos < size.getCurrentValue()).map(pos -> items.get(pos));

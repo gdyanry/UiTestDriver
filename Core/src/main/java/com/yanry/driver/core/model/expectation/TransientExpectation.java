@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.runtime.Presentable;
+import lib.common.util.object.Presentable;
 
 /**
  * Created by rongyu.yan on 4/24/2017.

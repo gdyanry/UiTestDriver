@@ -1,6 +1,7 @@
 package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
+import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
@@ -17,12 +18,12 @@ public class ConsoleCommunicator extends SerializedCommunicator {
     }
 
     public String readLine(String prompt) {
-        System.out.println(prompt);
+        System.err.println(prompt);
         return scanner.nextLine();
     }
 
     private String getInput(int repeat, String type, Object content, Runnable showHint) {
-        String prompt = String.format("----%s: %s", type, Utils.getPresentation(content));
+        String prompt = String.format("----%s: %s", type, Graph.getPresentation(content));
         if (repeat == 0) {
             return readLine(prompt);
         } else {
