@@ -1,6 +1,5 @@
 package com.yanry.driver.mobile.sample;
 
-import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.ConsoleCommunicator;

@@ -1,6 +1,5 @@
 package com.yanry.driver.core.distribute;
 
-import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;

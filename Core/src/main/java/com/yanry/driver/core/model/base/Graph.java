@@ -3,7 +3,6 @@
  */
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;

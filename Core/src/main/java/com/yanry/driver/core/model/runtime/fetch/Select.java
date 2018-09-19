@@ -1,6 +1,5 @@
 package com.yanry.driver.core.model.runtime.fetch;
 
-import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Presentable;
 
@@ -19,7 +18,7 @@ public class Select<V> extends Obtainable<V> {
 
     @Override
     public final V convert(String fetchedValue) {
-        if (Utils.isNonNegativeInteger(fetchedValue)) {
+        if (fetchedValue.matches("^([1-9]\\d*)|0$")) {
             int index = Integer.parseInt(fetchedValue);
             if (index < options.length) {
                 return options[index];

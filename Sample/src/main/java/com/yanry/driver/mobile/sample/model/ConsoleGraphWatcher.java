@@ -1,13 +1,9 @@
 package com.yanry.driver.mobile.sample.model;
 
-import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.CacheProperty;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
-import com.yanry.driver.mobile.window.PreviousWindow;
-import com.yanry.driver.mobile.window.VisibilityState;
 import lib.common.model.log.Logger;
-import lib.common.util.ConsoleUtil;
 
 import java.util.Map;
 import java.util.Set;

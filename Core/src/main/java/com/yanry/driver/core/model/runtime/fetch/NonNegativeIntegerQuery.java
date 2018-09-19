@@ -1,6 +1,5 @@
 package com.yanry.driver.core.model.runtime.fetch;
 
-import com.yanry.driver.core.Utils;
 import com.yanry.driver.core.model.base.Property;
 
 public class NonNegativeIntegerQuery extends Obtainable<Integer> {
@@ -10,7 +9,7 @@ public class NonNegativeIntegerQuery extends Obtainable<Integer> {
 
     @Override
     public Integer convert(String fetchedValue) {
-        if (Utils.isNonNegativeInteger(fetchedValue)) {
+        if (fetchedValue.matches("^([1-9]\\d*)|0$")) {
             return Integer.valueOf(fetchedValue);
         }
         return null;
