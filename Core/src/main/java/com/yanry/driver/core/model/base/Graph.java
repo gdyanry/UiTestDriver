@@ -38,7 +38,7 @@ public class Graph {
     private boolean isTraversing;
     private List<Communicator> communicators;
     private List<Path> optionalPaths;
-    Map<CacheProperty, Object> cacheProperties;
+    Map<Property, Object> propertyCache;
     private GraphWatcher watcher;
     private long actionTimeFrame;
     private Set<Path> temp;
@@ -54,7 +54,7 @@ public class Graph {
         records = new LinkedList<>();
         failedPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
-        cacheProperties = new HashMap<>();
+        propertyCache = new HashMap<>();
         temp = new HashSet<>();
         rollingPath = new HashSet<>();
         stackDepth = new AtomicInteger();
@@ -172,7 +172,7 @@ public class Graph {
 
     private void notifyStandBy(Path path) {
         if (watcher != null) {
-            watcher.onStandby(cacheProperties, unprocessedPaths, temp, failedPaths, path);
+            watcher.onStandby(propertyCache, unprocessedPaths, temp, failedPaths, path);
         }
     }
 

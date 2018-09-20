@@ -33,6 +33,10 @@ public abstract class Property<V> {
         return graph;
     }
 
+    public final boolean switchToValue(V toState) {
+        return switchTo(new Equals<>(toState));
+    }
+
     /**
      * @param toState
      * @return 是否触发ActionEvent
@@ -43,21 +47,26 @@ public abstract class Property<V> {
                 (verifySuperPaths(toState) || graph.findPathToRoll((prop, val) -> equals(prop) && toState.test((V) val)));
     }
 
-    public final boolean switchToValue(V toState) {
-        return switchTo(new Equals<>(toState));
-    }
-
     private boolean verifySuperPaths(ValuePredicate<V> toState) {
         V oldValue = getCurrentValue();
         return toState.getValidValue().anyMatch(v -> {
-            if (selfSwitch(v)) {
-                V newValue = getCurrentValue();
-                if (!newValue.equals(oldValue)) {
-                    graph.verifySuperPaths(this, oldValue, newValue);
-                }
-                return true;
+            SwitchResult switchResult = doSelfSwitch(v);
+            // 注意此时不是通过搜寻路径来实现状态变迁的，故触发动作后需要处理缓存值。
+            switch (switchResult) {
+                case NoAction:
+                    return false;
+                case ActionNoCheck:
+                    handleExpectation(v, false);
+                    break;
+                case ActionNeedCheck:
+                    handleExpectation(v, true);
+                    break;
             }
-            return false;
+            V newValue = getCurrentValue();
+            if (!newValue.equals(oldValue)) {
+                graph.verifySuperPaths(this, oldValue, newValue);
+            }
+            return true;
         });
     }
 
@@ -69,13 +78,32 @@ public abstract class Property<V> {
         return new SDPropertyExpectation<>(timing, needCheck, this, valueSupplier);
     }
 
-    public abstract void handleExpectation(V expectedValue, boolean needCheck);
+    public void handleExpectation(V expectedValue, boolean needCheck) {
+        if (expectedValue != null && needCheck) {
+            if (!getGraph().isValueFresh(this)) {
+                // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
+                getGraph().propertyCache.put(this, null);
+            }
+        } else {
+            // 不查询客户端，直接通过验证并更新状态值
+            getGraph().propertyCache.put(this, expectedValue);
+        }
+    }
 
-    public abstract V getCurrentValue();
+    public V getCurrentValue() {
+        V cacheValue = (V) getGraph().propertyCache.get(this);
+        if (cacheValue == null) {
+            cacheValue = checkValue();
+            getGraph().propertyCache.put(this, cacheValue);
+        }
+        return cacheValue;
+    }
 
-    /**
-     * @param to
-     * @return 是否触发ActionEvent
-     */
-    protected abstract boolean selfSwitch(V to);
+    protected abstract V checkValue();
+
+    protected abstract SwitchResult doSelfSwitch(V to);
+
+    public enum SwitchResult {
+        NoAction, ActionNoCheck, ActionNeedCheck
+    }
 }
