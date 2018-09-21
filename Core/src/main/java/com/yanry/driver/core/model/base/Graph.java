@@ -239,13 +239,7 @@ public class Graph {
             }
             // collect paths that share the same environment states and event
             // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-            List<Path> pathToVerify = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                    .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).collect(Collectors.toList());
-            pathToVerify.forEach(p -> p.getExpectation().preVerify());
-            for (Path p : pathToVerify) {
-                Logger.getDefault().v("verify path: %s", getPresentation(p));
-                verify(p, false);
-            }
+            consumeAction(event);
             rollingPath.remove(path);
             exitStack(depth, false, "perform action success");
             return true;
@@ -254,6 +248,16 @@ public class Graph {
             rollingPath.remove(path);
             exitStack(depth, true, String.format("unprocessed event: %s", getPresentation(inputEvent)));
             return false;
+        }
+    }
+
+    public void consumeAction(ActionEvent inputEvent) {
+        List<Path> pathToVerify = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).collect(Collectors.toList());
+        pathToVerify.forEach(p -> p.getExpectation().preVerify());
+        for (Path p : pathToVerify) {
+            Logger.getDefault().v("verify path: %s", getPresentation(p));
+            verify(p, false);
         }
     }
 
