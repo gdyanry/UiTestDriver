@@ -17,25 +17,23 @@ public class LoginState extends Property<Boolean> {
     public LoginState(Graph graph, CurrentUser currentUser) {
         super(graph);
         this.currentUser = currentUser;
-        new Path(new TransitionEvent<>(currentUser, new Equals<>(""), new Within<>(currentUser.getUserPasswordMap().keySet()))
-                , getStaticExpectation(Timing.IMMEDIATELY, false, true));
+        Equals<String> isEmpty = new Equals<>("");
+        Within<String> notEmpty = new Within<>(currentUser.getUserPasswordMap().keySet());
+        // -> true
+        graph.addPath(new Path(new TransitionEvent<>(currentUser, isEmpty, notEmpty),
+                getStaticExpectation(Timing.IMMEDIATELY, false, true)));
+        // -> false
+        graph.addPath(new Path(new TransitionEvent<>(currentUser, notEmpty, isEmpty),
+                getStaticExpectation(Timing.IMMEDIATELY, false, false)));
     }
 
     @Override
-    public void handleExpectation(Boolean expectedValue, boolean needCheck) {
-
-    }
-
-    @Override
-    protected boolean selfSwitch(Boolean to) {
-        if (to) {
-            return currentUser.getUserPasswordMap().keySet().stream().anyMatch(u -> currentUser.switchToValue(u));
-        }
-        return currentUser.switchToValue("");
-    }
-
-    @Override
-    public Boolean getCurrentValue() {
+    protected Boolean checkValue() {
         return !currentUser.getCurrentValue().equals("");
+    }
+
+    @Override
+    protected SwitchResult doSelfSwitch(Boolean to) {
+        return null;
     }
 }

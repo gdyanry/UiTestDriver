@@ -3,7 +3,7 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.Presentable;
 
-public abstract class IntProperty extends CacheProperty<Integer> {
+public abstract class IntProperty extends Property<Integer> {
 
     public IntProperty(Graph graph) {
         super(graph);
@@ -28,11 +28,6 @@ public abstract class IntProperty extends CacheProperty<Integer> {
             return SwitchResult.ActionNeedCheck;
         }
         return SwitchResult.NoAction;
-    }
-
-    @Override
-    protected final boolean needCheckAfterSelfSwitch() {
-        return true;
     }
 
     public class ShiftExpectation extends Expectation {

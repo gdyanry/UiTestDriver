@@ -65,17 +65,12 @@ public class TextValidity extends Property<Boolean> {
     }
 
     @Override
-    public void handleExpectation(Boolean expectedValue, boolean needCheck) {
-
-    }
-
-    @Override
-    public Boolean getCurrentValue() {
+    protected Boolean checkValue() {
         return validContents.contains(text.getCurrentValue());
     }
 
     @Override
-    protected boolean selfSwitch(Boolean to) {
-        return false;
+    protected SwitchResult doSelfSwitch(Boolean to) {
+        return null;
     }
 }

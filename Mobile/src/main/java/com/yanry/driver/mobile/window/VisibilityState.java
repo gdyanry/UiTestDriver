@@ -18,17 +18,7 @@ public class VisibilityState extends Property<Visibility> {
     }
 
     @Override
-    public void handleExpectation(Visibility expectedValue, boolean needCheck) {
-
-    }
-
-    @Override
-    protected boolean selfSwitch(Visibility to) {
-        return false;
-    }
-
-    @Override
-    public Visibility getCurrentValue() {
+    protected Visibility checkValue() {
         Window current = window.getManager().currentWindow.getCurrentValue();
         if (current.equals(window)) {
             return Visibility.Foreground;
@@ -37,6 +27,11 @@ public class VisibilityState extends Property<Visibility> {
         } else {
             return Visibility.NotCreated;
         }
+    }
+
+    @Override
+    protected SwitchResult doSelfSwitch(Visibility to) {
+        return null;
     }
 
     private boolean checkExist(PreviousWindow previousWindow) {

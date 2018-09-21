@@ -151,17 +151,12 @@ public abstract class Window extends ViewContainer {
     protected abstract void addCases(Graph graph, WindowManager manager);
 
     @Override
-    public void handleExpectation(Boolean expectedValue, boolean needCheck) {
-
-    }
-
-    @Override
-    public Boolean getCurrentValue() {
+    protected Boolean checkValue() {
         return visibility.getCurrentValue() == Visibility.Foreground;
     }
 
     @Override
-    protected boolean selfSwitch(Boolean to) {
-        return false;
+    protected SwitchResult doSelfSwitch(Boolean to) {
+        return null;
     }
 }

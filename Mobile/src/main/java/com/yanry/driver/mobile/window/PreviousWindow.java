@@ -1,10 +1,10 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.Graph;
 import lib.common.util.object.Presentable;
 
-public class PreviousWindow extends CacheProperty<Window> {
+public class PreviousWindow extends Property<Window> {
     private Window window;
 
     PreviousWindow(Graph graph, Window window) {

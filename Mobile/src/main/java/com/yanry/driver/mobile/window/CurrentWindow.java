@@ -1,10 +1,10 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
-public class CurrentWindow extends CacheProperty<Window> {
+public class CurrentWindow extends Property<Window> {
     private WindowManager manager;
 
     CurrentWindow(Graph graph, WindowManager manager) {

@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.property;
 
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Created by rongyu.yan on 4/18/2017.
  */
-public class CurrentUser extends CacheProperty<String> {
+public class CurrentUser extends Property<String> {
     private HashMap<String, String> userPasswordMap;
 
     public CurrentUser(Graph graph) {

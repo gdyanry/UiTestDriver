@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.view.listview;
 
 import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.event.StateChangeCallback;
+import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -48,7 +48,17 @@ public class ListView<I extends ListViewItem<I>> extends View {
         // 变为可见时清除clickedItem缓存
         getWindow().createForegroundPath(getShowEvent(), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, itemNone));
         // size变化时重新初始化item
-        getWindow().createForegroundPath(new StateChangeCallback<>(size, null, s -> s != null), new ActionExpectation() {
+        getWindow().createForegroundPath(new TransitionEvent<>(size, null, new ValuePredicate<Integer>() {
+            @Override
+            public boolean test(Integer value) {
+                return value != null;
+            }
+
+            @Override
+            protected Stream<Integer> getValidValue() {
+                return null;
+            }
+        }), new ActionExpectation() {
             @Override
             protected void run() {
                 initItems();

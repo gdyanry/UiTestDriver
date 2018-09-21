@@ -1,10 +1,10 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.mobile.view.View;
 import lib.common.util.object.Presentable;
 
-public abstract class ViewProperty<V> extends CacheProperty<V> {
+public abstract class ViewProperty<V> extends Property<V> {
     private View view;
 
     public ViewProperty(View view) {

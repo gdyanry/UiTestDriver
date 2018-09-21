@@ -48,20 +48,17 @@ public abstract class Property<V> {
     }
 
     private boolean verifySuperPaths(ValuePredicate<V> toState) {
+        if (toState.getValidValue() == null) {
+            return false;
+        }
         V oldValue = getCurrentValue();
         return toState.getValidValue().anyMatch(v -> {
             SwitchResult switchResult = doSelfSwitch(v);
-            // 注意此时不是通过搜寻路径来实现状态变迁的，故触发动作后需要处理缓存值。
-            switch (switchResult) {
-                case NoAction:
-                    return false;
-                case ActionNoCheck:
-                    handleExpectation(v, false);
-                    break;
-                case ActionNeedCheck:
-                    handleExpectation(v, true);
-                    break;
+            if (switchResult == null || switchResult == SwitchResult.NoAction) {
+                return false;
             }
+            // 注意此时不是通过搜寻路径来实现状态变迁的，故触发动作后需要处理缓存值。
+            handleExpectation(v, switchResult == SwitchResult.ActionNeedCheck);
             V newValue = getCurrentValue();
             if (!newValue.equals(oldValue)) {
                 graph.verifySuperPaths(this, oldValue, newValue);
@@ -78,7 +75,7 @@ public abstract class Property<V> {
         return new SDPropertyExpectation<>(timing, needCheck, this, valueSupplier);
     }
 
-    public void handleExpectation(V expectedValue, boolean needCheck) {
+    public final void handleExpectation(V expectedValue, boolean needCheck) {
         if (expectedValue != null && needCheck) {
             if (!getGraph().isValueFresh(this)) {
                 // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
@@ -90,7 +87,7 @@ public abstract class Property<V> {
         }
     }
 
-    public V getCurrentValue() {
+    public final V getCurrentValue() {
         V cacheValue = (V) getGraph().propertyCache.get(this);
         if (cacheValue == null) {
             cacheValue = checkValue();

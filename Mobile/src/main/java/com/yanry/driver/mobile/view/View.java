@@ -3,7 +3,7 @@
  */
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.base.CacheProperty;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
@@ -67,21 +67,16 @@ public class View extends ViewContainer {
     }
 
     @Override
-    public void handleExpectation(Boolean expectedValue, boolean needCheck) {
-
-    }
-
-    @Override
-    public Boolean getCurrentValue() {
+    protected Boolean checkValue() {
         return parent.getCurrentValue() && independentVisibility.getCurrentValue();
     }
 
     @Override
-    protected boolean selfSwitch(Boolean to) {
-        return false;
+    protected SwitchResult doSelfSwitch(Boolean to) {
+        return null;
     }
 
-    public class IndependentVisibility extends CacheProperty<Boolean> {
+    public class IndependentVisibility extends Property<Boolean> {
 
         public IndependentVisibility(Graph graph) {
             super(graph);

@@ -6,7 +6,6 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
-import com.yanry.driver.core.model.event.StateChangeCallback;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
@@ -63,11 +62,7 @@ public class Graph {
     }
 
     public static Object getPresentation(Object object) {
-        Object presentation = ObjectUtil.getPresentation(object, TYPE_SYMBOL);
-        if (presentation == null) {
-            return null;
-        }
-        return StringUtil.formatJson(presentation.toString());
+        return ObjectUtil.getPresentation(object, TYPE_SYMBOL);
     }
 
     public void registerCommunicator(Communicator communicator) {
@@ -150,10 +145,6 @@ public class Graph {
      * @return 是否执行到verify()
      */
     private boolean deepRoll(Path path) {
-        // 状态变化回调事件只能被动触发，即成为其他路径的父路径
-        if (path.getEvent() instanceof StateChangeCallback) {
-            return false;
-        }
         notifyStandBy(path);
         while (shallowRoll(path)) {
             // 添加到temp里面说明已经执行到verify()了
