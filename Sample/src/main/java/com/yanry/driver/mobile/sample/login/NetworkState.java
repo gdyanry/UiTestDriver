@@ -2,6 +2,7 @@ package com.yanry.driver.mobile.sample.login;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
@@ -20,7 +21,7 @@ public class NetworkState extends Property<NetworkState.Network> {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(Network to) {
+    protected ActionEvent doSelfSwitch(Network to) {
         if (getGraph().performAction(new SwitchStateAction<>(this, to))) {
             return SwitchResult.ActionNoCheck;
         }

@@ -38,10 +38,10 @@ public class LoginPage extends Window {
     protected void addCases(Graph graph, WindowManager manager) {
         showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextState(loginState, false);
         View etUser = new View(graph, this, new ByDesc(DESC_USER));
-        Text txtUser = new EditableText(etUser);
+        Text txtUser = new EditText(etUser);
         TextValidity userValidity = new TextValidity(etUser, txtUser);
         View etPwd = new View(graph, this, new ByDesc(DESC_PWD));
-        Text txtPwd = new EditableText(etPwd);
+        Text txtPwd = new EditText(etPwd);
         TextValidity pwdValidity = new TextValidity(etPwd, txtPwd);
         // 页面打开时输入框内容为空
         graph.addPath(new Path(getCreateEvent(), txtUser.getStaticExpectation(Timing.IMMEDIATELY, true, "")));

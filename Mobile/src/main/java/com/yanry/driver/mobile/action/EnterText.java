@@ -1,20 +1,28 @@
 package com.yanry.driver.mobile.action;
 
-import com.yanry.driver.core.model.event.ActionEvent;
-import com.yanry.driver.mobile.view.View;
+import com.yanry.driver.core.model.event.ExpectationEvent;
+import com.yanry.driver.core.model.expectation.Timing;
+import com.yanry.driver.mobile.property.EditText;
 import lib.common.util.object.HashAndEquals;
 import lib.common.util.object.Presentable;
 
 /**
  * Created by rongyu.yan on 2/28/2017.
  */
-@Presentable
-public class EnterText extends ActionEvent<View, Object> {
+public class EnterText extends ExpectationEvent {
+    private EditText editText;
     private String text;
 
-    public EnterText(View view, String text) {
-        super(view);
+    public EnterText(EditText editText, String text) {
+        super(editText.getStaticExpectation(Timing.IMMEDIATELY, false, text));
+        this.editText = editText;
         this.text = text;
+    }
+
+    @HashAndEquals
+    @Presentable
+    public EditText getEditText() {
+        return editText;
     }
 
     @HashAndEquals
