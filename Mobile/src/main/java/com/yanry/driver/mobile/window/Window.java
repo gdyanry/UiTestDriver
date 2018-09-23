@@ -151,7 +151,7 @@ public abstract class Window extends ViewContainer {
     protected abstract void addCases(Graph graph, WindowManager manager);
 
     @Override
-    protected Boolean checkValue() {
+    protected Boolean fetchValue() {
         return visibility.getCurrentValue() == Visibility.Foreground;
     }
 

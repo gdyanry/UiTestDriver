@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.property;
 
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.runtime.fetch.StringQuery;
 import com.yanry.driver.mobile.view.View;
 
@@ -14,7 +15,7 @@ public class Text extends ViewProperty<String> {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(String to) {
-        return SwitchResult.NoAction;
+    protected ActionEvent doSelfSwitch(String to) {
+        return null;
     }
 }

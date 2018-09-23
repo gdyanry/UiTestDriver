@@ -65,7 +65,7 @@ public class TextValidity extends Property<Boolean> {
     }
 
     @Override
-    protected Boolean checkValue() {
+    protected Boolean fetchValue() {
         return validContents.contains(text.getCurrentValue());
     }
 

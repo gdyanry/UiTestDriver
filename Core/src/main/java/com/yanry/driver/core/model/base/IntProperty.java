@@ -1,5 +1,6 @@
 package com.yanry.driver.core.model.base;
 
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.Presentable;
 
@@ -14,9 +15,9 @@ public abstract class IntProperty extends Property<Integer> {
     }
 
     @Override
-    protected final SwitchResult doSelfSwitch(Integer to) {
+    protected final ActionEvent doSelfSwitch(Integer to) {
         int currentValue = getCurrentValue();
-        if (getGraph().findPathToRoll(exp -> {
+        return getGraph().findPathToRoll(exp -> {
             if (exp instanceof ShiftExpectation) {
                 ShiftExpectation expectation = (ShiftExpectation) exp;
                 if (expectation.getProperty() == this) {
@@ -24,10 +25,7 @@ public abstract class IntProperty extends Property<Integer> {
                 }
             }
             return false;
-        })) {
-            return SwitchResult.ActionNeedCheck;
-        }
-        return SwitchResult.NoAction;
+        });
     }
 
     public class ShiftExpectation extends Expectation {

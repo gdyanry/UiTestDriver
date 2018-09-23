@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Property;
 import lib.common.util.object.Presentable;
 
 public class PreviousWindow extends Property<Window> {
@@ -18,7 +18,7 @@ public class PreviousWindow extends Property<Window> {
     }
 
     @Override
-    protected Window checkValue() {
+    protected Window fetchValue() {
         return window.getManager().noWindow;
     }
 

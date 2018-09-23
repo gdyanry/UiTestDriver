@@ -3,12 +3,14 @@
  */
 package com.yanry.driver.core.model.base;
 
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Equals;
 import lib.common.util.object.Presentable;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -33,38 +35,21 @@ public abstract class Property<V> {
         return graph;
     }
 
-    public final boolean switchToValue(V toState) {
+    public final ActionEvent switchToValue(V toState) {
         return switchTo(new Equals<>(toState));
     }
 
-    /**
-     * @param toState
-     * @return 是否触发ActionEvent
-     */
-    public final boolean switchTo(ValuePredicate<V> toState) {
-        return !toState.test(getCurrentValue()) &&
-                // 先尝试自转化再搜索是否存在可用路径
-                (verifySuperPaths(toState) || graph.findPathToRoll((prop, val) -> equals(prop) && toState.test((V) val)));
-    }
-
-    private boolean verifySuperPaths(ValuePredicate<V> toState) {
-        if (toState.getValidValue() == null) {
-            return false;
+    public final ActionEvent switchTo(ValuePredicate<V> toState) {
+        if (toState.test(getCurrentValue())) {
+            return null;
         }
-        V oldValue = getCurrentValue();
-        return toState.getValidValue().anyMatch(v -> {
-            SwitchResult switchResult = doSelfSwitch(v);
-            if (switchResult == null || switchResult == SwitchResult.NoAction) {
-                return false;
+        if (toState.getValidValue() != null) {
+            Optional<ActionEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null).findAny();
+            if (any.isPresent()) {
+                return any.get();
             }
-            // 注意此时不是通过搜寻路径来实现状态变迁的，故触发动作后需要处理缓存值。
-            handleExpectation(v, switchResult == SwitchResult.ActionNeedCheck);
-            V newValue = getCurrentValue();
-            if (!newValue.equals(oldValue)) {
-                graph.verifySuperPaths(this, oldValue, newValue);
-            }
-            return true;
-        });
+        }
+        return graph.findPathToRoll((prop, val) -> equals(prop) && toState.test((V) val));
     }
 
     public SSPropertyExpectation<V> getStaticExpectation(Timing timing, boolean needCheck, V value) {
@@ -90,17 +75,13 @@ public abstract class Property<V> {
     public final V getCurrentValue() {
         V cacheValue = (V) getGraph().propertyCache.get(this);
         if (cacheValue == null) {
-            cacheValue = checkValue();
+            cacheValue = fetchValue();
             getGraph().propertyCache.put(this, cacheValue);
         }
         return cacheValue;
     }
 
-    protected abstract V checkValue();
+    protected abstract V fetchValue();
 
-    protected abstract SwitchResult doSelfSwitch(V to);
-
-    public enum SwitchResult {
-        NoAction, ActionNoCheck, ActionNeedCheck
-    }
+    protected abstract ActionEvent doSelfSwitch(V to);
 }

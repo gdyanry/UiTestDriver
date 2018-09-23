@@ -14,7 +14,6 @@ import com.yanry.driver.core.model.runtime.StateSwitch;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
-import lib.common.util.StringUtil;
 import lib.common.util.object.ObjectUtil;
 
 import java.util.*;
@@ -167,15 +166,11 @@ public class Graph {
         }
     }
 
-    /**
-     * @param path
-     * @return 是否触发ActionEvent
-     */
-    private boolean shallowRoll(Path path) {
+    private ActionEvent shallowRoll(Path path) {
         int depth = enterStack(String.format("roll: %s", getPresentation(path)));
         if (!rollingPath.add(path)) {
             exitStack(depth, true, "fail for repeating rolling");
-            return false;
+            return null;
         }
         // make sure environment states are satisfied.
         Optional<Property> any = path.context.keySet().stream().filter(property -> !path.context.get(property).test(property.getCurrentValue())).findAny();
@@ -252,8 +247,9 @@ public class Graph {
     }
 
     public void consumeAction(ActionEvent inputEvent) {
-        List<Path> pathToVerify = allPaths.stream().filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                .sorted(Comparator.comparingInt(p -> allPaths.indexOf(p))).collect(Collectors.toList());
+        List<Path> pathToVerify = allPaths.stream()
+                .filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                .collect(Collectors.toList());
         pathToVerify.forEach(p -> p.getExpectation().preVerify());
         for (Path p : pathToVerify) {
             Logger.getDefault().v("verify path: %s", getPresentation(p));
@@ -310,29 +306,21 @@ public class Graph {
         }
     }
 
-    /**
-     * try paths that satisfy the given predicates until an action event is triggered.
-     *
-     * @param expectationFilter
-     * @return 是否触发ActionEvent
-     */
-    boolean findPathToRoll(Predicate<Expectation> expectationFilter) {
+    ActionEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
         String msg = "find path to roll";
         int depth = enterStack(msg);
-        if (allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
+        Optional<ActionEvent> any = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
                     int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
                     Logger.getDefault().v("compare unsatisfied degree: %s - %s", unsatisfiedDegree, getPresentation(p));
                     return unsatisfiedDegree;
-                })).filter(p -> {
-                    Logger.getDefault().v("try to roll: %s", getPresentation(p));
-                    return shallowRoll(p);
-                }).findFirst().isPresent()) {
+                })).map(path -> shallowRoll(path)).filter(a -> a != null).findAny();
+        if (any.isPresent()) {
             exitStack(depth, false, msg);
-            return true;
+            return any.get();
         }
         exitStack(depth, true, msg);
-        return false;
+        return null;
     }
 
     private boolean isSatisfied(Expectation expectation, Predicate<Expectation> expectationFilter) {
@@ -345,7 +333,7 @@ public class Graph {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, expectationFilter));
     }
 
-    <V> boolean findPathToRoll(BiPredicate<Property<V>, V> endStateFilter) {
+    <V> ActionEvent findPathToRoll(BiPredicate<Property<V>, V> endStateFilter) {
         return findPathToRoll(e -> {
             if (e instanceof PropertyExpectation) {
                 PropertyExpectation<V> exp = (PropertyExpectation<V>) e;

@@ -3,8 +3,8 @@
  */
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -67,7 +67,7 @@ public class View extends ViewContainer {
     }
 
     @Override
-    protected Boolean checkValue() {
+    protected Boolean fetchValue() {
         return parent.getCurrentValue() && independentVisibility.getCurrentValue();
     }
 
@@ -88,7 +88,7 @@ public class View extends ViewContainer {
         }
 
         @Override
-        protected Boolean checkValue() {
+        protected Boolean fetchValue() {
             return getGraph().obtainValue(new BooleanQuery(this));
         }
 

@@ -20,7 +20,7 @@ public class ViewIntProperty extends IntProperty {
     }
 
     @Override
-    protected final Integer checkValue() {
+    protected final Integer fetchValue() {
         if (view.getCurrentValue()) {
             return getGraph().obtainValue(new NonNegativeIntegerQuery(this));
         }

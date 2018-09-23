@@ -28,7 +28,7 @@ public class LoginState extends Property<Boolean> {
     }
 
     @Override
-    protected Boolean checkValue() {
+    protected Boolean fetchValue() {
         return !currentUser.getCurrentValue().equals("");
     }
 
