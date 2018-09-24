@@ -9,8 +9,6 @@ import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
-import com.yanry.driver.core.model.runtime.MissedPath;
-import com.yanry.driver.core.model.runtime.StateSwitch;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
@@ -39,7 +37,7 @@ public class Graph {
     Map<Property, Object> propertyCache;
     private GraphWatcher watcher;
     private long actionTimeFrame;
-    private Set<Path> temp;
+    private Set<Path> verifiedPaths;
     private Set<Path> rollingPath;
     private AtomicInteger stackDepth;
     private Set<Expectation> pendingExpectations;
@@ -53,7 +51,7 @@ public class Graph {
         failedPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
         propertyCache = new HashMap<>();
-        temp = new HashSet<>();
+        verifiedPaths = new HashSet<>();
         rollingPath = new HashSet<>();
         stackDepth = new AtomicInteger();
         pendingExpectations = new HashSet<>();
@@ -109,7 +107,7 @@ public class Graph {
         records.clear();
         failedPaths.clear();
         unprocessedPaths.clear();
-        temp.clear();
+        verifiedPaths.clear();
         rollingPath.clear();
         pendingExpectations.clear();
         failedExpectation.clear();
@@ -139,56 +137,54 @@ public class Graph {
         isTraversing = false;
     }
 
+    public boolean postAction(ActionEvent actionEvent) {
+        records.add(actionEvent);
+        for (Communicator communicator : communicators) {
+            if (communicator.performAction(actionEvent)) {
+                actionTimeFrame = System.currentTimeMillis();
+                List<Path> pathToVerify = allPaths.stream()
+                        .filter(p -> p.getEvent().equals(actionEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                        .collect(Collectors.toList());
+                pathToVerify.forEach(p -> p.getExpectation().preVerify());
+                for (Path p : pathToVerify) {
+                    Logger.getDefault().v("verify path: %s", getPresentation(p));
+                    verify(p, false);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @param path
      * @return 是否执行到verify()
      */
     private boolean deepRoll(Path path) {
-        notifyStandBy(path);
-        while (shallowRoll(path)) {
-            // 添加到temp里面说明已经执行到verify()了
-            if (temp.contains(path)) {
-                temp.clear();
-                return true;
+        ActionEvent actionEvent;
+        while ((actionEvent = roll(path)) != null) {
+            if (postAction(actionEvent)) {
+                if (verifiedPaths.contains(path)) {
+                    return true;
+                }
             }
-            notifyStandBy(path);
         }
-        // 还未执行到verify()便在shallowRoll()中返回false，说明没有可到达该path可执行环境且可用的路径
-        temp.clear();
-        unprocessedPaths.remove(path);
-        failedPaths.add(path);
         return false;
     }
 
     private void notifyStandBy(Path path) {
         if (watcher != null) {
-            watcher.onStandby(propertyCache, unprocessedPaths, temp, failedPaths, path);
+            watcher.onStandby(propertyCache, unprocessedPaths, verifiedPaths, failedPaths, path);
         }
     }
 
-    private ActionEvent shallowRoll(Path path) {
-        int depth = enterStack(String.format("roll: %s", getPresentation(path)));
-        if (!rollingPath.add(path)) {
-            exitStack(depth, true, "fail for repeating rolling");
-            return null;
-        }
+    private ActionEvent roll(Path path) {
         // make sure environment states are satisfied.
-        Optional<Property> any = path.context.keySet().stream().filter(property -> !path.context.get(property).test(property.getCurrentValue())).findAny();
-        if (any.isPresent()) {
-            Property property = any.get();
-            Object oldValue = property.getCurrentValue();
-            ValuePredicate toState = path.context.get(property);
-            String msg = String.format("switch init state: %s, %s", getPresentation(property), getPresentation(toState));
-            Logger.getDefault().v(msg);
-            if (!property.switchTo(toState)) {
-                records.add(new MissedPath(path, new StateSwitch<>(property, oldValue, toState)));
-                rollingPath.remove(path);
-                exitStack(depth, true, msg);
-                return false;
+        for (Property property : path.context.keySet()) {
+            ValuePredicate valuePredicate = path.context.get(property);
+            if (!valuePredicate.test(property.getCurrentValue())) {
+                return property.switchTo(valuePredicate);
             }
-            rollingPath.remove(path);
-            exitStack(depth, false, msg);
-            return true;
         }
         // all environment states are satisfied by now.
         // trigger event
@@ -201,60 +197,16 @@ public class Graph {
             if (event.getFrom() != null && !event.getFrom().test(oldValue)) {
                 String msg = String.format("switch state event(from): %s", getPresentation(event));
                 Logger.getDefault().v(msg);
-                if (!property.switchTo(event.getFrom())) {
-                    records.add(new MissedPath(path, event));
-                    rollingPath.remove(path);
-                    exitStack(depth, true, msg);
-                    return false;
-                }
-                rollingPath.remove(path);
-                exitStack(depth, false, msg);
-                return true;
+                return property.switchTo(event.getFrom());
             }
             String msg = String.format("switch state event(to): %s", getPresentation(event));
             Logger.getDefault().v(msg);
-            if (!property.switchTo(event.getTo())) {
-                records.add(new MissedPath(path, event));
-                rollingPath.remove(path);
-                exitStack(depth, true, msg);
-                return false;
-            }
-            rollingPath.remove(path);
-            exitStack(depth, false, msg);
-            return true;
+            return property.switchTo(event.getTo());
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent event = (ActionEvent) inputEvent;
-            event.processPreAction();
-            // this is where the action event is performed!
-            if (!performAction(event)) {
-                records.add(new MissedPath(path, event));
-                rollingPath.remove(path);
-                exitStack(depth, true, String.format("perform action fail: %s", getPresentation(event)));
-                return false;
-            }
-            // collect paths that share the same environment states and event
-            // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-            consumeAction(event);
-            rollingPath.remove(path);
-            exitStack(depth, false, "perform action success");
-            return true;
-        } else {
-            records.add(new MissedPath(path, inputEvent));
-            rollingPath.remove(path);
-            exitStack(depth, true, String.format("unprocessed event: %s", getPresentation(inputEvent)));
-            return false;
+            return event;
         }
-    }
-
-    public void consumeAction(ActionEvent inputEvent) {
-        List<Path> pathToVerify = allPaths.stream()
-                .filter(p -> p.getEvent().equals(inputEvent) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                .collect(Collectors.toList());
-        pathToVerify.forEach(p -> p.getExpectation().preVerify());
-        for (Path p : pathToVerify) {
-            Logger.getDefault().v("verify path: %s", getPresentation(p));
-            verify(p, false);
-        }
+        return null;
     }
 
     private void verify(Path path, boolean isSuper) {
@@ -271,11 +223,12 @@ public class Graph {
                 failedPaths.add(path);
             }
         }
-        temp.add(path);
+        verifiedPaths.add(path);
         unprocessedPaths.remove(path);
         exitStack(depth, result == VerifyResult.Failed, msg);
     }
 
+    // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
         // 处理pending expectation
         if (pendingExpectations.size() > 0) {
@@ -314,7 +267,7 @@ public class Graph {
                     int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
                     Logger.getDefault().v("compare unsatisfied degree: %s - %s", unsatisfiedDegree, getPresentation(p));
                     return unsatisfiedDegree;
-                })).map(path -> shallowRoll(path)).filter(a -> a != null).findAny();
+                })).map(path -> roll(path)).filter(a -> a != null).findAny();
         if (any.isPresent()) {
             exitStack(depth, false, msg);
             return any.get();
@@ -362,17 +315,6 @@ public class Graph {
             }
         }
         throw new NullPointerException(String.format("unable to check state: %s", getPresentation(obtainable)));
-    }
-
-    public boolean performAction(ActionEvent actionEvent) {
-        records.add(actionEvent);
-        for (Communicator communicator : communicators) {
-            if (communicator.performAction(actionEvent)) {
-                actionTimeFrame = System.currentTimeMillis();
-                return true;
-            }
-        }
-        return false;
     }
 
     public Boolean verifyExpectation(Expectation expectation) {

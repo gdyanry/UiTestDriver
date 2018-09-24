@@ -79,7 +79,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         I child = items.get(index);
         if (child == null) {
             child = itemCreator.create(getGraph(), this, index);
-            getWindow().createForegroundPath(new Click<>(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
+            getWindow().createForegroundPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
                     .addContextState(this, true)
                     .addContextStatePredicate(size, new UnaryIntPredicate(index, true));
             items.put(index, child);

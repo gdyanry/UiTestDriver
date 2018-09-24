@@ -4,6 +4,7 @@ import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Within;
@@ -70,7 +71,7 @@ public class TextValidity extends Property<Boolean> {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(Boolean to) {
+    protected ActionEvent doSelfSwitch(Boolean to) {
         return null;
     }
 }

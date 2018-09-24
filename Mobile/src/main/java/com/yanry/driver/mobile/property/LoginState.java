@@ -3,6 +3,7 @@ package com.yanry.driver.mobile.property;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Equals;
@@ -33,7 +34,7 @@ public class LoginState extends Property<Boolean> {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(Boolean to) {
+    protected ActionEvent doSelfSwitch(Boolean to) {
         return null;
     }
 }

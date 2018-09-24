@@ -2,6 +2,7 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import lib.common.util.object.Presentable;
 
 public class VisibilityState extends Property<Visibility> {
@@ -30,7 +31,7 @@ public class VisibilityState extends Property<Visibility> {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(Visibility to) {
+    protected ActionEvent doSelfSwitch(Visibility to) {
         return null;
     }
 

@@ -5,6 +5,7 @@ package com.yanry.driver.mobile.view;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -72,7 +73,7 @@ public class View extends ViewContainer {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(Boolean to) {
+    protected ActionEvent doSelfSwitch(Boolean to) {
         return null;
     }
 
@@ -93,8 +94,8 @@ public class View extends ViewContainer {
         }
 
         @Override
-        protected SwitchResult doSelfSwitch(Boolean to) {
-            return SwitchResult.NoAction;
+        protected ActionEvent doSelfSwitch(Boolean to) {
+            return null;
         }
     }
 }

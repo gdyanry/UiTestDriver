@@ -22,10 +22,7 @@ public class NetworkState extends Property<NetworkState.Network> {
 
     @Override
     protected ActionEvent doSelfSwitch(Network to) {
-        if (getGraph().performAction(new SwitchStateAction<>(this, to))) {
-            return SwitchResult.ActionNoCheck;
-        }
-        return SwitchResult.NoAction;
+        return new SwitchStateAction<>(this, to);
     }
 
     /**

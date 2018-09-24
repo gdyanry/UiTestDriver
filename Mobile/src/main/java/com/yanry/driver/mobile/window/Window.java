@@ -4,6 +4,7 @@ import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -156,7 +157,7 @@ public abstract class Window extends ViewContainer {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(Boolean to) {
+    protected ActionEvent doSelfSwitch(Boolean to) {
         return null;
     }
 }

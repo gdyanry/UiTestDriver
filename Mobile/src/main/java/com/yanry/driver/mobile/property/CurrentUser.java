@@ -2,6 +2,7 @@ package com.yanry.driver.mobile.property;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class CurrentUser extends Property<String> {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(String to) {
-        return SwitchResult.NoAction;
+    protected ActionEvent doSelfSwitch(String to) {
+        return null;
     }
 }

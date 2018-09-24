@@ -2,8 +2,8 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
+import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.property.ProcessState;
@@ -27,7 +27,8 @@ public class WindowManager {
         // 开启进程
         graph.addPath(new Path(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addContextState(processState, false));
         // 退出进程
-        graph.addPath(new SwitchStateAction<>(processState, false).createPath().addContextState(processState, true));
+        graph.addPath(new Path(new SwitchStateAction<>(processState, false), processState.getStaticExpectation(Timing.IMMEDIATELY, false, false))
+                .addContextState(processState, true));
         noWindow = new NoWindow(graph, this);
         currentWindow.handleExpectation(noWindow, false);
         // 退出进程时清理当前窗口

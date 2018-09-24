@@ -2,6 +2,7 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
 public class CurrentWindow extends Property<Window> {
@@ -24,7 +25,7 @@ public class CurrentWindow extends Property<Window> {
     }
 
     @Override
-    protected SwitchResult doSelfSwitch(Window to) {
-        return SwitchResult.NoAction;
+    protected ActionEvent doSelfSwitch(Window to) {
+        return null;
     }
 }
