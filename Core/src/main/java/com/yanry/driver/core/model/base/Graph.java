@@ -7,7 +7,6 @@ import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
-import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.log.LogLevel;
@@ -17,6 +16,7 @@ import lib.common.util.object.ObjectUtil;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -29,11 +29,9 @@ public class Graph {
     private static final String TYPE_SYMBOL = "#";
     private List<Path> allPaths;
     private Set<Path> unprocessedPaths;
-    private Set<Path> failedPaths;
     private List<Object> records;
     private boolean isTraversing;
     private List<Communicator> communicators;
-    private List<Path> optionalPaths;
     Map<Property, Object> propertyCache;
     private GraphWatcher watcher;
     private long actionTimeFrame;
@@ -41,21 +39,18 @@ public class Graph {
     private Set<Path> rollingPath;
     private AtomicInteger stackDepth;
     private Set<Expectation> pendingExpectations;
-    private Set<Expectation> failedExpectation;
 
     public Graph(GraphWatcher watcher) {
         this.watcher = watcher;
         this.communicators = new LinkedList<>();
         allPaths = new LinkedList<>();
         records = new LinkedList<>();
-        failedPaths = new HashSet<>();
         unprocessedPaths = new HashSet<>();
         propertyCache = new HashMap<>();
         verifiedPaths = new HashSet<>();
         rollingPath = new HashSet<>();
         stackDepth = new AtomicInteger();
         pendingExpectations = new HashSet<>();
-        failedExpectation = new HashSet<>();
     }
 
     public static Object getPresentation(Object object) {
@@ -74,56 +69,45 @@ public class Graph {
         pendingExpectations.add(expectation);
     }
 
-    /**
-     * @return 得到可供用户选择的测试用例（路径）列表。
-     */
-    public List<Path> prepare() {
-        if (optionalPaths == null) {
-            synchronized (this) {
-                if (optionalPaths == null) {
-                    optionalPaths = allPaths.parallelStream().filter(p -> needCheck(p.getExpectation())).collect(Collectors.toList());
-                }
-            }
-        }
-        return optionalPaths;
-    }
-
     private boolean needCheck(Expectation expectation) {
         return expectation.isNeedCheck() || expectation.getFollowingExpectations().parallelStream().anyMatch(exp -> needCheck(exp));
     }
 
-    /**
-     * @param pathIndexes null indicates traversing all paths.
-     * @return return null if traversing is currently processing.
-     */
-    public List<Object> traverse(int[] pathIndexes) {
-        if (isTraversing) {
-            return null;
-        }
-        isTraversing = true;
-        if (optionalPaths == null) {
-            prepare();
-        }
+    private void reset() {
         records.clear();
-        failedPaths.clear();
         unprocessedPaths.clear();
         verifiedPaths.clear();
         rollingPath.clear();
         pendingExpectations.clear();
-        failedExpectation.clear();
-        if (pathIndexes == null) {
-            unprocessedPaths.addAll(optionalPaths);
-        } else if (pathIndexes.length >= optionalPaths.size()) {
-            return Collections.EMPTY_LIST;
-        } else {
-            for (int index : pathIndexes) {
-                unprocessedPaths.add(optionalPaths.get(index));
-            }
+    }
+
+    public List<Object> traverse(Function<List<Path>, List<Path>> pathFilter) {
+        if (isTraversing) {
+            return null;
         }
+        isTraversing = true;
+        reset();
+        List<Path> optionalPaths = allPaths.parallelStream().filter(p -> needCheck(p.getExpectation())).collect(Collectors.toList());
+        List<Path> paths;
+        if (pathFilter == null || (paths = pathFilter.apply(optionalPaths)) == null) {
+            paths = optionalPaths;
+        }
+        unprocessedPaths.addAll(paths);
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = unprocessedPaths.stream().sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true))).findFirst().get();
             Logger.getDefault().d("traverse: %s", getPresentation(path));
-            deepRoll(path);
+            ActionEvent actionEvent;
+            while ((actionEvent = roll(path)) != null) {
+                if (postAction(actionEvent)) {
+                    if (verifiedPaths.contains(path)) {
+                        break;
+                    }
+                } else {
+                    unprocessedPaths.remove(path);
+                    break;
+                }
+            }
+            unprocessedPaths.removeAll(verifiedPaths);
         }
         List<Object> result = new ArrayList<>(records);
         isTraversing = false;
@@ -154,28 +138,6 @@ public class Graph {
             }
         }
         return false;
-    }
-
-    /**
-     * @param path
-     * @return 是否执行到verify()
-     */
-    private boolean deepRoll(Path path) {
-        ActionEvent actionEvent;
-        while ((actionEvent = roll(path)) != null) {
-            if (postAction(actionEvent)) {
-                if (verifiedPaths.contains(path)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private void notifyStandBy(Path path) {
-        if (watcher != null) {
-            watcher.onStandby(propertyCache, unprocessedPaths, verifiedPaths, failedPaths, path);
-        }
     }
 
     private ActionEvent roll(Path path) {
@@ -212,19 +174,14 @@ public class Graph {
     private void verify(Path path, boolean isSuper) {
         String msg = String.format("%s: %s", isSuper ? "verify super" : "verify", getPresentation(path));
         int depth = enterStack(msg);
+        verifiedPaths.add(path);
         Expectation expectation = path.getExpectation();
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
-                records.add(new Assertion(expectation, result == VerifyResult.Success));
-            }
-            if (result == VerifyResult.Failed) {
-                failedExpectation.add(expectation);
-                failedPaths.add(path);
+                records.add(expectation);
             }
         }
-        verifiedPaths.add(path);
-        unprocessedPaths.remove(path);
         exitStack(depth, result == VerifyResult.Failed, msg);
     }
 
@@ -240,11 +197,7 @@ public class Graph {
                 VerifyResult result = expectation.verify(this);
                 if (result != VerifyResult.Pending) {
                     if (expectation.isNeedCheck()) {
-                        records.add(new Assertion(expectation, result == VerifyResult.Success));
-                    }
-                    if (result == VerifyResult.Failed) {
-                        failedExpectation.add(expectation);
-                        allPaths.stream().filter(p -> !failedPaths.contains(p) && p.getExpectation() == expectation).forEach(p -> failedPaths.add(p));
+                        records.add(expectation);
                     }
                     pendingExpectations.remove(expectation);
                 }
@@ -252,7 +205,7 @@ public class Graph {
         }
         if (!to.equals(from)) {
             List<Path> pathToVerify = allPaths.stream()
-                    .filter(p -> !failedPaths.contains(p) && p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                    .filter(p -> p.getEvent().matches(property, from, to) && p.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                     .collect(Collectors.toList());
             pathToVerify.forEach(path -> path.getExpectation().preVerify());
             pathToVerify.forEach(path -> verify(path, true));
@@ -277,9 +230,6 @@ public class Graph {
     }
 
     private boolean isSatisfied(Expectation expectation, Predicate<Expectation> expectationFilter) {
-        if (failedExpectation.contains(expectation)) {
-            return false;
-        }
         if (expectationFilter.test(expectation)) {
             return true;
         }
