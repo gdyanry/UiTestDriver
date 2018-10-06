@@ -19,7 +19,7 @@ public class PreviousWindow extends Property<Window> {
     }
 
     @Override
-    protected Window fetchValue() {
+    protected Window checkValue() {
         return window.getManager().noWindow;
     }
 

@@ -68,7 +68,7 @@ public class View extends ViewContainer {
     }
 
     @Override
-    protected Boolean fetchValue() {
+    protected Boolean checkValue() {
         return parent.getCurrentValue() && independentVisibility.getCurrentValue();
     }
 
@@ -89,7 +89,7 @@ public class View extends ViewContainer {
         }
 
         @Override
-        protected Boolean fetchValue() {
+        protected Boolean checkValue() {
             return getGraph().obtainValue(new BooleanQuery(this));
         }
 

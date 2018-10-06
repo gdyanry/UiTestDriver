@@ -19,7 +19,7 @@ public class VisibilityState extends Property<Visibility> {
     }
 
     @Override
-    protected Visibility fetchValue() {
+    protected Visibility checkValue() {
         Window current = window.getManager().currentWindow.getCurrentValue();
         if (current.equals(window)) {
             return Visibility.Foreground;

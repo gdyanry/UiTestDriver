@@ -31,7 +31,7 @@ public abstract class SerializedCommunicator implements Communicator {
     protected abstract String verifyExpectation(int repeat, Expectation expectation);
 
     @Override
-    public <V> V checkState(Obtainable<V> stateToCheck) {
+    public <V> V fetchState(Obtainable<V> stateToCheck) {
         return _checkState(0, stateToCheck);
     }
 

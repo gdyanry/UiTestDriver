@@ -5,6 +5,7 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.state.Equals;
+import lib.common.model.log.Logger;
 import lib.common.util.object.Presentable;
 
 import java.util.HashMap;
@@ -69,6 +70,7 @@ public class Path {
         if (result > 0) {
             result += baseUnsatisfiedDegree;
         }
+        Logger.getDefault().v("%s: %s", result, Graph.getPresentation(this));
         return result;
     }
 

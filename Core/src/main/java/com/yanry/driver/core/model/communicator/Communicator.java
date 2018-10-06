@@ -13,7 +13,7 @@ public interface Communicator {
      * @param <V>
      * @return 返回null表示无法确定状态值。
      */
-    <V> V checkState(Obtainable<V> stateToCheck);
+    <V> V fetchState(Obtainable<V> stateToCheck);
 
     /**
      * @param actionEvent

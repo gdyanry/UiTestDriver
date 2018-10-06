@@ -16,7 +16,7 @@ public class NetworkState extends Property<NetworkState.Network> {
     }
 
     @Override
-    protected Network fetchValue() {
+    protected Network checkValue() {
         return getGraph().obtainValue(new Select<>(this, Network.values()));
     }
 

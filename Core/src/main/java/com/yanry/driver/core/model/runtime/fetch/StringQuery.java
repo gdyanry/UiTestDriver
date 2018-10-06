@@ -8,7 +8,7 @@ public class StringQuery extends Obtainable<String> {
     }
 
     @Override
-    public String convert(String fetchedValue) {
-        return fetchedValue;
+    public String convert(String responseString) {
+        return responseString;
     }
 }

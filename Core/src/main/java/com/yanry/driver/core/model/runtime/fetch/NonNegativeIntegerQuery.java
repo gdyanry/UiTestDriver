@@ -8,9 +8,9 @@ public class NonNegativeIntegerQuery extends Obtainable<Integer> {
     }
 
     @Override
-    public Integer convert(String fetchedValue) {
-        if (fetchedValue.matches("^([1-9]\\d*)|0$")) {
-            return Integer.valueOf(fetchedValue);
+    public Integer convert(String responseString) {
+        if (responseString.matches("^([1-9]\\d*)|0$")) {
+            return Integer.valueOf(responseString);
         }
         return null;
     }

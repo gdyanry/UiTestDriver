@@ -44,12 +44,18 @@ public abstract class Property<V> {
             return null;
         }
         if (toState.getValidValue() != null) {
-            Optional<ActionEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null).findAny();
+            Optional<ActionEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
             if (any.isPresent()) {
                 return any.get();
             }
         }
-        return graph.findPathToRoll((prop, val) -> equals(prop) && toState.test((V) val));
+        return graph.findPathToRoll(e -> {
+            if (e instanceof PropertyExpectation) {
+                PropertyExpectation<Object> exp = (PropertyExpectation<Object>) e;
+                return equals(exp.getProperty()) && toState.test((V) exp.getExpectedValue());
+            }
+            return false;
+        });
     }
 
     public SSPropertyExpectation<V> getStaticExpectation(Timing timing, boolean needCheck, V value) {
@@ -75,13 +81,13 @@ public abstract class Property<V> {
     public final V getCurrentValue() {
         V cacheValue = (V) getGraph().propertyCache.get(this);
         if (cacheValue == null) {
-            cacheValue = fetchValue();
+            cacheValue = checkValue();
             getGraph().propertyCache.put(this, cacheValue);
         }
         return cacheValue;
     }
 
-    protected abstract V fetchValue();
+    protected abstract V checkValue();
 
     protected abstract ActionEvent doSelfSwitch(V to);
 }

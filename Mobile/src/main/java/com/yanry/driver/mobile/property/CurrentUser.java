@@ -29,7 +29,7 @@ public class CurrentUser extends Property<String> {
     }
 
     @Override
-    protected String fetchValue() {
+    protected String checkValue() {
         Set<String> users = userPasswordMap.keySet();
         String[] options = new String[users.size() + 1];
         options[0] = "";

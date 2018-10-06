@@ -18,7 +18,7 @@ public abstract class ViewProperty<V> extends Property<V> {
     }
 
     @Override
-    protected final V fetchValue() {
+    protected final V checkValue() {
         if (view.getCurrentValue()) {
             return doCheckValue();
         }

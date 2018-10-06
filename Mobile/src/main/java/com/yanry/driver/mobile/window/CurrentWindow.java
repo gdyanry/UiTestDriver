@@ -14,7 +14,7 @@ public class CurrentWindow extends Property<Window> {
     }
 
     @Override
-    protected Window fetchValue() {
+    protected Window checkValue() {
         Window[] options = new Window[manager.windowInstances.size() + 1];
         int i = 0;
         options[0] = manager.noWindow;

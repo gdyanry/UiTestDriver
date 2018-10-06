@@ -17,9 +17,9 @@ public class Select<V> extends Obtainable<V> {
     }
 
     @Override
-    public final V convert(String fetchedValue) {
-        if (fetchedValue.matches("^([1-9]\\d*)|0$")) {
-            int index = Integer.parseInt(fetchedValue);
+    public final V convert(String responseString) {
+        if (responseString.matches("^([1-9]\\d*)|0$")) {
+            int index = Integer.parseInt(responseString);
             if (index < options.length) {
                 return options[index];
             }
