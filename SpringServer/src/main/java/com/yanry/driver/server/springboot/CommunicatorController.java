@@ -38,7 +38,7 @@ public abstract class CommunicatorController {
     public String prepare(HttpServletResponse response) {
         String token = UUID.randomUUID().toString();
         ServerReception reception = new ServerReception();
-        Graph graph = new Graph(null);
+        Graph graph = new Graph();
         populateGraph(graph);
         receptionMap.put(token, reception);
         response.setHeader(Const.HTTP_HEADER_TOKEN, token);

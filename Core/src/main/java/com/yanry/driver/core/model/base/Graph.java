@@ -37,6 +37,7 @@ public class Graph {
     private Set<Expectation> pendingExpectations;
     private ArrayList<Path> rollingPaths;
     private HashSet<ActionEvent> invalidActions;
+    private List<Path> concernedPaths;
 
     public Graph() {
         this.communicators = new LinkedList<>();
@@ -77,7 +78,7 @@ public class Graph {
         isTraversing = false;
     }
 
-    private boolean prepare() {
+    private boolean setup() {
         if (isTraversing) {
             return false;
         }
@@ -88,13 +89,39 @@ public class Graph {
         return true;
     }
 
+    public List<Path> getConcernedPaths() {
+        if (concernedPaths == null) {
+            concernedPaths = allPaths.parallelStream()
+                    .filter(p -> needCheck(p.getExpectation()))
+                    .collect(Collectors.toList());
+        }
+        return concernedPaths;
+    }
+
     public List<Object> traverse(Predicate<Path> pathFilter) {
-        if (!prepare()) {
+        List<Path> unprocessedPaths = concernedPaths.parallelStream()
+                .filter(p -> pathFilter == null || pathFilter.test(p))
+                .collect(Collectors.toList());
+        return traverse(unprocessedPaths);
+    }
+
+    public List<Object> traverse(int[] selectedIndexes) {
+        List<Path> unprocessedPaths;
+        if (selectedIndexes == null) {
+            unprocessedPaths = new ArrayList<>(concernedPaths);
+        } else {
+            unprocessedPaths = new ArrayList<>(selectedIndexes.length);
+            for (int i : selectedIndexes) {
+                unprocessedPaths.add(concernedPaths.get(i));
+            }
+        }
+        return traverse(unprocessedPaths);
+    }
+
+    private List<Object> traverse(List<Path> unprocessedPaths) {
+        if (!setup()) {
             return null;
         }
-        List<Path> unprocessedPaths = allPaths.parallelStream()
-                .filter(p -> needCheck(p.getExpectation()) && (pathFilter == null || pathFilter.test(p)))
-                .collect(Collectors.toList());
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = null;
             int minDegree = Integer.MAX_VALUE;
@@ -149,7 +176,7 @@ public class Graph {
     }
 
     public <V> boolean achieveState(Property<V> property, V value) {
-        boolean success = prepare() && achieveStatePredicate(property, new Equals<>(value));
+        boolean success = setup() && achieveStatePredicate(property, new Equals<>(value));
         isTraversing = false;
         return success;
     }

@@ -18,7 +18,7 @@ public class ConsoleCommunicator extends SerializedCommunicator {
     }
 
     public String readLine(String prompt) {
-        System.err.println(prompt);
+        System.out.println(prompt);
         return scanner.nextLine();
     }
 

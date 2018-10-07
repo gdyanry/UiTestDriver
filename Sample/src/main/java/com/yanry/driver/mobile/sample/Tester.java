@@ -21,13 +21,13 @@ import java.util.function.Consumer;
 public class Tester {
 
     public static void test(boolean verbose, Consumer<Graph> setupGraph) {
-        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatterBuilder().level().sequenceNumber().build(), verbose ? LogLevel.Verbose : LogLevel.Debug));
+        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatterBuilder().level().method().sequenceNumber().build(), verbose ? LogLevel.Verbose : LogLevel.Debug));
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         GraphWatcher watcher = new ConsoleGraphWatcher();
-        Graph graph = new Graph(watcher);
+        Graph graph = new Graph();
         graph.registerCommunicator(communicator);
         setupGraph.accept(graph);
-        List<Path> options = graph.prepare();
+        List<Path> options = graph.getConcernedPaths();
         int i = 0;
         for (Path option : options) {
             Logger.getDefault().d("%05d - %s", i++, Graph.getPresentation(option));

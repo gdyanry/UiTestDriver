@@ -33,7 +33,7 @@ public class ServerReception extends SerializedCommunicator {
         this.graph = graph;
         instructionQueue = new SynchronousQueue(true);
         feedbackQueue = new SynchronousQueue<>(true);
-        List<Path> paths = graph.prepare();
+        List<Path> paths = graph.getConcernedPaths();
         JSONArray jsonArray = new JSONArray();
         for (Path path : paths) {
             jsonArray.put(Graph.getPresentation(path));
