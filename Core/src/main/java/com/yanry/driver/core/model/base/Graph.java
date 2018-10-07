@@ -301,8 +301,9 @@ public class Graph {
                 .filter(a -> a != null)
                 .findAny();
         if (any.isPresent()) {
-            exitStack(depth, false, null);
-            return any.get();
+            ActionEvent actionEvent = any.get();
+            exitStack(depth, false, getPresentation(actionEvent).toString());
+            return actionEvent;
         }
         exitStack(depth, true, "no path found.");
         return null;
@@ -357,9 +358,9 @@ public class Graph {
 
     private void exitStack(int depth, boolean isError, String msg) {
         if (isError) {
-            Logger.getDefault().log(1, LogLevel.Error, "stack(%s) - %s", depth, msg);
+            Logger.getDefault().log(1, LogLevel.Error, "-%s: %s", depth, msg);
         } else {
-            Logger.getDefault().log(1, LogLevel.Verbose, "stack(%s) - %s", depth, msg);
+            Logger.getDefault().log(1, LogLevel.Verbose, "-%s: %s", depth, msg);
         }
         stackDepth.decrementAndGet();
     }
