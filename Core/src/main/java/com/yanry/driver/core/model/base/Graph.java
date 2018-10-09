@@ -6,6 +6,7 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExpectationEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.state.Equals;
@@ -186,6 +187,9 @@ public class Graph {
         for (Communicator communicator : communicators) {
             if (communicator.performAction(actionEvent)) {
                 actionTimeFrame = System.currentTimeMillis();
+                if (actionEvent instanceof ExpectationEvent) {
+                    verifyExpectation(((ExpectationEvent) actionEvent).getExpectation());
+                }
                 allPaths.stream().filter(path -> {
                     if (path.getEvent().equals(actionEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
                         path.getExpectation().preVerify();
@@ -271,13 +275,18 @@ public class Graph {
         int depth = enterStack(getPresentation(path).toString());
         verifiedPaths.add(path);
         Expectation expectation = path.getExpectation();
+        VerifyResult result = verifyExpectation(expectation);
+        exitStack(depth, result == VerifyResult.Failed, result.name());
+    }
+
+    private VerifyResult verifyExpectation(Expectation expectation) {
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
                 records.add(expectation);
             }
         }
-        exitStack(depth, result == VerifyResult.Failed, result.name());
+        return result;
     }
 
     // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
