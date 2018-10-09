@@ -13,6 +13,7 @@ import com.yanry.driver.core.model.state.Equals;
 import com.yanry.driver.core.model.state.State;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
+import lib.common.util.CollectionUtil;
 import lib.common.util.object.ObjectUtil;
 
 import java.util.*;
@@ -36,7 +37,6 @@ public class Graph {
     private Set<Path> verifiedPaths;
     private AtomicInteger stackDepth;
     private Set<Expectation> pendingExpectations;
-    private ArrayList<Path> rollingPaths;
     private HashSet<ActionEvent> invalidActions;
     private List<Path> concernedPaths;
 
@@ -48,7 +48,6 @@ public class Graph {
         verifiedPaths = new HashSet<>();
         stackDepth = new AtomicInteger();
         pendingExpectations = new HashSet<>();
-        rollingPaths = new ArrayList<>();
         invalidActions = new HashSet<>();
     }
 
@@ -86,7 +85,6 @@ public class Graph {
         isTraversing = true;
         records.clear();
         verifiedPaths.clear();
-        rollingPaths.clear();
         return true;
     }
 
@@ -222,26 +220,6 @@ public class Graph {
     }
 
     private ActionEvent roll(Path path) {
-        // 判断是否进入循环
-        int lastOccurrence = rollingPaths.lastIndexOf(path);
-        if (lastOccurrence >= 0) {
-            int lastIndex = rollingPaths.size() - 1;
-            if (lastOccurrence == lastIndex) {
-                return null;
-            }
-            int distance = rollingPaths.size() - lastOccurrence;
-            boolean isInLoop = true;
-            for (int i = lastIndex; i > lastOccurrence && i - distance >= 0; i--) {
-                if (!rollingPaths.get(i).equals(rollingPaths.get(i - distance))) {
-                    isInLoop = false;
-                    break;
-                }
-            }
-            if (isInLoop) {
-                return null;
-            }
-        }
-        rollingPaths.add(path);
         // make sure context states are satisfied.
         for (Property property : path.context.keySet()) {
             ValuePredicate valuePredicate = path.context.get(property);
@@ -326,7 +304,7 @@ public class Graph {
     }
 
     boolean isValidAction(ActionEvent actionEvent) {
-        return !invalidActions.contains(actionEvent);
+        return !invalidActions.contains(actionEvent) && !CollectionUtil.checkLoop(records, actionEvent);
     }
 
     boolean isValueFresh(Property property) {
