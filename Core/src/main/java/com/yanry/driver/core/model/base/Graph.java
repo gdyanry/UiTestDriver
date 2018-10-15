@@ -35,7 +35,7 @@ public class Graph {
     Map<Property, Object> propertyCache;
     private long actionTimeFrame;
     private Set<Path> verifiedPaths;
-    private AtomicInteger stackDepth;
+    private AtomicInteger methodStack;
     private Set<Expectation> pendingExpectations;
     private HashSet<ActionEvent> invalidActions;
     private List<Path> concernedPaths;
@@ -46,7 +46,7 @@ public class Graph {
         records = new LinkedList<>();
         propertyCache = new HashMap<>();
         verifiedPaths = new HashSet<>();
-        stackDepth = new AtomicInteger();
+        methodStack = new AtomicInteger();
         pendingExpectations = new HashSet<>();
         invalidActions = new HashSet<>();
     }
@@ -188,19 +188,12 @@ public class Graph {
                 if (actionEvent instanceof ExpectationEvent) {
                     verifyExpectation(((ExpectationEvent) actionEvent).getExpectation());
                 }
-                allPaths.stream().filter(path -> {
-                    if (path.getEvent().equals(actionEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
-                        path.getExpectation().preVerify();
-                        return true;
-                    }
-                    return false;
-                }).forEach(path -> verify(path));
+                allPaths.stream().filter(path -> path.getEvent().equals(actionEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                        .collect(Collectors.toList())
+                        .forEach(path -> verify(path));
                 // process pending expectation
                 if (pendingExpectations.size() > 0) {
                     ArrayList<Expectation> pending = new ArrayList<>(pendingExpectations);
-                    for (Expectation expectation : pending) {
-                        expectation.preVerify();
-                    }
                     for (Expectation expectation : pending) {
                         VerifyResult result = expectation.verify(this);
                         if (result != VerifyResult.Pending) {
@@ -250,11 +243,11 @@ public class Graph {
     }
 
     private void verify(Path path) {
-        int depth = enterStack(getPresentation(path).toString());
+        int depth = enterMethod(getPresentation(path).toString());
         verifiedPaths.add(path);
         Expectation expectation = path.getExpectation();
         VerifyResult result = verifyExpectation(expectation);
-        exitStack(depth, result == VerifyResult.Failed, result.name());
+        exitMethod(depth, result == VerifyResult.Failed, result.name());
     }
 
     private VerifyResult verifyExpectation(Expectation expectation) {
@@ -270,18 +263,13 @@ public class Graph {
     // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
-            allPaths.stream().filter(path -> {
-                if (path.getEvent().matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
-                    path.getExpectation().preVerify();
-                    return true;
-                }
-                return false;
-            }).forEach(path -> verify(path));
+            allPaths.stream().filter(path -> path.getEvent().matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                    .forEach(path -> verify(path));
         }
     }
 
     ActionEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
-        int depth = enterStack(null);
+        int depth = enterMethod(null);
         Optional<ActionEvent> any = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true)))
                 .map(path -> roll(path))
@@ -289,10 +277,10 @@ public class Graph {
                 .findAny();
         if (any.isPresent()) {
             ActionEvent actionEvent = any.get();
-            exitStack(depth, false, getPresentation(actionEvent).toString());
+            exitMethod(depth, false, getPresentation(actionEvent).toString());
             return actionEvent;
         }
-        exitStack(depth, true, "no path found.");
+        exitMethod(depth, true, "no path found.");
         return null;
     }
 
@@ -337,18 +325,18 @@ public class Graph {
         return null;
     }
 
-    private int enterStack(String msg) {
-        int depth = stackDepth.incrementAndGet();
+    private int enterMethod(String msg) {
+        int depth = methodStack.incrementAndGet();
         Logger.getDefault().log(1, LogLevel.Verbose, "+%s: %s", depth, msg);
         return depth;
     }
 
-    private void exitStack(int depth, boolean isError, String msg) {
+    private void exitMethod(int depth, boolean isError, String msg) {
         if (isError) {
             Logger.getDefault().log(1, LogLevel.Error, "-%s: %s", depth, msg);
         } else {
             Logger.getDefault().log(1, LogLevel.Verbose, "-%s: %s", depth, msg);
         }
-        stackDepth.decrementAndGet();
+        methodStack.decrementAndGet();
     }
 }

@@ -44,11 +44,6 @@ public abstract class Expectation {
         return trigger;
     }
 
-    final void preVerify() {
-        onVerify();
-        followingExpectations.forEach(e -> e.preVerify());
-    }
-
     final VerifyResult verify(Graph graph) {
         if (trigger == null || trigger.isSatisfied()) {
             if (doVerify()) {
@@ -72,8 +67,6 @@ public abstract class Expectation {
     public Timing getTiming() {
         return timing;
     }
-
-    protected abstract void onVerify();
 
     protected abstract boolean doVerify();
 

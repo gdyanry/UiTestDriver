@@ -1,7 +1,5 @@
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.Presentable;
 
@@ -16,11 +14,6 @@ public abstract class NonPropertyExpectation extends Expectation {
     public NonPropertyExpectation(Timing timing, Graph graph) {
         super(timing, true);
         this.graph = graph;
-    }
-
-    @Override
-    protected void onVerify() {
-
     }
 
     @Override

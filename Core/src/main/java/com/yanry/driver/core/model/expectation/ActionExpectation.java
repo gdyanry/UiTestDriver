@@ -11,11 +11,6 @@ public abstract class ActionExpectation extends Expectation {
     protected abstract void run();
 
     @Override
-    protected void onVerify() {
-
-    }
-
-    @Override
     protected final boolean doVerify() {
         run();
         return true;

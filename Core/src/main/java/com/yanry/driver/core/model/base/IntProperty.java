@@ -29,7 +29,6 @@ public abstract class IntProperty extends Property<Integer> {
     }
 
     public class ShiftExpectation extends Expectation {
-        private int oldValue;
         private boolean upward;
         private int step;
 
@@ -55,12 +54,8 @@ public abstract class IntProperty extends Property<Integer> {
         }
 
         @Override
-        protected void onVerify() {
-            oldValue = getCurrentValue();
-        }
-
-        @Override
         protected boolean doVerify() {
+            int oldValue = getCurrentValue();
             int expectedValue = upward ? oldValue + step : oldValue - step;
             handleExpectation(expectedValue, isNeedCheck());
             int actualValue = getCurrentValue();

@@ -8,7 +8,6 @@ import lib.common.util.object.Presentable;
  * Created by rongyu.yan on 5/10/2017.
  */
 public abstract class PropertyExpectation<V> extends Expectation {
-    private V oldValue;
 
     public PropertyExpectation(Timing timing, boolean needCheck) {
         super(timing, needCheck);
@@ -28,14 +27,10 @@ public abstract class PropertyExpectation<V> extends Expectation {
     public abstract Property<V> getProperty();
 
     @Override
-    protected final void onVerify() {
-        oldValue = getProperty().getCurrentValue();
-    }
-
-    @Override
     protected final boolean doVerify() {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
+        V oldValue = property.getCurrentValue();
         property.handleExpectation(expectedValue, isNeedCheck());
         V actualValue = property.getCurrentValue();
         if (actualValue != null && !actualValue.equals(oldValue)) {

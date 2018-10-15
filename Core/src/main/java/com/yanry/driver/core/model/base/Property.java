@@ -51,7 +51,7 @@ public abstract class Property<V> {
         }
         return graph.findPathToRoll(e -> {
             if (e instanceof PropertyExpectation) {
-                PropertyExpectation<Object> exp = (PropertyExpectation<Object>) e;
+                PropertyExpectation exp = (PropertyExpectation) e;
                 return equals(exp.getProperty()) && toState.test((V) exp.getExpectedValue());
             }
             return false;
