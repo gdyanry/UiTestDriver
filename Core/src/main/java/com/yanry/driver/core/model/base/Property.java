@@ -43,19 +43,24 @@ public abstract class Property<V> {
         if (toState.test(getCurrentValue())) {
             return null;
         }
+        int depth = graph.enterMethod(String.format("%s > %s", Graph.getPresentation(this), Graph.getPresentation(toState)));
         if (toState.getValidValue() != null) {
             Optional<ActionEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
             if (any.isPresent()) {
-                return any.get();
+                ActionEvent actionEvent = any.get();
+                graph.exitMethod(depth, false, Graph.getPresentation(actionEvent).toString());
+                return actionEvent;
             }
         }
-        return graph.findPathToRoll(e -> {
+        ActionEvent actionEvent = graph.findPathToRoll(e -> {
             if (e instanceof PropertyExpectation) {
                 PropertyExpectation exp = (PropertyExpectation) e;
                 return equals(exp.getProperty()) && toState.test((V) exp.getExpectedValue());
             }
             return false;
         });
+        graph.exitMethod(depth, false, Graph.getPresentation(actionEvent).toString());
+        return actionEvent;
     }
 
     public SSPropertyExpectation<V> getStaticExpectation(Timing timing, boolean needCheck, V value) {

@@ -213,11 +213,14 @@ public class Graph {
     }
 
     private ActionEvent roll(Path path) {
+        int depth = enterMethod(getPresentation(path).toString());
         // make sure context states are satisfied.
         for (Property property : path.context.keySet()) {
             ValuePredicate valuePredicate = path.context.get(property);
             if (!valuePredicate.test(property.getCurrentValue())) {
-                return property.switchTo(valuePredicate);
+                ActionEvent actionEvent = property.switchTo(valuePredicate);
+                exitMethod(depth, false, getPresentation(actionEvent).toString());
+                return actionEvent;
             }
         }
         // all context states are satisfied by now.
@@ -228,35 +231,38 @@ public class Graph {
             // roll path for this switch event.
             Property property = event.getProperty();
             if (event.getFrom() != null && !event.getFrom().test(property.getCurrentValue())) {
-                Logger.getDefault().v("switch state event(from): %s", getPresentation(event));
-                return property.switchTo(event.getFrom());
+                ActionEvent actionEvent = property.switchTo(event.getFrom());
+                exitMethod(depth, false, getPresentation(actionEvent).toString());
+                return actionEvent;
             }
-            Logger.getDefault().v("switch state event(to): %s", getPresentation(event));
-            return property.switchTo(event.getTo());
+            ActionEvent actionEvent = property.switchTo(event.getTo());
+            exitMethod(depth, false, getPresentation(actionEvent).toString());
+            return actionEvent;
         } else if (inputEvent instanceof ActionEvent) {
             ActionEvent actionEvent = (ActionEvent) inputEvent;
             if (isValidAction(actionEvent)) {
+                exitMethod(depth, false, getPresentation(actionEvent).toString());
                 return actionEvent;
             }
         }
+        exitMethod(depth, true, "no available action.");
         return null;
     }
 
     private void verify(Path path) {
-        int depth = enterMethod(getPresentation(path).toString());
         verifiedPaths.add(path);
-        Expectation expectation = path.getExpectation();
-        VerifyResult result = verifyExpectation(expectation);
-        exitMethod(depth, result == VerifyResult.Failed, result.name());
+        verifyExpectation(path.getExpectation());
     }
 
     private VerifyResult verifyExpectation(Expectation expectation) {
+        int depth = enterMethod(getPresentation(expectation).toString());
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
                 records.add(expectation);
             }
         }
+        exitMethod(depth, false, result.name());
         return result;
     }
 
@@ -269,7 +275,6 @@ public class Graph {
     }
 
     ActionEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
-        int depth = enterMethod(null);
         Optional<ActionEvent> any = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true)))
                 .map(path -> roll(path))
@@ -277,10 +282,8 @@ public class Graph {
                 .findAny();
         if (any.isPresent()) {
             ActionEvent actionEvent = any.get();
-            exitMethod(depth, false, getPresentation(actionEvent).toString());
             return actionEvent;
         }
-        exitMethod(depth, true, "no path found.");
         return null;
     }
 
@@ -325,13 +328,13 @@ public class Graph {
         return null;
     }
 
-    private int enterMethod(String msg) {
+    int enterMethod(String msg) {
         int depth = methodStack.incrementAndGet();
         Logger.getDefault().log(1, LogLevel.Verbose, "+%s: %s", depth, msg);
         return depth;
     }
 
-    private void exitMethod(int depth, boolean isError, String msg) {
+    void exitMethod(int depth, boolean isError, String msg) {
         if (isError) {
             Logger.getDefault().log(1, LogLevel.Error, "-%s: %s", depth, msg);
         } else {
