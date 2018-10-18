@@ -295,6 +295,14 @@ public class Graph {
     }
 
     boolean isValidAction(ActionEvent actionEvent) {
+        if (invalidActions.contains(actionEvent)) {
+            Logger.getDefault().v("action is invalid: %s", getPresentation(actionEvent));
+            return false;
+        }
+        if (CollectionUtil.checkLoop(records, actionEvent)) {
+            Logger.getDefault().v("skip action to avoid loop: %s", getPresentation(actionEvent));
+            return false;
+        }
         return !invalidActions.contains(actionEvent) && !CollectionUtil.checkLoop(records, actionEvent);
     }
 
