@@ -4,7 +4,7 @@ import com.yanry.driver.core.distribute.Const;
 import com.yanry.driver.core.distribute.ServerReception;
 import com.yanry.driver.core.model.base.Graph;
 import lib.common.model.Singletons;
-import lib.common.model.cache.TimerCache;
+import lib.common.model.cache.TimedCache;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +24,11 @@ import java.util.concurrent.Executors;
  * Subclasses should be annotated with {@link RestController}(required) and {@link RequestMapping}(optional)
  */
 public abstract class CommunicatorController {
-    private TimerCache<ServerReception> receptionMap;
+    private TimedCache<ServerReception> receptionMap;
     private Executor executor;
 
     public CommunicatorController(int sessionTimeoutSecond) {
-        receptionMap = new TimerCache<>(sessionTimeoutSecond, Singletons.get(Timer.class));
+        receptionMap = new TimedCache<>(sessionTimeoutSecond, Singletons.get(Timer.class));
         executor = Executors.newCachedThreadPool();
     }
 
