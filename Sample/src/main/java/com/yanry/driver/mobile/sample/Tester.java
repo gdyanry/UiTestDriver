@@ -10,7 +10,7 @@ import com.yanry.driver.mobile.sample.model.ConsoleGraphWatcher;
 import lib.common.model.log.ConsoleHandler;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
-import lib.common.model.log.SimpleFormatterBuilder;
+import lib.common.model.log.SimpleFormatter;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class Tester {
 
     public static void test(boolean verbose, Consumer<Graph> setupGraph) {
-        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatterBuilder().level().method().sequenceNumber().build(), verbose ? LogLevel.Verbose : LogLevel.Debug));
+        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().level().method(2).sequenceNumber(), verbose ? LogLevel.Verbose : LogLevel.Debug));
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         GraphWatcher watcher = new ConsoleGraphWatcher();
         Graph graph = new Graph();
