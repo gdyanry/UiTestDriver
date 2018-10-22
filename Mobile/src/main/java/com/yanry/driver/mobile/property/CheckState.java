@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.action.Click;
@@ -26,7 +26,7 @@ public class CheckState extends ViewProperty<Boolean> {
     }
 
     @Override
-    protected ActionEvent doSelfSwitch(Boolean to) {
+    protected ExternalEvent doSelfSwitch(Boolean to) {
         return null;
     }
 }

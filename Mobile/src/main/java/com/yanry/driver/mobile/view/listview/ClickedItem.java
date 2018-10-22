@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.mobile.property.ViewProperty;
 
 public class ClickedItem<I extends ListViewItem<I>> extends ViewProperty<I> {
@@ -15,7 +15,7 @@ public class ClickedItem<I extends ListViewItem<I>> extends ViewProperty<I> {
     }
 
     @Override
-    protected ActionEvent doSelfSwitch(I to) {
+    protected ExternalEvent doSelfSwitch(I to) {
         return null;
     }
 }

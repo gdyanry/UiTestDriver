@@ -2,7 +2,7 @@ package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 import java.util.Scanner;
@@ -42,8 +42,8 @@ public class ConsoleCommunicator extends SerializedCommunicator {
     }
 
     @Override
-    protected String performAction(int repeat, ActionEvent actionEvent) {
-        getInput(repeat, "perform", actionEvent, null);
+    protected String performAction(int repeat, ExternalEvent externalEvent) {
+        getInput(repeat, "perform", externalEvent, null);
         return "1";
     }
 

@@ -5,8 +5,8 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
-import com.yanry.driver.core.model.event.ActionEvent;
 import com.yanry.driver.core.model.event.ExpectationEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.state.Equals;
@@ -37,7 +37,7 @@ public class Graph {
     private Set<Path> verifiedPaths;
     private AtomicInteger methodStack;
     private Set<Expectation> pendingExpectations;
-    private HashSet<ActionEvent> invalidActions;
+    private HashSet<ExternalEvent> invalidActions;
     private List<Path> concernedPaths;
 
     public Graph() {
@@ -135,9 +135,9 @@ public class Graph {
                 }
             }
             Logger.getDefault().d("traverse path: %s", getPresentation(path));
-            ActionEvent actionEvent;
-            while (isTraversing && (actionEvent = roll(path)) != null && isTraversing) {
-                if (postAction(actionEvent) && verifiedPaths.contains(path)) {
+            ExternalEvent externalEvent;
+            while (isTraversing && (externalEvent = roll(path)) != null && isTraversing) {
+                if (postAction(externalEvent) && verifiedPaths.contains(path)) {
                     break;
                 }
             }
@@ -164,11 +164,11 @@ public class Graph {
 
     private <V> boolean achieveStatePredicate(Property<V> property, ValuePredicate<V> valuePredicate) {
         while (isTraversing && !valuePredicate.test(property.getCurrentValue())) {
-            ActionEvent actionEvent = property.switchTo(valuePredicate);
-            if (actionEvent == null) {
+            ExternalEvent externalEvent = property.switchTo(valuePredicate);
+            if (externalEvent == null) {
                 break;
             } else {
-                postAction(actionEvent);
+                postAction(externalEvent);
             }
         }
         return valuePredicate.test(property.getCurrentValue());
@@ -180,15 +180,15 @@ public class Graph {
         return success;
     }
 
-    public boolean postAction(ActionEvent actionEvent) {
-        records.add(actionEvent);
+    public boolean postAction(ExternalEvent externalEvent) {
+        records.add(externalEvent);
         for (Communicator communicator : communicators) {
-            if (communicator.performAction(actionEvent)) {
+            if (communicator.performAction(externalEvent)) {
                 actionTimeFrame = System.currentTimeMillis();
-                if (actionEvent instanceof ExpectationEvent) {
-                    verifyExpectation(((ExpectationEvent) actionEvent).getExpectation());
+                if (externalEvent instanceof ExpectationEvent) {
+                    verifyExpectation(((ExpectationEvent) externalEvent).getExpectation());
                 }
-                allPaths.stream().filter(path -> path.getEvent().equals(actionEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
+                allPaths.stream().filter(path -> path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
                         .collect(Collectors.toList())
                         .forEach(path -> verify(path));
                 // process pending expectation
@@ -207,20 +207,20 @@ public class Graph {
                 return true;
             }
         }
-        Logger.getDefault().e("cannot perform action: %s", getPresentation(actionEvent));
-        invalidActions.add(actionEvent);
+        Logger.getDefault().e("cannot perform action: %s", getPresentation(externalEvent));
+        invalidActions.add(externalEvent);
         return false;
     }
 
-    private ActionEvent roll(Path path) {
+    private ExternalEvent roll(Path path) {
         int depth = enterMethod(getPresentation(path).toString());
         // make sure context states are satisfied.
         for (Property property : path.context.keySet()) {
             ValuePredicate valuePredicate = path.context.get(property);
             if (!valuePredicate.test(property.getCurrentValue())) {
-                ActionEvent actionEvent = property.switchTo(valuePredicate);
-                exitMethod(depth, false, getPresentation(actionEvent).toString());
-                return actionEvent;
+                ExternalEvent externalEvent = property.switchTo(valuePredicate);
+                exitMethod(depth, false, getPresentation(externalEvent).toString());
+                return externalEvent;
             }
         }
         // all context states are satisfied by now.
@@ -231,18 +231,18 @@ public class Graph {
             // roll path for this switch event.
             Property property = event.getProperty();
             if (event.getFrom() != null && !event.getFrom().test(property.getCurrentValue())) {
-                ActionEvent actionEvent = property.switchTo(event.getFrom());
-                exitMethod(depth, false, getPresentation(actionEvent).toString());
-                return actionEvent;
+                ExternalEvent externalEvent = property.switchTo(event.getFrom());
+                exitMethod(depth, false, getPresentation(externalEvent).toString());
+                return externalEvent;
             }
-            ActionEvent actionEvent = property.switchTo(event.getTo());
-            exitMethod(depth, false, getPresentation(actionEvent).toString());
-            return actionEvent;
-        } else if (inputEvent instanceof ActionEvent) {
-            ActionEvent actionEvent = (ActionEvent) inputEvent;
-            if (isValidAction(actionEvent)) {
-                exitMethod(depth, false, getPresentation(actionEvent).toString());
-                return actionEvent;
+            ExternalEvent externalEvent = property.switchTo(event.getTo());
+            exitMethod(depth, false, getPresentation(externalEvent).toString());
+            return externalEvent;
+        } else if (inputEvent instanceof ExternalEvent) {
+            ExternalEvent externalEvent = (ExternalEvent) inputEvent;
+            if (isValidAction(externalEvent)) {
+                exitMethod(depth, false, getPresentation(externalEvent).toString());
+                return externalEvent;
             }
         }
         exitMethod(depth, true, "no available action.");
@@ -274,15 +274,15 @@ public class Graph {
         }
     }
 
-    ActionEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
-        Optional<ActionEvent> any = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
+    ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
+        List<Path> sorted = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true)))
-                .map(path -> roll(path))
-                .filter(a -> a != null)
-                .findAny();
-        if (any.isPresent()) {
-            ActionEvent actionEvent = any.get();
-            return actionEvent;
+                .collect(Collectors.toList());
+        for (Path path : sorted) {
+            ExternalEvent externalEvent = roll(path);
+            if (externalEvent != null) {
+                return externalEvent;
+            }
         }
         return null;
     }
@@ -294,16 +294,16 @@ public class Graph {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, expectationFilter));
     }
 
-    boolean isValidAction(ActionEvent actionEvent) {
-        if (invalidActions.contains(actionEvent)) {
-            Logger.getDefault().v("action is invalid: %s", getPresentation(actionEvent));
+    boolean isValidAction(ExternalEvent externalEvent) {
+        if (invalidActions.contains(externalEvent)) {
+            Logger.getDefault().v("action is invalid: %s", getPresentation(externalEvent));
             return false;
         }
-        if (CollectionUtil.checkLoop(records, actionEvent)) {
-            Logger.getDefault().v("skip action to avoid loop: %s", getPresentation(actionEvent));
+        if (CollectionUtil.checkLoop(records, externalEvent)) {
+            Logger.getDefault().v("skip action to avoid loop: %s", getPresentation(externalEvent));
             return false;
         }
-        return !invalidActions.contains(actionEvent) && !CollectionUtil.checkLoop(records, actionEvent);
+        return !invalidActions.contains(externalEvent) && !CollectionUtil.checkLoop(records, externalEvent);
     }
 
     boolean isValueFresh(Property property) {

@@ -3,7 +3,7 @@
  */
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -35,32 +35,32 @@ public abstract class Property<V> {
         return graph;
     }
 
-    public final ActionEvent switchToValue(V toState) {
+    public final ExternalEvent switchToValue(V toState) {
         return switchTo(new Equals<>(toState));
     }
 
-    public final ActionEvent switchTo(ValuePredicate<V> toState) {
+    public final ExternalEvent switchTo(ValuePredicate<V> toState) {
         if (toState.test(getCurrentValue())) {
             return null;
         }
         int depth = graph.enterMethod(String.format("%s > %s", Graph.getPresentation(this), Graph.getPresentation(toState)));
         if (toState.getValidValue() != null) {
-            Optional<ActionEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
+            Optional<ExternalEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
             if (any.isPresent()) {
-                ActionEvent actionEvent = any.get();
-                graph.exitMethod(depth, false, Graph.getPresentation(actionEvent).toString());
-                return actionEvent;
+                ExternalEvent externalEvent = any.get();
+                graph.exitMethod(depth, false, Graph.getPresentation(externalEvent).toString());
+                return externalEvent;
             }
         }
-        ActionEvent actionEvent = graph.findPathToRoll(e -> {
+        ExternalEvent externalEvent = graph.findPathToRoll(e -> {
             if (e instanceof PropertyExpectation) {
                 PropertyExpectation exp = (PropertyExpectation) e;
                 return equals(exp.getProperty()) && toState.test((V) exp.getExpectedValue());
             }
             return false;
         });
-        graph.exitMethod(depth, false, Graph.getPresentation(actionEvent).toString());
-        return actionEvent;
+        graph.exitMethod(depth, false, Graph.getPresentation(externalEvent).toString());
+        return externalEvent;
     }
 
     public SSPropertyExpectation<V> getStaticExpectation(Timing timing, boolean needCheck, V value) {
@@ -94,5 +94,5 @@ public abstract class Property<V> {
 
     protected abstract V checkValue();
 
-    protected abstract ActionEvent doSelfSwitch(V to);
+    protected abstract ExternalEvent doSelfSwitch(V to);
 }

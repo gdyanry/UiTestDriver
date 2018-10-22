@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 /**
@@ -16,10 +16,10 @@ public interface Communicator {
     <V> V fetchState(Obtainable<V> stateToCheck);
 
     /**
-     * @param actionEvent
+     * @param externalEvent
      * @return 表示是否执行动作。
      */
-    boolean performAction(ActionEvent actionEvent);
+    boolean performAction(ExternalEvent externalEvent);
 
     /**
      * @param expectation

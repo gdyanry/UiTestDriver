@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.property;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 
 /**
  * Created by rongyu.yan on 3/9/2017.
@@ -19,7 +19,7 @@ public class ProcessState extends Property<Boolean> {
     }
 
     @Override
-    protected ActionEvent doSelfSwitch(Boolean to) {
+    protected ExternalEvent doSelfSwitch(Boolean to) {
         return null;
     }
 }

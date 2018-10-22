@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import lib.common.util.object.Presentable;
 
 public class PreviousWindow extends Property<Window> {
@@ -24,7 +24,7 @@ public class PreviousWindow extends Property<Window> {
     }
 
     @Override
-    protected ActionEvent doSelfSwitch(Window to) {
+    protected ExternalEvent doSelfSwitch(Window to) {
         return null;
     }
 }

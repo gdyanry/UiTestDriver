@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.Presentable;
 
@@ -15,7 +15,7 @@ public abstract class IntProperty extends Property<Integer> {
     }
 
     @Override
-    protected final ActionEvent doSelfSwitch(Integer to) {
+    protected final ExternalEvent doSelfSwitch(Integer to) {
         int currentValue = getCurrentValue();
         return getGraph().findPathToRoll(exp -> {
             if (exp instanceof ShiftExpectation) {

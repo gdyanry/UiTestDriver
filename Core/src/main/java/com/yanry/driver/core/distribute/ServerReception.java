@@ -4,7 +4,7 @@ import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.SerializedCommunicator;
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
@@ -133,8 +133,8 @@ public class ServerReception extends SerializedCommunicator {
     }
 
     @Override
-    protected String performAction(int repeat, ActionEvent actionEvent) {
-        return carryOut(repeat, actionEvent);
+    protected String performAction(int repeat, ExternalEvent externalEvent) {
+        return carryOut(repeat, externalEvent);
     }
 
     @Override

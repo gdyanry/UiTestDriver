@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.event.ActionEvent;
+import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 /**
@@ -18,10 +18,10 @@ public abstract class SerializedCommunicator implements Communicator {
 
     /**
      * @param repeat
-     * @param actionEvent
+     * @param externalEvent
      * @return 返回1（已执行）或者0（未执行）。
      */
-    protected abstract String performAction(int repeat, ActionEvent actionEvent);
+    protected abstract String performAction(int repeat, ExternalEvent externalEvent);
 
     /**
      * @param repeat
@@ -48,11 +48,11 @@ public abstract class SerializedCommunicator implements Communicator {
     }
 
     @Override
-    public boolean performAction(ActionEvent actionEvent) {
-        return _performAction(0, actionEvent);
+    public boolean performAction(ExternalEvent externalEvent) {
+        return _performAction(0, externalEvent);
     }
 
-    private boolean _performAction(int repeat, ActionEvent req) {
+    private boolean _performAction(int repeat, ExternalEvent req) {
         String resp = performAction(repeat, req);
         if ("0".equals(resp)) {
             return false;

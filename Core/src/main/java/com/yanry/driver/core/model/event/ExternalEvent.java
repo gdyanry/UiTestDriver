@@ -11,7 +11,7 @@ import com.yanry.driver.core.model.base.Property;
  * <p>
  * Jan 6, 2017
  */
-public class ActionEvent extends Event {
+public class ExternalEvent extends Event {
 
     @Override
     protected boolean matches(Property property, Object fromValue, Object toValue) {
