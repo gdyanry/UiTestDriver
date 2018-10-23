@@ -6,7 +6,6 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ExpectationEvent;
-import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.state.Equals;
@@ -14,7 +13,6 @@ import com.yanry.driver.core.model.state.State;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
 import lib.common.util.CollectionUtil;
-import lib.common.util.object.ObjectUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
  * Jan 5, 2017
  */
 public class Graph {
-    private static final String TYPE_SYMBOL = "#";
     private List<Path> allPaths;
     private List<Object> records;
     private boolean isTraversing;
@@ -49,10 +46,6 @@ public class Graph {
         methodStack = new AtomicInteger();
         pendingExpectations = new HashSet<>();
         invalidActions = new HashSet<>();
-    }
-
-    public static Object getPresentation(Object object) {
-        return ObjectUtil.getPresentation(object, TYPE_SYMBOL);
     }
 
     public void registerCommunicator(Communicator communicator) {
@@ -134,7 +127,7 @@ public class Graph {
                     minDegree = unsatisfiedDegree;
                 }
             }
-            Logger.getDefault().d("traverse path: %s", getPresentation(path));
+            Logger.getDefault().dd("traverse path: ", path);
             ExternalEvent externalEvent;
             while (isTraversing && (externalEvent = roll(path)) != null && isTraversing) {
                 if (postAction(externalEvent) && verifiedPaths.contains(path)) {
@@ -143,7 +136,7 @@ public class Graph {
             }
             unprocessedPaths.removeAll(verifiedPaths);
             if (unprocessedPaths.remove(path)) {
-                Logger.getDefault().e("fail to traverse path: %s", getPresentation(path));
+                Logger.getDefault().ww("fail to traverse path: ", path);
             }
             verifiedPaths.clear();
         }
@@ -151,10 +144,10 @@ public class Graph {
         Iterator<Expectation> iterator = pendingExpectations.iterator();
         while (iterator.hasNext()) {
             Expectation expectation = iterator.next();
-            Logger.getDefault().v("verify pending expectation: %s", expectation);
+            Logger.getDefault().vv("verify pending expectation: ", expectation);
             State trigger = expectation.getTrigger();
             if (!achieveStatePredicate(trigger.getProperty(), trigger.getValuePredicate())) {
-                Logger.getDefault().e("fail to trigger pending expectation: %s", expectation);
+                Logger.getDefault().ww("fail to trigger pending expectation: ", expectation);
             }
         }
         List<Object> result = new ArrayList<>(records);
@@ -207,19 +200,19 @@ public class Graph {
                 return true;
             }
         }
-        Logger.getDefault().e("cannot perform action: %s", getPresentation(externalEvent));
+        Logger.getDefault().ee("cannot perform action: ", externalEvent);
         invalidActions.add(externalEvent);
         return false;
     }
 
     private ExternalEvent roll(Path path) {
-        int depth = enterMethod(getPresentation(path).toString());
+        enterMethod(path);
         // make sure context states are satisfied.
         for (Property property : path.context.keySet()) {
             ValuePredicate valuePredicate = path.context.get(property);
             if (!valuePredicate.test(property.getCurrentValue())) {
                 ExternalEvent externalEvent = property.switchTo(valuePredicate);
-                exitMethod(depth, false, getPresentation(externalEvent).toString());
+                exitMethod(false, externalEvent);
                 return externalEvent;
             }
         }
@@ -232,20 +225,20 @@ public class Graph {
             Property property = event.getProperty();
             if (event.getFrom() != null && !event.getFrom().test(property.getCurrentValue())) {
                 ExternalEvent externalEvent = property.switchTo(event.getFrom());
-                exitMethod(depth, false, getPresentation(externalEvent).toString());
+                exitMethod(false, externalEvent);
                 return externalEvent;
             }
             ExternalEvent externalEvent = property.switchTo(event.getTo());
-            exitMethod(depth, false, getPresentation(externalEvent).toString());
+            exitMethod(false, externalEvent);
             return externalEvent;
         } else if (inputEvent instanceof ExternalEvent) {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
             if (isValidAction(externalEvent)) {
-                exitMethod(depth, false, getPresentation(externalEvent).toString());
+                exitMethod(false, externalEvent);
                 return externalEvent;
             }
         }
-        exitMethod(depth, true, "no available action.");
+        exitMethod(true, "no available action.");
         return null;
     }
 
@@ -255,22 +248,27 @@ public class Graph {
     }
 
     private VerifyResult verifyExpectation(Expectation expectation) {
-        int depth = enterMethod(getPresentation(expectation).toString());
+        enterMethod(expectation);
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
                 records.add(expectation);
             }
         }
-        exitMethod(depth, false, result.name());
+        exitMethod(false, result.name());
         return result;
     }
 
     // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
-            allPaths.stream().filter(path -> path.getEvent().matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                    .forEach(path -> verify(path));
+            allPaths.stream().filter(path -> {
+                Event event = path.getEvent();
+                if (event instanceof InternalEvent) {
+                    return ((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0;
+                }
+                return false;
+            }).forEach(path -> verify(path));
         }
     }
 
@@ -296,11 +294,11 @@ public class Graph {
 
     boolean isValidAction(ExternalEvent externalEvent) {
         if (invalidActions.contains(externalEvent)) {
-            Logger.getDefault().v("action is invalid: %s", getPresentation(externalEvent));
+            Logger.getDefault().ii("action is invalid: ", externalEvent);
             return false;
         }
         if (CollectionUtil.checkLoop(records, externalEvent)) {
-            Logger.getDefault().v("skip action to avoid loop: %s", getPresentation(externalEvent));
+            Logger.getDefault().ii("skip action to avoid loop: ", externalEvent);
             return false;
         }
         return !invalidActions.contains(externalEvent) && !CollectionUtil.checkLoop(records, externalEvent);
@@ -322,7 +320,7 @@ public class Graph {
                 return value;
             }
         }
-        Logger.getDefault().e("unable to check state: %s", getPresentation(obtainable));
+        Logger.getDefault().ww("unable to check state: ", obtainable);
         return null;
     }
 
@@ -336,18 +334,16 @@ public class Graph {
         return null;
     }
 
-    int enterMethod(String msg) {
-        int depth = methodStack.incrementAndGet();
-        Logger.getDefault().log(1, LogLevel.Verbose, "+%s: %s", depth, msg);
-        return depth;
+    void enterMethod(Object msg) {
+        Logger.getDefault().concat(1, LogLevel.Verbose, '+', methodStack.incrementAndGet(), ':', msg);
     }
 
-    void exitMethod(int depth, boolean isError, String msg) {
+    void exitMethod(boolean isError, Object msg) {
+        int depth = methodStack.decrementAndGet();
         if (isError) {
-            Logger.getDefault().log(1, LogLevel.Error, "-%s: %s", depth, msg);
+            Logger.getDefault().concat(1, LogLevel.Error, '-', depth, ':', msg);
         } else {
-            Logger.getDefault().log(1, LogLevel.Verbose, "-%s: %s", depth, msg);
+            Logger.getDefault().concat(1, LogLevel.Verbose, '-', depth, ':', msg);
         }
-        methodStack.decrementAndGet();
     }
 }

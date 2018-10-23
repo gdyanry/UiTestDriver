@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.event.ExternalEvent;
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 /**

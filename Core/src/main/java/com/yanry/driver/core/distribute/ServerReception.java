@@ -1,13 +1,14 @@
 package com.yanry.driver.core.distribute;
 
 import com.yanry.driver.core.model.base.Expectation;
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.communicator.SerializedCommunicator;
-import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
+import lib.common.util.object.ObjectUtil;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -36,7 +37,7 @@ public class ServerReception extends SerializedCommunicator {
         List<Path> paths = graph.getConcernedPaths();
         JSONArray jsonArray = new JSONArray();
         for (Path path : paths) {
-            jsonArray.put(Graph.getPresentation(path));
+            jsonArray.put(ObjectUtil.getPresentation(path));
         }
         return jsonArray;
     }
@@ -61,7 +62,7 @@ public class ServerReception extends SerializedCommunicator {
             List<Object> result = graph.traverse(finalIndexes);
             JSONArray ja = new JSONArray();
             for (Object o : result) {
-                ja.put(Graph.getPresentation(o));
+                ja.put(ObjectUtil.getPresentation(o));
             }
             lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_RECORD, ja);
             try {
@@ -118,7 +119,7 @@ public class ServerReception extends SerializedCommunicator {
             return "0";
         }
         try {
-            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(Graph.getPresentation(presentable)));
+            lastInstruction = new JSONObject().put(Const.RESPONSE_TYPE_INSTRUCTION, new JSONArray().put(repeat).put(ObjectUtil.getPresentation(presentable)));
             instructionQueue.put(lastInstruction);
             return feedbackQueue.take();
         } catch (InterruptedException e) {

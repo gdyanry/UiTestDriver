@@ -6,6 +6,7 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.state.Equals;
 import lib.common.model.log.Logger;
+import lib.common.util.object.HandyObject;
 import lib.common.util.object.Presentable;
 
 import java.util.HashMap;
@@ -15,8 +16,7 @@ import java.util.HashMap;
  * <p>
  * Jan 5, 2017
  */
-@Presentable
-public class Path {
+public class Path extends HandyObject {
     private Event event;
     private Expectation expectation;
     private long timeFrame;
@@ -70,7 +70,7 @@ public class Path {
         if (result > 0) {
             result += baseUnsatisfiedDegree;
         }
-        Logger.getDefault().v("%s: %s", result, Graph.getPresentation(this));
+        Logger.getDefault().vv(result, ": ", this);
         return result;
     }
 

@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.event.ExternalEvent;
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.mobile.action.EnterText;
 import com.yanry.driver.mobile.view.View;
 

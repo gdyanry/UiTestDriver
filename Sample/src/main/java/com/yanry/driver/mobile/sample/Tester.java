@@ -30,7 +30,7 @@ public class Tester {
         List<Path> options = graph.getConcernedPaths();
         int i = 0;
         for (Path option : options) {
-            Logger.getDefault().d("%05d - %s", i++, Graph.getPresentation(option));
+            Logger.getDefault().d("%05d - %s", i++, option);
         }
         String input = communicator.readLine("请选择需要测试的path：").trim();
         int[] pathIndexes = null;
@@ -61,9 +61,9 @@ public class Tester {
                 missCount++;
             }
             if (fail) {
-                Logger.getDefault().e(Graph.getPresentation(record).toString());
+                Logger.getDefault().ee(record);
             } else {
-                Logger.getDefault().d(Graph.getPresentation(record).toString());
+                Logger.getDefault().dd(record);
             }
         }
         Logger.getDefault().d("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);

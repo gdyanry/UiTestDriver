@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.property;
 
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
 import java.util.HashMap;

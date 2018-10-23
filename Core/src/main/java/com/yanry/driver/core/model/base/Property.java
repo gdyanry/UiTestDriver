@@ -3,11 +3,11 @@
  */
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Equals;
+import lib.common.util.object.HandyObject;
 import lib.common.util.object.Presentable;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * Jan 5, 2017
  */
 @Presentable
-public abstract class Property<V> {
+public abstract class Property<V> extends HandyObject {
     private Graph graph;
 
     /**
@@ -43,12 +43,12 @@ public abstract class Property<V> {
         if (toState.test(getCurrentValue())) {
             return null;
         }
-        int depth = graph.enterMethod(String.format("%s > %s", Graph.getPresentation(this), Graph.getPresentation(toState)));
+        graph.enterMethod(String.format("%s > %s", this, toState));
         if (toState.getValidValue() != null) {
             Optional<ExternalEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
             if (any.isPresent()) {
                 ExternalEvent externalEvent = any.get();
-                graph.exitMethod(depth, false, Graph.getPresentation(externalEvent).toString());
+                graph.exitMethod(false, externalEvent);
                 return externalEvent;
             }
         }
@@ -59,7 +59,7 @@ public abstract class Property<V> {
             }
             return false;
         });
-        graph.exitMethod(depth, false, Graph.getPresentation(externalEvent).toString());
+        graph.exitMethod(false, externalEvent);
         return externalEvent;
     }
 

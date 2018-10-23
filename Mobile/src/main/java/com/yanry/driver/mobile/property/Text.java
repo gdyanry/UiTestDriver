@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.event.ExternalEvent;
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.StringQuery;
 import com.yanry.driver.mobile.view.View;
 

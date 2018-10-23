@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.core.model.event.ExternalEvent;
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.mobile.property.ViewProperty;
 
 public class ClickedItem<I extends ListViewItem<I>> extends ViewProperty<I> {

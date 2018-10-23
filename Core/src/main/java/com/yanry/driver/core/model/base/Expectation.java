@@ -2,6 +2,7 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.State;
+import lib.common.util.object.HandyObject;
 import lib.common.util.object.Presentable;
 
 import java.util.LinkedList;
@@ -11,8 +12,7 @@ import java.util.List;
  * Expectation that has a timing and following expectations. Following expectations are verified only when this expectation passes its verification at runtime.
  * Created by rongyu.yan on 4/24/2017.
  */
-@Presentable
-public abstract class Expectation {
+public abstract class Expectation extends HandyObject {
     private Timing timing;
     private List<Expectation> followingExpectations;
     private boolean needCheck;

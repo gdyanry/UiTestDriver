@@ -3,9 +3,9 @@
  */
 package com.yanry.driver.mobile.view;
 
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;

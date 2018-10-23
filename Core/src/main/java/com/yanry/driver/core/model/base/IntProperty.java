@@ -1,6 +1,5 @@
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.event.ExternalEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.Presentable;
 

@@ -1,10 +1,6 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.base.Event;
-import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.ExternalEvent;
+import com.yanry.driver.core.model.base.*;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Within;

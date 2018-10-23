@@ -1,8 +1,7 @@
 package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
-import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.event.ExternalEvent;
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 import java.util.Scanner;
@@ -23,7 +22,7 @@ public class ConsoleCommunicator extends SerializedCommunicator {
     }
 
     private String getInput(int repeat, String type, Object content, Runnable showHint) {
-        String prompt = String.format("----%s: %s", type, Graph.getPresentation(content));
+        String prompt = String.format("----%s: %s", type, content);
         if (repeat == 0) {
             return readLine(prompt);
         } else {

@@ -1,25 +1,18 @@
 package com.yanry.driver.core.model.event;
 
-import com.yanry.driver.core.model.base.Event;
+import com.yanry.driver.core.model.base.InternalEvent;
 import com.yanry.driver.core.model.base.Property;
-import lib.common.util.object.Presentable;
 
 import java.util.Objects;
 
-public class StateChangeEvent extends Event {
-    private Property property;
+public class StateChangeEvent<V> extends InternalEvent<V> {
 
-    public StateChangeEvent(Property property) {
-        this.property = property;
-    }
-
-    @Presentable
-    public Property getProperty() {
-        return property;
+    public StateChangeEvent(Property<V> property) {
+        super(property);
     }
 
     @Override
-    protected boolean matches(Property property, Object fromValue, Object toValue) {
-        return this.property.equals(property) && !Objects.equals(fromValue, toValue);
+    protected boolean matches(V fromValue, V toValue) {
+        return !Objects.equals(fromValue, toValue);
     }
 }
