@@ -1,8 +1,8 @@
 package com.yanry.driver.core.model.state;
 
 import com.yanry.driver.core.model.base.ValuePredicate;
-import lib.common.util.object.HashAndEquals;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 public abstract class UnaryPredicate<V> extends ValuePredicate<V> {
     private V operand;
@@ -11,8 +11,8 @@ public abstract class UnaryPredicate<V> extends ValuePredicate<V> {
         this.operand = operand;
     }
 
-    @HashAndEquals
-    @Presentable
+    @EqualsPart
+    @Visible
     public V getOperand() {
         return operand;
     }

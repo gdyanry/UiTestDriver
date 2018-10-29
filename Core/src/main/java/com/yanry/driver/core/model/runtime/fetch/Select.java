@@ -1,7 +1,8 @@
 package com.yanry.driver.core.model.runtime.fetch;
 
 import com.yanry.driver.core.model.base.Property;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 public class Select<V> extends Obtainable<V> {
     private V[] options;
@@ -11,7 +12,8 @@ public class Select<V> extends Obtainable<V> {
         this.options = options;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public V[] getOptions() {
         return options;
     }

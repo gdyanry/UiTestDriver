@@ -2,7 +2,7 @@ package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.NonPropertyExpectation;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 4/24/2017.
@@ -15,7 +15,7 @@ public class TransientExpectation extends NonPropertyExpectation {
         this.duration = duration;
     }
 
-    @Presentable
+    @Visible
     public int getDuration() {
         return duration;
     }

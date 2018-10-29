@@ -2,10 +2,11 @@ package com.yanry.driver.core.model.state;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.ValuePredicate;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.HandyObject;
+import lib.common.util.object.Visible;
 
-@Presentable
-public class State<V> {
+public class State<V> extends HandyObject {
     private Property<V> property;
     private ValuePredicate<V> valuePredicate;
 
@@ -18,12 +19,14 @@ public class State<V> {
         return valuePredicate.test(property.getCurrentValue());
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public Property<V> getProperty() {
         return property;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public ValuePredicate<V> getValuePredicate() {
         return valuePredicate;
     }

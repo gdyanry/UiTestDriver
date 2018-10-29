@@ -5,7 +5,8 @@ import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Within;
 import com.yanry.driver.mobile.view.View;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -56,7 +57,8 @@ public class TextValidity extends Property<Boolean> {
         return text;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public View getView() {
         return view;
     }

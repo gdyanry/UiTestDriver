@@ -2,7 +2,8 @@ package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.PropertyExpectation;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 /**
  * A key-value pair (aka state) expectation
@@ -16,7 +17,8 @@ public abstract class StaticPropertyExpectation<V> extends PropertyExpectation<V
         this.property = property;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     @Override
     public Property<V> getProperty() {
         return property;

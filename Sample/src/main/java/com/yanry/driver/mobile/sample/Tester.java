@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class Tester {
 
     public static void test(boolean verbose, Consumer<Graph> setupGraph) {
-        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().level().method(2).sequenceNumber(), verbose ? LogLevel.Verbose : LogLevel.Debug));
+        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().level().method(3).sequenceNumber(), verbose ? LogLevel.Verbose : LogLevel.Debug));
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         GraphWatcher watcher = new ConsoleGraphWatcher();
         Graph graph = new Graph();

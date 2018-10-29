@@ -30,6 +30,6 @@ public class MainPage extends Window {
         Click clickLogout = new Click(new View(graph, this, new ByText("退出登录")));
         popWindow(LoginPage.class, clickLogout, Timing.IMMEDIATELY, true);
         createForegroundPath(clickLogout, currentUser.getStaticExpectation(Timing.IMMEDIATELY, false, ""));
-        popWindow(AboutPage.class, new Click<>(new View(graph, this, new ByText("关于"))), Timing.IMMEDIATELY, false);
+        popWindow(AboutPage.class, new Click(new View(graph, this, new ByText("关于"))), Timing.IMMEDIATELY, false);
     }
 }

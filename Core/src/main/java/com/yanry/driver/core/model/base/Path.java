@@ -6,8 +6,10 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.state.Equals;
 import lib.common.model.log.Logger;
+import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.Visible;
+import lib.common.util.object.VisibleObject;
 
 import java.util.HashMap;
 
@@ -16,13 +18,13 @@ import java.util.HashMap;
  * <p>
  * Jan 5, 2017
  */
-public class Path extends HandyObject {
+public class Path extends VisibleObject {
     private Event event;
     private Expectation expectation;
     private long timeFrame;
     private int unsatisfiedDegree;
     private int baseUnsatisfiedDegree;
-    HashMap<Property, ValuePredicate> context;
+    private HashMap<Property, ValuePredicate> context;
 
     public Path(Event event, Expectation expectation) {
         this.event = event;
@@ -70,21 +72,21 @@ public class Path extends HandyObject {
         if (result > 0) {
             result += baseUnsatisfiedDegree;
         }
-        Logger.getDefault().vv(result, ": ", this);
+        Logger.getDefault().vv(result, " - ", this);
         return result;
     }
 
-    @Presentable
+    @Visible
     public HashMap<Property, ValuePredicate> getContext() {
         return context;
     }
 
-    @Presentable
+    @Visible
     public Event getEvent() {
         return event;
     }
 
-    @Presentable
+    @Visible
     public Expectation getExpectation() {
         return expectation;
     }

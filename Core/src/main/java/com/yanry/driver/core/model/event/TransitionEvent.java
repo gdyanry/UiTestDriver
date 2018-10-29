@@ -4,8 +4,8 @@ import com.yanry.driver.core.model.base.InternalEvent;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.state.Equals;
-import lib.common.util.object.HashAndEquals;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 5/17/2017.
@@ -24,14 +24,14 @@ public class TransitionEvent<V> extends InternalEvent<V> {
         this(property, from == null ? null : new Equals<>(from), new Equals<>(to));
     }
 
-    @HashAndEquals
-    @Presentable
+    @EqualsPart
+    @Visible
     public ValuePredicate<V> getFrom() {
         return from;
     }
 
-    @HashAndEquals
-    @Presentable
+    @EqualsPart
+    @Visible
     public ValuePredicate<V> getTo() {
         return to;
     }

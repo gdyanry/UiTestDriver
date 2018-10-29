@@ -1,13 +1,14 @@
 package com.yanry.driver.core.model.runtime;
 
 import com.yanry.driver.core.model.base.Path;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.HandyObject;
+import lib.common.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 2/18/2017.
  */
-@Presentable
-public class MissedPath {
+public class MissedPath extends HandyObject {
     private Path path;
     private Object cause;
 
@@ -16,12 +17,14 @@ public class MissedPath {
         this.cause = cause;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public Path getPath() {
         return path;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public Object getCause() {
         return cause;
     }

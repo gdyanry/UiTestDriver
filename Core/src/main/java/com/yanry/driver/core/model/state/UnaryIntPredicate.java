@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.state;
 
-import lib.common.util.object.HashAndEquals;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -16,8 +16,8 @@ public class UnaryIntPredicate extends UnaryPredicate<Integer> implements Suppli
         temp = operand;
     }
 
-    @HashAndEquals
-    @Presentable
+    @Visible
+    @EqualsPart
     public boolean isLargerThan() {
         return isLargerThan;
     }

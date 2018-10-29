@@ -1,7 +1,8 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 /**
  * A key-value pair (aka state) expectation
@@ -13,7 +14,8 @@ public abstract class PropertyExpectation<V> extends Expectation {
         super(timing, needCheck);
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public final V getExpectedValue() {
         try {
             return doGetExpectedValue();
@@ -22,9 +24,9 @@ public abstract class PropertyExpectation<V> extends Expectation {
         }
     }
 
-    protected abstract V doGetExpectedValue();
-
     public abstract Property<V> getProperty();
+
+    protected abstract V doGetExpectedValue();
 
     @Override
     protected final boolean doVerify() {

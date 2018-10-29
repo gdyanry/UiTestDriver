@@ -208,8 +208,8 @@ public class Graph {
     private ExternalEvent roll(Path path) {
         enterMethod(path);
         // make sure context states are satisfied.
-        for (Property property : path.context.keySet()) {
-            ValuePredicate valuePredicate = path.context.get(property);
+        for (Property property : path.getContext().keySet()) {
+            ValuePredicate valuePredicate = path.getContext().get(property);
             if (!valuePredicate.test(property.getCurrentValue())) {
                 ExternalEvent externalEvent = property.switchTo(valuePredicate);
                 exitMethod(false, externalEvent);
@@ -339,7 +339,7 @@ public class Graph {
     }
 
     void exitMethod(boolean isError, Object msg) {
-        int depth = methodStack.decrementAndGet();
+        int depth = methodStack.getAndDecrement();
         if (isError) {
             Logger.getDefault().concat(1, LogLevel.Error, '-', depth, ':', msg);
         } else {

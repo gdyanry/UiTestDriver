@@ -1,12 +1,13 @@
 package com.yanry.driver.core.model.expectation;
 
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.HandyObject;
+import lib.common.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 3/9/2017.
  */
-@Presentable
-public class Timing {
+public class Timing extends HandyObject {
     public static final Timing IMMEDIATELY = null;
 
     private boolean isWithin;
@@ -17,12 +18,14 @@ public class Timing {
         this.millis = millis;
     }
 
-    @Presentable
+    @EqualsPart
+    @Visible
     public boolean isWithin() {
         return isWithin;
     }
 
-    @Presentable
+    @EqualsPart
+    @Visible
     public int getMillis() {
         return millis;
     }

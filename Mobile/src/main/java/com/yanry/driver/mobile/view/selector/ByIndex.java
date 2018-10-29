@@ -1,19 +1,20 @@
 package com.yanry.driver.mobile.view.selector;
 
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 4/27/2017.
  */
-@Presentable
-public class ByIndex implements ViewSelector {
+public class ByIndex extends ViewSelector {
     private int index;
 
     public ByIndex(int index) {
         this.index = index;
     }
 
-    @Presentable
+    @EqualsPart
+    @Visible
     public int getIndex() {
         return index;
     }

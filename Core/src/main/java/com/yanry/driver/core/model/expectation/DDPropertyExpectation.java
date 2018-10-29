@@ -2,7 +2,8 @@ package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.PropertyExpectation;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 import java.util.function.Supplier;
 
@@ -16,7 +17,8 @@ public class DDPropertyExpectation<V> extends PropertyExpectation<V> {
         this.valueSupplier = valueSupplier;
     }
 
-    @Presentable
+    @EqualsPart
+    @Visible
     @Override
     public Property<V> getProperty() {
         return propertySupplier.get();

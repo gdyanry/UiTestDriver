@@ -2,8 +2,9 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.State;
+import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.Visible;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,14 +35,22 @@ public abstract class Expectation extends HandyObject {
         return this;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public List<Expectation> getFollowingExpectations() {
         return followingExpectations;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public State getTrigger() {
         return trigger;
+    }
+
+    @Visible
+    @EqualsPart
+    public Timing getTiming() {
+        return timing;
     }
 
     final VerifyResult verify(Graph graph) {
@@ -61,11 +70,6 @@ public abstract class Expectation extends HandyObject {
      */
     public final boolean isNeedCheck() {
         return needCheck;
-    }
-
-    @Presentable
-    public Timing getTiming() {
-        return timing;
     }
 
     protected abstract boolean doVerify();

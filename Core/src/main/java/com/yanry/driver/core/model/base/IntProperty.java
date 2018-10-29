@@ -1,7 +1,8 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 public abstract class IntProperty extends Property<Integer> {
 
@@ -37,17 +38,20 @@ public abstract class IntProperty extends Property<Integer> {
             this.step = step;
         }
 
-        @Presentable
+        @Visible
+        @EqualsPart
         public IntProperty getProperty() {
             return IntProperty.this;
         }
 
-        @Presentable
+        @Visible
+        @EqualsPart
         public boolean isUpward() {
             return upward;
         }
 
-        @Presentable
+        @Visible
+        @EqualsPart
         public int getStep() {
             return step;
         }

@@ -11,11 +11,9 @@ import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
-import lib.common.util.object.Presentable;
 
 import java.util.stream.Stream;
 
-@Presentable
 public abstract class Window extends ViewContainer {
     private VisibilityState visibility;
     private TransitionEvent<Visibility> createEvent;

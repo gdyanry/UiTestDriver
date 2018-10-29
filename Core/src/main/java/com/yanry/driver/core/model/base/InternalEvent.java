@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.base;
 
-import lib.common.util.object.HashAndEquals;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 import java.util.Objects;
 
@@ -12,8 +12,8 @@ public abstract class InternalEvent<V> extends Event {
         this.property = property;
     }
 
-    @Presentable
-    @HashAndEquals
+    @Visible
+    @EqualsPart
     public Property getProperty() {
         return property;
     }

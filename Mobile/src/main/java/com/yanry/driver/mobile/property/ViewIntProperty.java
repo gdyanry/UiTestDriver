@@ -4,7 +4,8 @@ import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.IntProperty;
 import com.yanry.driver.core.model.runtime.fetch.NonNegativeIntegerQuery;
 import com.yanry.driver.mobile.view.View;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 public class ViewIntProperty extends IntProperty {
     private View view;
@@ -14,7 +15,8 @@ public class ViewIntProperty extends IntProperty {
         this.view = view;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public View getView() {
         return view;
     }

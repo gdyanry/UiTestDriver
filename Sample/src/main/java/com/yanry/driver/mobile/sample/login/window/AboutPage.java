@@ -18,6 +18,6 @@ public class AboutPage extends Window {
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        close(new Click<>(new View(graph, this, new ByText("关闭"))), Timing.IMMEDIATELY);
+        close(new Click(new View(graph, this, new ByText("关闭"))), Timing.IMMEDIATELY);
     }
 }

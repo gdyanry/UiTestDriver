@@ -1,20 +1,22 @@
 package com.yanry.driver.mobile.view.selector;
 
 import com.yanry.driver.mobile.view.View;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 4/27/2017.
  */
-@Presentable
-public class ByChild implements ViewSelector {
+@Visible
+public class ByChild extends ViewSelector {
     private View child;
 
     public ByChild(View child) {
         this.child = child;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public View getChild() {
         return child;
     }

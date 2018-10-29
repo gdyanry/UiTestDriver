@@ -3,7 +3,8 @@ package com.yanry.driver.mobile.expectation;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.expectation.TransientExpectation;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 3/3/2017.
@@ -16,7 +17,8 @@ public class Toast extends TransientExpectation {
         this.message = message;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public String getMessage() {
         return message;
     }

@@ -1,7 +1,8 @@
 package com.yanry.driver.core.model.state;
 
 import com.yanry.driver.core.model.base.ValuePredicate;
-import lib.common.util.object.HashAndEquals;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -13,7 +14,8 @@ public class Within<V> extends ValuePredicate<V> {
         this.values = values;
     }
 
-    @HashAndEquals
+    @Visible
+    @EqualsPart
     public Collection<V> getValues() {
         return values;
     }

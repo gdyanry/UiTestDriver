@@ -12,14 +12,14 @@ import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 import com.yanry.driver.mobile.window.Window;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 /**
  * @author yanry
  * <p>
  * Jan 10, 2017
  */
-@Presentable
 public class View extends ViewContainer {
     private ViewContainer parent;
     private ViewSelector selector;
@@ -57,12 +57,14 @@ public class View extends ViewContainer {
         return independentVisibility;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public ViewContainer getParent() {
         return parent;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public Object getSelector() {
         return selector;
     }
@@ -83,7 +85,8 @@ public class View extends ViewContainer {
             super(graph);
         }
 
-        @Presentable
+        @Visible
+        @EqualsPart
         public View getView() {
             return View.this;
         }

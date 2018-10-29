@@ -13,10 +13,10 @@ public class CheckState extends ViewProperty<Boolean> {
 
     public void switchCheckStateOnClick(boolean needCheck) {
         // to checked
-        getView().getWindow().createForegroundPath(new Click<>(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, true))
+        getView().getWindow().createForegroundPath(new Click(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, true))
                 .addContextState(this, false);
         // to unchecked
-        getView().getWindow().createForegroundPath(new Click<>(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, false))
+        getView().getWindow().createForegroundPath(new Click(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, false))
                 .addContextState(this, true);
     }
 

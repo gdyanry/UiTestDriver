@@ -4,15 +4,16 @@
 package com.yanry.driver.core.model.runtime;
 
 import com.yanry.driver.core.model.base.Expectation;
-import lib.common.util.object.Presentable;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.HandyObject;
+import lib.common.util.object.Visible;
 
 /**
  * @author yanry
  * <p>
  * Jan 9, 2017
  */
-@Presentable
-public class Assertion {
+public class Assertion extends HandyObject {
 
     private Expectation expectation;
     private Boolean isPass;
@@ -22,12 +23,14 @@ public class Assertion {
         this.isPass = isPass;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public Expectation getExpectation() {
         return expectation;
     }
 
-    @Presentable
+    @Visible
+    @EqualsPart
     public Boolean isPass() {
         return isPass;
     }

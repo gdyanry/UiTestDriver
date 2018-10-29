@@ -7,8 +7,8 @@ import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Equals;
+import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
-import lib.common.util.object.Presentable;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -18,7 +18,6 @@ import java.util.function.Supplier;
  * <p>
  * Jan 5, 2017
  */
-@Presentable
 public abstract class Property<V> extends HandyObject {
     private Graph graph;
 
@@ -31,6 +30,7 @@ public abstract class Property<V> extends HandyObject {
         this.graph = graph;
     }
 
+    @EqualsPart
     public Graph getGraph() {
         return graph;
     }
