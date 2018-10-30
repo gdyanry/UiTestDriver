@@ -2,6 +2,7 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.State;
+import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 import lib.common.util.object.Visible;
@@ -54,14 +55,18 @@ public abstract class Expectation extends HandyObject {
     }
 
     final VerifyResult verify(Graph graph) {
+        graph.enterMethod(this);
         if (trigger == null || trigger.isSatisfied()) {
             if (doVerify()) {
                 followingExpectations.forEach(e -> e.verify(graph));
+                graph.exitMethod(LogLevel.Verbose, VerifyResult.Success);
                 return VerifyResult.Success;
             }
+            graph.exitMethod(LogLevel.Warn, VerifyResult.Failed);
             return VerifyResult.Failed;
         }
         graph.addPendingExpectation(this);
+        graph.exitMethod(LogLevel.Info, VerifyResult.Pending);
         return VerifyResult.Pending;
     }
 

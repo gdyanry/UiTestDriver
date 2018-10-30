@@ -5,6 +5,7 @@ package com.yanry.driver.mobile.view;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
@@ -33,15 +34,17 @@ public class View extends ViewContainer {
         // 默认可见
         independentVisibility.handleExpectation(true, false);
         SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
-        getWindow().createForegroundPath(parent.getShowEvent(), showExpectation)
-                .addContextState(independentVisibility, true);
-        getWindow().createForegroundPath(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
-                .addContextState(parent, true);
+        // false -> true
+        graph.addPath(new Path(parent.getShowEvent(), showExpectation)
+                .addContextState(independentVisibility, true));
+        graph.addPath(new Path(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
+                .addContextState(parent, true));
         SSPropertyExpectation<Boolean> dismissExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, false);
-        getWindow().createForegroundPath(parent.getDismissEvent(), dismissExpectation)
-                .addContextState(independentVisibility, true);
-        getWindow().createForegroundPath(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
-                .addContextState(parent, true);
+        // true -> false
+        graph.addPath(new Path(parent.getDismissEvent(), dismissExpectation)
+                .addContextState(independentVisibility, true));
+        graph.addPath(new Path(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
+                .addContextState(parent, true));
     }
 
     public Window getWindow() {
@@ -65,7 +68,7 @@ public class View extends ViewContainer {
 
     @Visible
     @EqualsPart
-    public Object getSelector() {
+    public ViewSelector getSelector() {
         return selector;
     }
 

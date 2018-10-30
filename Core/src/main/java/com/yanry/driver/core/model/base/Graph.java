@@ -212,7 +212,7 @@ public class Graph {
             ValuePredicate valuePredicate = path.getContext().get(property);
             if (!valuePredicate.test(property.getCurrentValue())) {
                 ExternalEvent externalEvent = property.switchTo(valuePredicate);
-                exitMethod(false, externalEvent);
+                exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
         }
@@ -225,37 +225,36 @@ public class Graph {
             Property property = event.getProperty();
             if (event.getFrom() != null && !event.getFrom().test(property.getCurrentValue())) {
                 ExternalEvent externalEvent = property.switchTo(event.getFrom());
-                exitMethod(false, externalEvent);
+                exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
             ExternalEvent externalEvent = property.switchTo(event.getTo());
-            exitMethod(false, externalEvent);
+            exitMethod(LogLevel.Verbose, externalEvent);
             return externalEvent;
         } else if (inputEvent instanceof ExternalEvent) {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
             if (isValidAction(externalEvent)) {
-                exitMethod(false, externalEvent);
+                exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
         }
-        exitMethod(true, "no available action.");
+        exitMethod(LogLevel.Warn, "no available action.");
         return null;
     }
 
     private void verify(Path path) {
+        Logger.getDefault().vv(path);
         verifiedPaths.add(path);
         verifyExpectation(path.getExpectation());
     }
 
     private VerifyResult verifyExpectation(Expectation expectation) {
-        enterMethod(expectation);
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
                 records.add(expectation);
             }
         }
-        exitMethod(false, result.name());
         return result;
     }
 
@@ -338,12 +337,8 @@ public class Graph {
         Logger.getDefault().concat(1, LogLevel.Verbose, '+', methodStack.incrementAndGet(), ':', msg);
     }
 
-    void exitMethod(boolean isError, Object msg) {
+    void exitMethod(LogLevel logLevel, Object msg) {
         int depth = methodStack.getAndDecrement();
-        if (isError) {
-            Logger.getDefault().concat(1, LogLevel.Error, '-', depth, ':', msg);
-        } else {
-            Logger.getDefault().concat(1, LogLevel.Verbose, '-', depth, ':', msg);
-        }
+        Logger.getDefault().concat(1, logLevel, '-', depth, ':', msg);
     }
 }

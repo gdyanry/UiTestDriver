@@ -7,6 +7,7 @@ import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Equals;
+import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
@@ -48,7 +49,7 @@ public abstract class Property<V> extends HandyObject {
             Optional<ExternalEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
             if (any.isPresent()) {
                 ExternalEvent externalEvent = any.get();
-                graph.exitMethod(false, externalEvent);
+                graph.exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
         }
@@ -59,7 +60,7 @@ public abstract class Property<V> extends HandyObject {
             }
             return false;
         });
-        graph.exitMethod(false, externalEvent);
+        graph.exitMethod(LogLevel.Verbose, externalEvent);
         return externalEvent;
     }
 

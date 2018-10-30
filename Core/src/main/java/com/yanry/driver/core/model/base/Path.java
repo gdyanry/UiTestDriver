@@ -5,9 +5,6 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.state.Equals;
-import lib.common.model.log.Logger;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.HandyObject;
 import lib.common.util.object.Visible;
 import lib.common.util.object.VisibleObject;
 
@@ -72,7 +69,6 @@ public class Path extends VisibleObject {
         if (result > 0) {
             result += baseUnsatisfiedDegree;
         }
-        Logger.getDefault().vv(result, " - ", this);
         return result;
     }
 

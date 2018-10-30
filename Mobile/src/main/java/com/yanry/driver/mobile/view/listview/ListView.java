@@ -39,7 +39,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
         itemNone = itemCreator.create(graph, this, -1);
-        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<I>(itemNone) {
+        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<>(itemNone) {
             @Override
             protected Stream<I> getAllValues() {
                 return items.keySet().stream().filter(pos -> pos < size.getCurrentValue()).map(pos -> items.get(pos));
