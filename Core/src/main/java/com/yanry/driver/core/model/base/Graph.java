@@ -270,7 +270,6 @@ public class Graph {
     }
 
     private void verify(Path path) {
-        Logger.getDefault().vv(path);
         verifiedPaths.add(path);
         verifyExpectation(path.getExpectation());
     }

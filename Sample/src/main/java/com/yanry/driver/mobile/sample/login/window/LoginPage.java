@@ -49,12 +49,18 @@ public class LoginPage extends Window {
 
         Click clickLogin = new Click(new View(graph, this, new ByText("登录")));
         // 添加输入框用例
-        userValidity.addNegativeCase("", clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "用户名不能为空"));
-        userValidity.addNegativeCase("A lan", clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "用户名不能包含空格"));
         userValidity.addPositiveCases("daming.wang");
-        pwdValidity.addNegativeCase("", clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "密码不能为空"), userValidity);
-        pwdValidity.addNegativeCase("124", clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "密码长度不能小于6"), userValidity);
+        userValidity.addNegativeCase("", "A lan");
+        createForegroundPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "用户名不能为空")).addContextState(txtUser, "");
+        createForegroundPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "用户名不能包含空格")).addContextState(txtUser, "A lan");
         pwdValidity.addPositiveCases("123456");
+        pwdValidity.addNegativeCase("", "124");
+        createForegroundPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "密码不能为空"))
+                .addContextState(userValidity, true)
+                .addContextState(txtPwd, "");
+        createForegroundPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "密码长度不能小于6"))
+                .addContextState(userValidity, true)
+                .addContextState(txtPwd, "124");
         // 无网络连接
         createForegroundPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "无网络连接"))
                 .addContextState(networkState, NetworkState.Network.Disconnected)

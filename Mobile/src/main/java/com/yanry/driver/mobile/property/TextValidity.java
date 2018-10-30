@@ -1,6 +1,7 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.base.*;
+import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.state.Within;
@@ -39,14 +40,10 @@ public class TextValidity extends Property<Boolean> {
         }
     }
 
-    public Path addNegativeCase(String content, Event event, Expectation expectation, Property<Boolean>... preValidity) {
-        invalidContents.add(content);
-        Path path = view.getWindow().createForegroundPath(event, expectation)
-                .addContextState(text, content);
-        for (Property<Boolean> v : preValidity) {
-            path.addContextState(v, true);
+    public void addNegativeCase(String... contents) {
+        for (String content : contents) {
+            invalidContents.add(content);
         }
-        return path;
     }
 
     public Set<String> getValidContents() {

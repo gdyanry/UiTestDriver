@@ -22,10 +22,20 @@ public class EditPage extends Window {
     protected void addCases(Graph graph, WindowManager manager) {
         closeOnPressBack();
         TextValidity etPrincipal = getTextValidity("et_principal");
+        etPrincipal.addPositiveCases("40000");
+        etPrincipal.addNegativeCase("");
         TextValidity etBonus = getTextValidity("et_bonus");
+        etBonus.addNegativeCase("");
+        etBonus.addPositiveCases("880");
         TextValidity etRawInterestRate = getTextValidity("et_raw_interest_rate");
+        etRawInterestRate.addPositiveCases("12");
+        etRawInterestRate.addNegativeCase("");
         TextValidity etPassDays = getTextValidity("et_pass_days");
+        etPassDays.addNegativeCase("");
+        etPassDays.addPositiveCases("5");
         TextValidity etTotalDays = getTextValidity("et_total_days");
+        etTotalDays.addPositiveCases("90");
+        etTotalDays.addNegativeCase("");
 //        EditText etRemark = new EditText(getViewById("et_remark"));
         Click click = new Click(new View(graph, this, new ById("finish")));
         // 添加
@@ -37,7 +47,12 @@ public class EditPage extends Window {
                 .addContextState(etRawInterestRate, true)
                 .addContextState(etPassDays, true)
                 .addContextState(etTotalDays, true);
-        close(click, Timing.IMMEDIATELY);
+        close(click, Timing.IMMEDIATELY).addContextState(etPrincipal, true)
+                .addContextState(etBonus, true)
+                .addContextState(etRawInterestRate, true)
+                .addContextState(etPassDays, true)
+                .addContextState(etTotalDays, true);
+        ;
     }
 
     private TextValidity getTextValidity(String viewId) {

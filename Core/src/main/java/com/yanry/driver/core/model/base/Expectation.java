@@ -55,18 +55,26 @@ public abstract class Expectation extends HandyObject {
     }
 
     final VerifyResult verify(Graph graph) {
-        graph.enterMethod(this);
+        if (needCheck) {
+            graph.enterMethod(this);
+        }
         if (trigger == null || trigger.isSatisfied()) {
             if (doVerify()) {
                 followingExpectations.forEach(e -> e.verify(graph));
-                graph.exitMethod(LogLevel.Verbose, VerifyResult.Success);
+                if (needCheck) {
+                    graph.exitMethod(LogLevel.Verbose, VerifyResult.Success);
+                }
                 return VerifyResult.Success;
             }
-            graph.exitMethod(LogLevel.Warn, VerifyResult.Failed);
+            if (needCheck) {
+                graph.exitMethod(LogLevel.Warn, VerifyResult.Failed);
+            }
             return VerifyResult.Failed;
         }
         graph.addPendingExpectation(this);
-        graph.exitMethod(LogLevel.Info, VerifyResult.Pending);
+        if (needCheck) {
+            graph.exitMethod(LogLevel.Info, VerifyResult.Pending);
+        }
         return VerifyResult.Pending;
     }
 
