@@ -36,6 +36,7 @@ public class Graph {
     private Set<Expectation> pendingExpectations;
     private HashSet<ExternalEvent> invalidActions;
     private List<Path> concernedPaths;
+    private LinkedList<Path> traverseTrace;
 
     public Graph() {
         this.communicators = new LinkedList<>();
@@ -46,6 +47,7 @@ public class Graph {
         methodStack = new AtomicInteger();
         pendingExpectations = new HashSet<>();
         invalidActions = new HashSet<>();
+        traverseTrace = new LinkedList<>();
     }
 
     public void registerCommunicator(Communicator communicator) {
@@ -78,6 +80,7 @@ public class Graph {
         isTraversing = true;
         records.clear();
         verifiedPaths.clear();
+        traverseTrace.clear();
         return true;
     }
 
@@ -129,7 +132,7 @@ public class Graph {
             }
             Logger.getDefault().dd("traverse path: ", path);
             ExternalEvent externalEvent;
-            while (isTraversing && (externalEvent = roll(path)) != null && isTraversing) {
+            while (isTraversing && (externalEvent = roll(getPathToRoll(path))) != null && isTraversing) {
                 if (postAction(externalEvent) && verifiedPaths.contains(path)) {
                     break;
                 }
@@ -139,6 +142,7 @@ public class Graph {
                 Logger.getDefault().ww("fail to traverse path: ", path);
             }
             verifiedPaths.clear();
+            traverseTrace.clear();
         }
         // handle pending expectation
         Iterator<Expectation> iterator = pendingExpectations.iterator();
@@ -153,6 +157,28 @@ public class Graph {
         List<Object> result = new ArrayList<>(records);
         isTraversing = false;
         return result;
+    }
+
+    private Path getPathToRoll(Path pathToTraverse) {
+        Path pathToRoll = pathToTraverse;
+        Iterator<Path> iterator = traverseTrace.iterator();
+        boolean found = false;
+        while (iterator.hasNext()) {
+            if (found) {
+                iterator.next();
+                iterator.remove();
+            } else {
+                Path path = iterator.next();
+                // 判断该path是否已完成
+                if (verifiedPaths.contains(path)) {
+                    found = true;
+                    iterator.remove();
+                } else {
+                    pathToRoll = path;
+                }
+            }
+        }
+        return pathToRoll;
     }
 
     private <V> boolean achieveStatePredicate(Property<V> property, ValuePredicate<V> valuePredicate) {
@@ -207,6 +233,7 @@ public class Graph {
 
     private ExternalEvent roll(Path path) {
         enterMethod(path);
+        traverseTrace.add(path);
         // make sure context states are satisfied.
         for (Property property : path.getContext().keySet()) {
             ValuePredicate valuePredicate = path.getContext().get(property);
