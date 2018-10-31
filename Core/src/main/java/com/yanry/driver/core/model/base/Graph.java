@@ -9,7 +9,6 @@ import com.yanry.driver.core.model.event.ExpectationEvent;
 import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.state.Equals;
-import com.yanry.driver.core.model.state.State;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
 import lib.common.util.CollectionUtil;
@@ -36,7 +35,7 @@ public class Graph {
     private Set<Expectation> pendingExpectations;
     private HashSet<ExternalEvent> invalidActions;
     private List<Path> concernedPaths;
-    private LinkedList<Path> traverseTrace;
+    private LinkedList<State> stateTrace;
 
     public Graph() {
         this.communicators = new LinkedList<>();
@@ -47,7 +46,7 @@ public class Graph {
         methodStack = new AtomicInteger();
         pendingExpectations = new HashSet<>();
         invalidActions = new HashSet<>();
-        traverseTrace = new LinkedList<>();
+        stateTrace = new LinkedList<>();
     }
 
     public void registerCommunicator(Communicator communicator) {
@@ -80,7 +79,7 @@ public class Graph {
         isTraversing = true;
         records.clear();
         verifiedPaths.clear();
-        traverseTrace.clear();
+        stateTrace.clear();
         return true;
     }
 
@@ -132,7 +131,7 @@ public class Graph {
             }
             Logger.getDefault().dd("traverse path: ", path);
             ExternalEvent externalEvent;
-            while (isTraversing && (externalEvent = roll(getPathToRoll(path))) != null && isTraversing) {
+            while (isTraversing && (externalEvent = getNextAction(path)) != null && isTraversing) {
                 if (postAction(externalEvent) && verifiedPaths.contains(path)) {
                     break;
                 }
@@ -142,7 +141,7 @@ public class Graph {
                 Logger.getDefault().ww("fail to traverse path: ", path);
             }
             verifiedPaths.clear();
-            traverseTrace.clear();
+            stateTrace.clear();
         }
         // handle pending expectation
         Iterator<Expectation> iterator = pendingExpectations.iterator();
@@ -159,26 +158,28 @@ public class Graph {
         return result;
     }
 
-    private Path getPathToRoll(Path pathToTraverse) {
-        Path pathToRoll = pathToTraverse;
-        Iterator<Path> iterator = traverseTrace.iterator();
+    private ExternalEvent getNextAction(Path pathToTraverse) {
+        State selectedState = null;
+        Iterator<State> iterator = stateTrace.iterator();
         boolean found = false;
         while (iterator.hasNext()) {
             if (found) {
                 iterator.next();
                 iterator.remove();
             } else {
-                Path path = iterator.next();
-                // 判断该path是否已完成
-                if (verifiedPaths.contains(path)) {
+                State state = iterator.next();
+                if (state.isSatisfied()) {
                     found = true;
                     iterator.remove();
                 } else {
-                    pathToRoll = path;
+                    selectedState = state;
                 }
             }
         }
-        return pathToRoll;
+        if (selectedState == null) {
+            return roll(pathToTraverse);
+        }
+        return selectedState.getProperty().switchTo(selectedState.getValuePredicate());
     }
 
     private <V> boolean achieveStatePredicate(Property<V> property, ValuePredicate<V> valuePredicate) {
@@ -233,11 +234,11 @@ public class Graph {
 
     private ExternalEvent roll(Path path) {
         enterMethod(path);
-        traverseTrace.add(path);
         // make sure context states are satisfied.
         for (Property property : path.getContext().keySet()) {
             ValuePredicate valuePredicate = path.getContext().get(property);
             if (!valuePredicate.test(property.getCurrentValue())) {
+                stateTrace.add(property.getState(valuePredicate));
                 ExternalEvent externalEvent = property.switchTo(valuePredicate);
                 exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
@@ -250,12 +251,16 @@ public class Graph {
             TransitionEvent event = (TransitionEvent) inputEvent;
             // roll path for this switch event.
             Property property = event.getProperty();
-            if (event.getFrom() != null && !event.getFrom().test(property.getCurrentValue())) {
-                ExternalEvent externalEvent = property.switchTo(event.getFrom());
+            ValuePredicate from = event.getFrom();
+            if (from != null && !from.test(property.getCurrentValue())) {
+                stateTrace.add(property.getState(from));
+                ExternalEvent externalEvent = property.switchTo(from);
                 exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
-            ExternalEvent externalEvent = property.switchTo(event.getTo());
+            ValuePredicate to = event.getTo();
+            stateTrace.add(property.getState(to));
+            ExternalEvent externalEvent = property.switchTo(to);
             exitMethod(LogLevel.Verbose, externalEvent);
             return externalEvent;
         } else if (inputEvent instanceof ExternalEvent) {

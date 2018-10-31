@@ -1,7 +1,6 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.State;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;

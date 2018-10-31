@@ -64,6 +64,10 @@ public abstract class Property<V> extends HandyObject {
         return externalEvent;
     }
 
+    public State<V> getState(ValuePredicate<V> predicate) {
+        return new State<>(this, predicate);
+    }
+
     public SSPropertyExpectation<V> getStaticExpectation(Timing timing, boolean needCheck, V value) {
         return new SSPropertyExpectation<>(timing, needCheck, this, value);
     }
