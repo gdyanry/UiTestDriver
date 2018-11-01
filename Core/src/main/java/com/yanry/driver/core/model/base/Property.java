@@ -11,7 +11,10 @@ import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -21,14 +24,27 @@ import java.util.function.Supplier;
  */
 public abstract class Property<V> extends HandyObject {
     private Graph graph;
-
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
     long communicateTimeFrame;
+    private HashSet<V> values;
+    private Set<V> externalValueSet;
 
     public Property(Graph graph) {
         this.graph = graph;
+        values = new HashSet<>();
+    }
+
+    void addValue(V value) {
+        values.add(value);
+    }
+
+    public Set<V> getValues() {
+        if (externalValueSet == null) {
+            externalValueSet = Collections.unmodifiableSet(values);
+        }
+        return externalValueSet;
     }
 
     @EqualsPart
