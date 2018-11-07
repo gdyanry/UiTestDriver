@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.sample.login;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.event.TransitionEvent;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.mobile.property.CurrentUser;
 import com.yanry.driver.mobile.property.LoginState;
 import com.yanry.driver.mobile.sample.Tester;

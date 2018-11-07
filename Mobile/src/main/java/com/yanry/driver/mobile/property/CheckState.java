@@ -6,6 +6,9 @@ import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
 
+import java.util.Set;
+import java.util.stream.Stream;
+
 public class CheckState extends ViewProperty<Boolean> {
     public CheckState(View view) {
         super(view);
@@ -28,5 +31,10 @@ public class CheckState extends ViewProperty<Boolean> {
     @Override
     protected ExternalEvent doSelfSwitch(Boolean to) {
         return null;
+    }
+
+    @Override
+    protected Stream<Boolean> getValueStream(Set<Boolean> collectedValues) {
+        return Stream.of(false, true);
     }
 }

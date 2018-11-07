@@ -1,18 +1,18 @@
 package com.yanry.driver.mobile.property;
 
+import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.TransitionEvent;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.Equals;
-import com.yanry.driver.core.model.state.Within;
+import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.predicate.Within;
 
 /**
  * Created by rongyu.yan on 5/11/2017.
  */
-public class LoginState extends Property<Boolean> {
+public class LoginState extends BooleanProperty {
     private CurrentUser currentUser;
 
     public LoginState(Graph graph, CurrentUser currentUser) {

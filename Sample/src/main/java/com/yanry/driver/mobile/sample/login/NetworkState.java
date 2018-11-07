@@ -6,6 +6,9 @@ import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
+import java.util.Set;
+import java.util.stream.Stream;
+
 /**
  * Created by rongyu.yan on 2/27/2017.
  */
@@ -17,12 +20,17 @@ public class NetworkState extends Property<NetworkState.Network> {
 
     @Override
     protected Network checkValue() {
-        return getGraph().obtainValue(new Select<>(this, Network.values()));
+        return getGraph().obtainValue(new Select<>(this));
     }
 
     @Override
     protected ExternalEvent doSelfSwitch(Network to) {
         return new SwitchStateAction<>(this, to);
+    }
+
+    @Override
+    protected Stream<Network> getValueStream(Set<Network> collectedValues) {
+        return Stream.of(Network.values());
     }
 
     /**

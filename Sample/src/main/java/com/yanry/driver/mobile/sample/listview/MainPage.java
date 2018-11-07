@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.sample.listview;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.UnaryIntPredicate;
+import com.yanry.driver.core.model.predicate.GreaterThan;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.view.View;
@@ -30,7 +30,7 @@ public class MainPage extends Window {
         closeOnPressBack();
         // 点击列表项进入详情页
         popWindow(DetailPage.class, listView.getClickItemEvent(), Timing.IMMEDIATELY, false)
-                .addContextStatePredicate(listView.getSize(), new UnaryIntPredicate(0, true));
+                .addContextStatePredicate(listView.getSize(), new GreaterThan<>(0));
         // 筛选
         popWindow(FilterPage.class, new Click(new View(graph, this, new ById("filter"))), Timing.IMMEDIATELY, false);
         // 添加

@@ -1,18 +1,15 @@
 package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.*;
-import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.Equals;
-import com.yanry.driver.core.model.state.NotEquals;
+import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.predicate.NotEquals;
 import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
 import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
-
-import java.util.stream.Stream;
 
 public abstract class Window extends ViewContainer {
     private VisibilityState visibility;
@@ -45,12 +42,7 @@ public abstract class Window extends ViewContainer {
         createForegroundPath(new TransitionEvent<>(visibility, null, new Equals<>(Visibility.Foreground)),
                 getStaticExpectation(Timing.IMMEDIATELY, false, true));
         // 退出前台时visible->false
-        createForegroundPath(new TransitionEvent<>(visibility, null, new NotEquals(Visibility.Foreground) {
-            @Override
-            protected Stream getAllValues() {
-                return Stream.of(Visibility.values());
-            }
-        }), getStaticExpectation(Timing.IMMEDIATELY, false, false));
+        createForegroundPath(new TransitionEvent<>(visibility, null, new NotEquals(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, false));
     }
 
     public Path showOnLaunch(Timing timing) {

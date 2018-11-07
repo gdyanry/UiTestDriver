@@ -6,6 +6,9 @@ import com.yanry.driver.core.model.base.Property;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
+import java.util.Set;
+import java.util.stream.Stream;
+
 public class VisibilityState extends Property<Visibility> {
     private Window window;
 
@@ -35,6 +38,11 @@ public class VisibilityState extends Property<Visibility> {
     @Override
     protected ExternalEvent doSelfSwitch(Visibility to) {
         return null;
+    }
+
+    @Override
+    protected Stream<Visibility> getValueStream(Set<Visibility> collectedValues) {
+        return Stream.of(Visibility.values());
     }
 
     private boolean checkExist(PreviousWindow previousWindow) {

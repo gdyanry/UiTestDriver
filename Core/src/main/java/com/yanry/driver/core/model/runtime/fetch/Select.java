@@ -5,16 +5,16 @@ import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
 public class Select<V> extends Obtainable<V> {
-    private V[] options;
+    private Object[] options;
 
-    public Select(Property<V> property, V... options) {
+    public Select(Property<V> property) {
         super(property);
-        this.options = options;
+        this.options = property.getValues();
     }
 
     @Visible
     @EqualsPart
-    public V[] getOptions() {
+    public Object[] getOptions() {
         return options;
     }
 
@@ -23,7 +23,7 @@ public class Select<V> extends Obtainable<V> {
         if (responseString.matches("^([1-9]\\d*)|0$")) {
             int index = Integer.parseInt(responseString);
             if (index < options.length) {
-                return options[index];
+                return (V) options[index];
             }
         }
         return null;

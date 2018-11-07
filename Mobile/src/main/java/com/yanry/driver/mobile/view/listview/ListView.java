@@ -2,12 +2,12 @@ package com.yanry.driver.mobile.view.listview;
 
 import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.base.ValuePredicate;
-import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.NotEquals;
-import com.yanry.driver.core.model.state.UnaryIntPredicate;
+import com.yanry.driver.core.model.predicate.GreaterThan;
+import com.yanry.driver.core.model.predicate.NotEquals;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ViewContainer;
@@ -19,7 +19,6 @@ import java.util.Random;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * Created by rongyu.yan on 4/25/2017.
@@ -39,12 +38,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
         itemNone = itemCreator.create(graph, this, -1);
-        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<I>(itemNone) {
-            @Override
-            protected Stream<I> getAllValues() {
-                return items.keySet().stream().filter(pos -> pos < size.getCurrentValue()).map(pos -> items.get(pos));
-            }
-        });
+        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<>(itemNone));
         // 变为可见时清除clickedItem缓存
         getWindow().createForegroundPath(getShowEvent(), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, itemNone));
         // size变化时重新初始化item
@@ -52,11 +46,6 @@ public class ListView<I extends ListViewItem<I>> extends View {
             @Override
             public boolean test(Integer value) {
                 return value != null;
-            }
-
-            @Override
-            protected Stream<Integer> getValidValue() {
-                return null;
             }
         }), new ActionExpectation() {
             @Override
@@ -81,7 +70,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
             child = itemCreator.create(getGraph(), this, index);
             getWindow().createForegroundPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
                     .addContextState(this, true)
-                    .addContextStatePredicate(size, new UnaryIntPredicate(index, true));
+                    .addContextStatePredicate(size, new GreaterThan<>(index));
             items.put(index, child);
         }
         return child;

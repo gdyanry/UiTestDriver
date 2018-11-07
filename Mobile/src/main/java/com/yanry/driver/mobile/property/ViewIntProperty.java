@@ -7,7 +7,7 @@ import com.yanry.driver.mobile.view.View;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
-public class ViewIntProperty extends IntProperty {
+public abstract class ViewIntProperty extends IntProperty {
     private View view;
 
     public ViewIntProperty(Graph graph, View view) {

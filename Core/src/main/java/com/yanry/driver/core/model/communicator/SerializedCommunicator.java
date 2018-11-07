@@ -2,6 +2,7 @@ package com.yanry.driver.core.model.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.NonPropertyExpectation;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 /**
@@ -63,7 +64,7 @@ public abstract class SerializedCommunicator implements Communicator {
     }
 
     @Override
-    public Boolean verifyExpectation(Expectation expectation) {
+    public Boolean verifyExpectation(NonPropertyExpectation expectation) {
         return _verifyExpectation(0, expectation);
     }
 

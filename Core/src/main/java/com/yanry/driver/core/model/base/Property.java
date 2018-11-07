@@ -4,18 +4,17 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
-import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.Equals;
+import com.yanry.driver.core.model.predicate.Equals;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * @author yanry
@@ -28,23 +27,15 @@ public abstract class Property<V> extends HandyObject {
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
     long communicateTimeFrame;
-    private HashSet<V> values;
-    private Set<V> externalValueSet;
+    private HashSet<V> collectedValues;
 
     public Property(Graph graph) {
         this.graph = graph;
-        values = new HashSet<>();
+        collectedValues = new HashSet<>();
     }
 
     void addValue(V value) {
-        values.add(value);
-    }
-
-    public Set<V> getValues() {
-        if (externalValueSet == null) {
-            externalValueSet = Collections.unmodifiableSet(values);
-        }
-        return externalValueSet;
+        collectedValues.add(value);
     }
 
     @EqualsPart
@@ -61,13 +52,15 @@ public abstract class Property<V> extends HandyObject {
             return null;
         }
         graph.enterMethod(String.format("%s > %s", this, toState));
-        if (toState.getValidValue() != null) {
-            Optional<ExternalEvent> any = toState.getValidValue().map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
-            if (any.isPresent()) {
-                ExternalEvent externalEvent = any.get();
-                graph.exitMethod(LogLevel.Verbose, externalEvent);
-                return externalEvent;
-            }
+        Stream<V> stream = getValueStream(collectedValues);
+        if (stream == null) {
+            stream = collectedValues.stream();
+        }
+        Optional<ExternalEvent> any = stream.map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
+        if (any.isPresent()) {
+            ExternalEvent externalEvent = any.get();
+            graph.exitMethod(LogLevel.Verbose, externalEvent);
+            return externalEvent;
         }
         ExternalEvent externalEvent = graph.findPathToRoll(e -> {
             if (e instanceof PropertyExpectation) {
@@ -113,7 +106,13 @@ public abstract class Property<V> extends HandyObject {
         return cacheValue;
     }
 
+    public Object[] getValues() {
+        return getValueStream(collectedValues).toArray();
+    }
+
     protected abstract V checkValue();
 
     protected abstract ExternalEvent doSelfSwitch(V to);
+
+    protected abstract Stream<V> getValueStream(Set<V> collectedValues);
 }

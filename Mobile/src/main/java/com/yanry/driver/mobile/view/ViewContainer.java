@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.view;
 
+import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.TransitionEvent;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.mobile.view.selector.ById;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 /**
  * Created by rongyu.yan on 3/6/2017.
  */
-public abstract class ViewContainer extends Property<Boolean> {
+public abstract class ViewContainer extends BooleanProperty {
     private HashMap<String, View> childViews;
     private TransitionEvent<Boolean> showEvent;
     private TransitionEvent<Boolean> dismissEvent;

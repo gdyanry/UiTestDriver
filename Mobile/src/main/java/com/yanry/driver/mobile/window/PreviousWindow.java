@@ -6,6 +6,9 @@ import com.yanry.driver.core.model.base.Property;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
+import java.util.Set;
+import java.util.stream.Stream;
+
 public class PreviousWindow extends Property<Window> {
     private Window window;
 
@@ -28,5 +31,10 @@ public class PreviousWindow extends Property<Window> {
     @Override
     protected ExternalEvent doSelfSwitch(Window to) {
         return null;
+    }
+
+    @Override
+    protected Stream<Window> getValueStream(Set<Window> collectedValues) {
+        return collectedValues.stream();
     }
 }

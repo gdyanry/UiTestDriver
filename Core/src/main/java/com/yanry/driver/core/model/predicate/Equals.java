@@ -1,6 +1,4 @@
-package com.yanry.driver.core.model.state;
-
-import java.util.stream.Stream;
+package com.yanry.driver.core.model.predicate;
 
 public class Equals<V> extends UnaryPredicate<V> {
 
@@ -11,10 +9,5 @@ public class Equals<V> extends UnaryPredicate<V> {
     @Override
     public boolean test(V value) {
         return getOperand().equals(value);
-    }
-
-    @Override
-    protected Stream<V> getValidValue() {
-        return Stream.of(getOperand());
     }
 }

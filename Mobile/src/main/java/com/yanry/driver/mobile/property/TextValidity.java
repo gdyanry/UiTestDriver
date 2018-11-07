@@ -1,10 +1,10 @@
 package com.yanry.driver.mobile.property;
 
+import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.TransitionEvent;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.state.Within;
+import com.yanry.driver.core.model.predicate.Within;
 import com.yanry.driver.mobile.view.View;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
@@ -12,7 +12,7 @@ import lib.common.util.object.Visible;
 import java.util.HashSet;
 import java.util.Set;
 
-public class TextValidity extends Property<Boolean> {
+public class TextValidity extends BooleanProperty {
     private Set<String> validContents;
     private Set<String> invalidContents;
     private View view;

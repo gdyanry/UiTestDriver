@@ -7,6 +7,7 @@ import com.yanry.driver.core.model.runtime.fetch.Select;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Created by rongyu.yan on 4/18/2017.
@@ -30,18 +31,16 @@ public class CurrentUser extends Property<String> {
 
     @Override
     protected String checkValue() {
-        Set<String> users = userPasswordMap.keySet();
-        String[] options = new String[users.size() + 1];
-        options[0] = "";
-        int i = 0;
-        for (String user : users) {
-            options[++i] = user;
-        }
-        return getGraph().obtainValue(new Select<>(this, options));
+        return getGraph().obtainValue(new Select<>(this));
     }
 
     @Override
     protected ExternalEvent doSelfSwitch(String to) {
         return null;
+    }
+
+    @Override
+    protected Stream<String> getValueStream(Set<String> collectedValues) {
+        return collectedValues.stream();
     }
 }

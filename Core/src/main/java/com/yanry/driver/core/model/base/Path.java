@@ -3,8 +3,8 @@
  */
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.event.TransitionEvent;
-import com.yanry.driver.core.model.state.Equals;
+import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.predicate.UnaryPredicate;
 import lib.common.util.object.Visible;
 import lib.common.util.object.VisibleObject;
 
@@ -36,6 +36,9 @@ public class Path extends VisibleObject {
 
     public <V> Path addContextStatePredicate(Property<V> property, ValuePredicate<V> predicate) {
         context.put(property, predicate);
+        if (predicate instanceof UnaryPredicate) {
+            property.addValue(((UnaryPredicate<V>) predicate).getOperand());
+        }
         return this;
     }
 

@@ -5,27 +5,27 @@ import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
-public class CurrentWindow extends Property<Window> {
-    private WindowManager manager;
+import java.util.Set;
+import java.util.stream.Stream;
 
-    CurrentWindow(Graph graph, WindowManager manager) {
+public class CurrentWindow extends Property<Window> {
+
+    CurrentWindow(Graph graph) {
         super(graph);
-        this.manager = manager;
     }
 
     @Override
     protected Window checkValue() {
-        Window[] options = new Window[manager.windowInstances.size() + 1];
-        int i = 0;
-        options[0] = manager.noWindow;
-        for (Window window : manager.windowInstances.values()) {
-            options[++i] = window;
-        }
-        return getGraph().obtainValue(new Select<>(this, options));
+        return getGraph().obtainValue(new Select<>(this));
     }
 
     @Override
     protected ExternalEvent doSelfSwitch(Window to) {
         return null;
+    }
+
+    @Override
+    protected Stream<Window> getValueStream(Set<Window> collectedValues) {
+        return collectedValues.stream();
     }
 }

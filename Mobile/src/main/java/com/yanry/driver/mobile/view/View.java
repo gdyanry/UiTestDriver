@@ -3,12 +3,8 @@
  */
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.event.TransitionEvent;
-import com.yanry.driver.core.model.expectation.SSPropertyExpectation;
+import com.yanry.driver.core.model.BooleanProperty;
+import com.yanry.driver.core.model.base.*;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
@@ -82,7 +78,7 @@ public class View extends ViewContainer {
         return null;
     }
 
-    public class IndependentVisibility extends Property<Boolean> {
+    public class IndependentVisibility extends BooleanProperty {
 
         public IndependentVisibility(Graph graph) {
             super(graph);

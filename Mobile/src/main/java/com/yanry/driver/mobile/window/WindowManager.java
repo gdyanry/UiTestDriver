@@ -2,8 +2,8 @@ package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
-import com.yanry.driver.core.model.event.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.property.ProcessState;
@@ -22,7 +22,7 @@ public class WindowManager {
 
     public WindowManager(Graph graph) {
         windowInstances = new LinkedHashMap<>();
-        currentWindow = new CurrentWindow(graph, this);
+        currentWindow = new CurrentWindow(graph);
         processState = new ProcessState(graph);
         // 开启进程
         graph.addPath(new Path(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addContextState(processState, false));

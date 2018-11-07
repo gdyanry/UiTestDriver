@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.communicator;
 
-import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.NonPropertyExpectation;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 
 /**
@@ -25,5 +25,5 @@ public interface Communicator {
      * @param expectation
      * @return 返回null表示无法校验，否则表示校验结果。
      */
-    Boolean verifyExpectation(Expectation expectation);
+    Boolean verifyExpectation(NonPropertyExpectation expectation);
 }
