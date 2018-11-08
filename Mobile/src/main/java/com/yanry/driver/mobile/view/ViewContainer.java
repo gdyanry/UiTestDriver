@@ -22,11 +22,11 @@ public abstract class ViewContainer extends BooleanProperty {
         dismissEvent = new TransitionEvent<>(this, true, false);
     }
 
-    public TransitionEvent<Boolean> getShowEvent() {
+    public TransitionEvent<Boolean> onShow() {
         return showEvent;
     }
 
-    public TransitionEvent<Boolean> getDismissEvent() {
+    public TransitionEvent<Boolean> onDismiss() {
         return dismissEvent;
     }
 

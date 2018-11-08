@@ -1,10 +1,10 @@
 package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.*;
+import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.predicate.NotEquals;
 import com.yanry.driver.mobile.action.ClickLauncher;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.PressBack;
@@ -33,30 +33,31 @@ public abstract class Window extends ViewContainer {
         pauseEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.Background);
         ReflectionUtil.initStaticStringFields(getClass());
         // visibility->Foreground
-        graph.addPath(new Path(new TransitionEvent<>(manager.currentWindow, null, this),
-                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground)));
+        graph.createPath(new NegationEvent<>(manager.currentWindow, new Equals<>(this).not()),
+                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground));
         // 退出进程时visibility->NotCreated
-        graph.addPath(new Path(new TransitionEvent<>(manager.getProcessState(), true, false),
-                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, this == manager.noWindow ? Visibility.Foreground : Visibility.NotCreated)));
+        graph.createPath(new TransitionEvent<>(manager.getProcessState(), true, false),
+                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, this == manager.noWindow ? Visibility.Foreground : Visibility.NotCreated));
+
+        Equals<Visibility> foreground = new Equals<>(Visibility.Foreground);
         // 进入前台时visible->true
-        createForegroundPath(new TransitionEvent<>(visibility, null, new Equals<>(Visibility.Foreground)),
+        getGraph().createPath(new NegationEvent<>(visibility, foreground.not()),
                 getStaticExpectation(Timing.IMMEDIATELY, false, true));
         // 退出前台时visible->false
-        createForegroundPath(new TransitionEvent<>(visibility, null, new NotEquals(Visibility.Foreground)), getStaticExpectation(Timing.IMMEDIATELY, false, false));
+        getGraph().createPath(new NegationEvent<>(visibility, foreground),
+                getStaticExpectation(Timing.IMMEDIATELY, false, false));
     }
 
     public Path showOnLaunch(Timing timing) {
-        Path path = new Path(ClickLauncher.get(), manager.currentWindow.getStaticExpectation(timing, true, this)
+        return getGraph().createPath(ClickLauncher.get(), manager.currentWindow.getStaticExpectation(timing, true, this)
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow)))
                 .addContextState(manager.currentWindow, manager.noWindow)
                 .setBaseUnsatisfiedDegree(10000);
-        getGraph().addPath(path);
-        return path;
     }
 
     public Path popWindow(Class<? extends Window> windowType, Event inputEvent, Timing timing, boolean closeCurrent) {
         Window newWindow = getWindow(windowType);
-        return createForegroundPath(inputEvent, manager.currentWindow.getStaticExpectation(timing, true, newWindow)
+        return getGraph().createPath(inputEvent, manager.currentWindow.getStaticExpectation(timing, true, newWindow)
                 .addFollowingExpectation(new ActionExpectation() {
                     @Override
                     protected void run() {
@@ -79,11 +80,12 @@ public abstract class Window extends ViewContainer {
                 // TODO 处理相同页面多个实例的情况
                 .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this))
                 // visibility->Background
-                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background)));
+                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background)))
+                .addContextState(this, true);
     }
 
     public Path close(Event inputEvent, Timing timing) {
-        return createForegroundPath(inputEvent, manager.currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
+        return getGraph().createPath(inputEvent, manager.currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow))
                 .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated)));
     }
@@ -94,13 +96,6 @@ public abstract class Window extends ViewContainer {
 
     public Path closeOnTouchOutside() {
         return close(new ClickOutside(this), Timing.IMMEDIATELY);
-    }
-
-    public Path createForegroundPath(Event event, Expectation expectation) {
-        Path path = new Path(event, expectation);
-        path.addContextState(visibility, Visibility.Foreground);
-        getGraph().addPath(path);
-        return path;
     }
 
     public <W extends Window> W getWindow(Class<W> windowCls) {

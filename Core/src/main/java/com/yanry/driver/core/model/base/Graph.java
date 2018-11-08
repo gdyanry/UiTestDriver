@@ -7,6 +7,7 @@ import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ExpectationEvent;
 import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.predicate.ValuePredicate;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
@@ -52,8 +53,10 @@ public class Graph {
         communicators.add(communicator);
     }
 
-    public void addPath(Path path) {
+    public Path createPath(Event event, Expectation expectation) {
+        Path path = new Path(event, expectation);
         allPaths.add(path);
+        return path;
     }
 
     void addPendingExpectation(Expectation expectation) {

@@ -5,7 +5,7 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.predicate.*;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
@@ -34,8 +34,25 @@ public abstract class Property<V> extends HandyObject {
         collectedValues = new HashSet<>();
     }
 
-    void addValue(V value) {
-        collectedValues.add(value);
+    public void addValue(V... value) {
+        for (V v : value) {
+            collectedValues.add(v);
+        }
+    }
+
+    void findValueToAdd(ValuePredicate<V> predicate) {
+        if (predicate != null) {
+            if (predicate instanceof UnaryPredicate) {
+                collectedValues.add(((UnaryPredicate<V>) predicate).getOperand());
+            } else if (predicate instanceof Not) {
+                findValueToAdd(((Not<V>) predicate).getPredicate());
+            } else if (predicate instanceof CompoundPredicate) {
+                CompoundPredicate<V> compoundPredicate = (CompoundPredicate<V>) predicate;
+                for (ValuePredicate<V> valuePredicate : compoundPredicate.getPredicates()) {
+                    findValueToAdd(valuePredicate);
+                }
+            }
+        }
     }
 
     @EqualsPart
@@ -56,7 +73,10 @@ public abstract class Property<V> extends HandyObject {
         if (stream == null) {
             stream = collectedValues.stream();
         }
-        Optional<ExternalEvent> any = stream.map(v -> doSelfSwitch(v)).filter(a -> a != null && graph.isValidAction(a)).findAny();
+        Optional<ExternalEvent> any = stream.filter(v -> toState.test(v))
+                .map(v -> doSelfSwitch(v))
+                .filter(a -> a != null && graph.isValidAction(a))
+                .findAny();
         if (any.isPresent()) {
             ExternalEvent externalEvent = any.get();
             graph.exitMethod(LogLevel.Verbose, externalEvent);

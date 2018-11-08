@@ -1,7 +1,6 @@
 package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -25,14 +24,17 @@ public class WindowManager {
         currentWindow = new CurrentWindow(graph);
         processState = new ProcessState(graph);
         // 开启进程
-        graph.addPath(new Path(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true)).addContextState(processState, false));
+        graph.createPath(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
+                .addContextState(processState, false);
         // 退出进程
-        graph.addPath(new Path(new SwitchStateAction<>(processState, false), processState.getStaticExpectation(Timing.IMMEDIATELY, false, false))
-                .addContextState(processState, true));
+        graph.createPath(new SwitchStateAction<>(processState, false),
+                processState.getStaticExpectation(Timing.IMMEDIATELY, false, false))
+                .addContextState(processState, true);
         noWindow = new NoWindow(graph, this);
         currentWindow.handleExpectation(noWindow, false);
         // 退出进程时清理当前窗口
-        graph.addPath(new Path(new TransitionEvent<>(processState, true, false), currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow)));
+        graph.createPath(new TransitionEvent<>(processState, true, false),
+                currentWindow.getStaticExpectation(Timing.IMMEDIATELY, false, noWindow));
     }
 
     public void addWindow(Window... windows) {

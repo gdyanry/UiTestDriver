@@ -1,6 +1,5 @@
 package com.yanry.driver.core.model.predicate;
 
-import com.yanry.driver.core.model.base.ValuePredicate;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
@@ -14,6 +13,7 @@ public abstract class CompoundPredicate<V> extends ValuePredicate<V> {
     private HashSet<ValuePredicate<V>> predicates;
 
     public CompoundPredicate(ValuePredicate<V>... predicates) {
+        this.predicates = new HashSet<>(predicates.length);
         for (ValuePredicate<V> predicate : predicates) {
             this.predicates.add(predicate);
         }

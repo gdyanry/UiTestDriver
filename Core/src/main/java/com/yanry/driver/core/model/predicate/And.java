@@ -1,6 +1,4 @@
-package com.yanry.driver.core.model.base;
-
-import com.yanry.driver.core.model.predicate.CompoundPredicate;
+package com.yanry.driver.core.model.predicate;
 
 /**
  * @Author: yanry

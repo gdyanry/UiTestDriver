@@ -4,7 +4,7 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.predicate.UnaryPredicate;
+import com.yanry.driver.core.model.predicate.ValuePredicate;
 import lib.common.util.object.Visible;
 import lib.common.util.object.VisibleObject;
 
@@ -23,7 +23,7 @@ public class Path extends VisibleObject {
     private int baseUnsatisfiedDegree;
     private HashMap<Property, ValuePredicate> context;
 
-    public Path(Event event, Expectation expectation) {
+    Path(Event event, Expectation expectation) {
         this.event = event;
         this.expectation = expectation;
         context = new HashMap<>();
@@ -36,9 +36,7 @@ public class Path extends VisibleObject {
 
     public <V> Path addContextStatePredicate(Property<V> property, ValuePredicate<V> predicate) {
         context.put(property, predicate);
-        if (predicate instanceof UnaryPredicate) {
-            property.addValue(((UnaryPredicate<V>) predicate).getOperand());
-        }
+        property.findValueToAdd(predicate);
         return this;
     }
 

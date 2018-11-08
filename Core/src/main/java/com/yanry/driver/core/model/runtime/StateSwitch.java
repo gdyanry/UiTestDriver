@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.runtime;
 
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.base.ValuePredicate;
+import com.yanry.driver.core.model.predicate.ValuePredicate;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 import lib.common.util.object.Visible;

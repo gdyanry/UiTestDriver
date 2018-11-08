@@ -2,12 +2,10 @@ package com.yanry.driver.mobile.view.listview;
 
 import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.Graph;
-import com.yanry.driver.core.model.base.TransitionEvent;
-import com.yanry.driver.core.model.base.ValuePredicate;
+import com.yanry.driver.core.model.event.StateChangeEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.GreaterThan;
-import com.yanry.driver.core.model.predicate.NotEquals;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ViewContainer;
@@ -38,16 +36,9 @@ public class ListView<I extends ListViewItem<I>> extends View {
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
         itemNone = itemCreator.create(graph, this, -1);
-        clickItemEvent = new TransitionEvent<>(clickedItem, null, new NotEquals<>(itemNone));
-        // 变为可见时清除clickedItem缓存
-        getWindow().createForegroundPath(getShowEvent(), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, itemNone));
+        clickItemEvent = new StateChangeEvent<>(clickedItem);
         // size变化时重新初始化item
-        getWindow().createForegroundPath(new TransitionEvent<>(size, null, new ValuePredicate<Integer>() {
-            @Override
-            public boolean test(Integer value) {
-                return value != null;
-            }
-        }), new ActionExpectation() {
+        graph.createPath(new StateChangeEvent<>(size), new ActionExpectation() {
             @Override
             protected void run() {
                 initItems();
@@ -68,8 +59,8 @@ public class ListView<I extends ListViewItem<I>> extends View {
         I child = items.get(index);
         if (child == null) {
             child = itemCreator.create(getGraph(), this, index);
-            getWindow().createForegroundPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
-                    .addContextState(this, true)
+            getGraph().createPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
+                    .addContextState(child, true)
                     .addContextStatePredicate(size, new GreaterThan<>(index));
             items.put(index, child);
         }

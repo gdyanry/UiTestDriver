@@ -16,7 +16,7 @@ public abstract class BooleanProperty extends Property<Boolean> {
     }
 
     @Override
-    protected Stream<Boolean> getValueStream(Set<Boolean> collectedValues) {
+    protected final Stream<Boolean> getValueStream(Set<Boolean> collectedValues) {
         return Stream.of(false, true);
     }
 }

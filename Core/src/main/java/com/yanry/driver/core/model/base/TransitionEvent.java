@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.predicate.UnaryPredicate;
+import com.yanry.driver.core.model.predicate.ValuePredicate;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
@@ -16,14 +16,8 @@ public class TransitionEvent<V> extends InternalEvent<V> {
         super(property);
         this.from = from;
         this.to = to;
-        addPropertyValue(property, from);
-        addPropertyValue(property, to);
-    }
-
-    private void addPropertyValue(Property<V> property, ValuePredicate<V> predicate) {
-        if (predicate != null && predicate instanceof UnaryPredicate) {
-            property.addValue(((UnaryPredicate<V>) predicate).getOperand());
-        }
+        property.findValueToAdd(from);
+        property.findValueToAdd(to);
     }
 
     public TransitionEvent(Property<V> property, V from, V to) {

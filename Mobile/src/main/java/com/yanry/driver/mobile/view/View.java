@@ -4,7 +4,10 @@
 package com.yanry.driver.mobile.view;
 
 import com.yanry.driver.core.model.BooleanProperty;
-import com.yanry.driver.core.model.base.*;
+import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.SSPropertyExpectation;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
@@ -31,16 +34,16 @@ public class View extends ViewContainer {
         independentVisibility.handleExpectation(true, false);
         SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
         // false -> true
-        graph.addPath(new Path(parent.getShowEvent(), showExpectation)
-                .addContextState(independentVisibility, true));
-        graph.addPath(new Path(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
-                .addContextState(parent, true));
+        graph.createPath(parent.onShow(), showExpectation)
+                .addContextState(independentVisibility, true);
+        graph.createPath(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
+                .addContextState(parent, true);
         SSPropertyExpectation<Boolean> dismissExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, false);
         // true -> false
-        graph.addPath(new Path(parent.getDismissEvent(), dismissExpectation)
-                .addContextState(independentVisibility, true));
-        graph.addPath(new Path(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
-                .addContextState(parent, true));
+        graph.createPath(parent.onDismiss(), dismissExpectation)
+                .addContextState(independentVisibility, true);
+        graph.createPath(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
+                .addContextState(parent, true);
     }
 
     public Window getWindow() {
