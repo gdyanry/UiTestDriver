@@ -1,7 +1,9 @@
 package com.yanry.driver.mobile.property;
 
 import com.yanry.driver.core.model.Divider;
-import com.yanry.driver.core.model.base.*;
+import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
