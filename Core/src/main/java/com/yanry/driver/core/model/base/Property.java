@@ -36,7 +36,9 @@ public abstract class Property<V> extends HandyObject {
 
     public void addValue(V... value) {
         for (V v : value) {
-            collectedValues.add(v);
+            if (v != null) {
+                collectedValues.add(v);
+            }
         }
     }
 

@@ -17,7 +17,7 @@ public abstract class Window extends ViewContainer {
     private TransitionEvent<Visibility> closeEvent;
     private TransitionEvent<Visibility> resumeEvent;
     private TransitionEvent<Visibility> pauseEvent;
-    PreviousWindow previousWindow;
+    private PreviousWindow previousWindow;
     private WindowManager manager;
 
     public Window(Graph graph, WindowManager manager) {

@@ -209,9 +209,11 @@ public class Graph {
                 if (externalEvent instanceof ExpectationEvent) {
                     verifyExpectation(((ExpectationEvent) externalEvent).getExpectation());
                 }
-                allPaths.stream().filter(path -> path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0)
-                        .collect(Collectors.toList())
-                        .forEach(path -> verify(path));
+                for (Path path : new ArrayList<>(allPaths)) {
+                    if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
+                        verify(path);
+                    }
+                }
                 // process pending expectation
                 if (pendingExpectations.size() > 0) {
                     ArrayList<Expectation> pending = new ArrayList<>(pendingExpectations);
@@ -293,13 +295,14 @@ public class Graph {
     // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!to.equals(from)) {
-            allPaths.stream().filter(path -> {
+            for (Path path : new ArrayList<>(allPaths)) {
                 Event event = path.getEvent();
                 if (event instanceof InternalEvent) {
-                    return ((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0;
+                    if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
+                        verify(path);
+                    }
                 }
-                return false;
-            }).forEach(path -> verify(path));
+            }
         }
     }
 

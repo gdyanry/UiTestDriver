@@ -25,7 +25,6 @@ public class ListView<I extends ListViewItem<I>> extends View {
     private ListViewSize size;
     private HashMap<Integer, I> items;
     private ClickedItem<I> clickedItem;
-    private I itemNone;
     private Event clickItemEvent;
     private ListViewItemCreator<I> itemCreator;
 
@@ -35,7 +34,6 @@ public class ListView<I extends ListViewItem<I>> extends View {
         size = new ListViewSize(graph, this);
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
-        itemNone = itemCreator.create(graph, this, -1);
         clickItemEvent = new StateChangeEvent<>(clickedItem);
         // size变化时重新初始化item
         graph.createPath(new StateChangeEvent<>(size), new ActionExpectation() {
