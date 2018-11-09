@@ -2,9 +2,9 @@ package com.yanry.driver.core.model;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.predicate.ValuePredicate;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 

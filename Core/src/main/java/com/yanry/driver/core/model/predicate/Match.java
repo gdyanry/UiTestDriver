@@ -1,9 +1,11 @@
 package com.yanry.driver.core.model.predicate;
 
+import com.yanry.driver.core.model.base.ValuePredicate;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Match<V extends CharSequence> extends ValuePredicate<V> {
     private Pattern pattern;
@@ -16,6 +18,11 @@ public class Match<V extends CharSequence> extends ValuePredicate<V> {
     @Visible
     public String getRegex() {
         return pattern.pattern();
+    }
+
+    @Override
+    public Stream<V> getConcreteValues() {
+        return null;
     }
 
     @Override

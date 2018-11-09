@@ -2,9 +2,9 @@ package com.yanry.driver.mobile.sample.login.window;
 
 import com.yanry.driver.core.model.Divider;
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.predicate.ValuePredicate;
 import com.yanry.driver.core.model.predicate.Within;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.RequestDialog;
@@ -21,6 +21,7 @@ import com.yanry.driver.mobile.window.WindowManager;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Created by rongyu.yan on 5/8/2017.
@@ -44,12 +45,22 @@ public class LoginPage extends Window {
         EditText etUser = new EditText(new View(graph, this, new ByDesc(DESC_USER)));
         Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<>() {
             @Override
+            public Stream<String> getConcreteValues() {
+                return null;
+            }
+
+            @Override
             public boolean test(String value) {
                 return value != null && value.length() > 0 && !value.contains(" ");
             }
         });
         EditText etPwd = new EditText(new View(graph, this, new ByDesc(DESC_PWD)));
         Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<>() {
+            @Override
+            public Stream<String> getConcreteValues() {
+                return null;
+            }
+
             @Override
             public boolean test(String value) {
                 return value != null && value.length() >= 6;

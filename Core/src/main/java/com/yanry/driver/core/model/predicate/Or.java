@@ -1,5 +1,7 @@
 package com.yanry.driver.core.model.predicate;
 
+import com.yanry.driver.core.model.base.ValuePredicate;
+
 /**
  * @Author: yanry
  * @Date: 2018/11/6 23:35

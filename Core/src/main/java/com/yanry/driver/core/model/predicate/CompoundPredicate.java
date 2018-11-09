@@ -1,9 +1,11 @@
 package com.yanry.driver.core.model.predicate;
 
+import com.yanry.driver.core.model.base.ValuePredicate;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
 import java.util.HashSet;
+import java.util.stream.Stream;
 
 /**
  * @Author: yanry
@@ -23,5 +25,10 @@ public abstract class CompoundPredicate<V> extends ValuePredicate<V> {
     @Visible
     public HashSet<ValuePredicate<V>> getPredicates() {
         return predicates;
+    }
+
+    @Override
+    public Stream<V> getConcreteValues() {
+        return predicates.stream().flatMap(valuePredicate -> valuePredicate.getConcreteValues());
     }
 }

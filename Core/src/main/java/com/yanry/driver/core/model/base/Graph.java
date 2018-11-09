@@ -7,7 +7,6 @@ import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.ExpectationEvent;
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.predicate.ValuePredicate;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;

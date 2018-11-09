@@ -1,7 +1,9 @@
-package com.yanry.driver.core.model.predicate;
+package com.yanry.driver.core.model.base;
 
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
+
+import java.util.stream.Stream;
 
 public class Not<V> extends ValuePredicate<V> {
     private ValuePredicate<V> predicate;
@@ -19,6 +21,11 @@ public class Not<V> extends ValuePredicate<V> {
     @Override
     public ValuePredicate<V> not() {
         return predicate;
+    }
+
+    @Override
+    public Stream<V> getConcreteValues() {
+        return predicate.getConcreteValues();
     }
 
     @Override

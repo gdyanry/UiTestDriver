@@ -5,7 +5,7 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.predicate.*;
+import com.yanry.driver.core.model.predicate.Equals;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
@@ -42,15 +42,9 @@ public abstract class Property<V> extends HandyObject {
 
     void findValueToAdd(ValuePredicate<V> predicate) {
         if (predicate != null) {
-            if (predicate instanceof UnaryPredicate) {
-                collectedValues.add(((UnaryPredicate<V>) predicate).getOperand());
-            } else if (predicate instanceof Not) {
-                findValueToAdd(((Not<V>) predicate).getPredicate());
-            } else if (predicate instanceof CompoundPredicate) {
-                CompoundPredicate<V> compoundPredicate = (CompoundPredicate<V>) predicate;
-                for (ValuePredicate<V> valuePredicate : compoundPredicate.getPredicates()) {
-                    findValueToAdd(valuePredicate);
-                }
+            Stream<V> concreteValues = predicate.getConcreteValues();
+            if (concreteValues != null) {
+                concreteValues.forEach(v -> addValue(v));
             }
         }
     }
