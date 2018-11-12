@@ -20,7 +20,7 @@ public class LoginTest extends WindowManager {
         LoginPage loginPage = new LoginPage(graph, this, currentUser, networkState);
         MainPage mainPage = new MainPage(graph, this, currentUser);
         AboutPage aboutPage = new AboutPage(graph, this);
-        addWindow(loginPage, mainPage, aboutPage);
+        registerWindows(loginPage, mainPage, aboutPage);
     }
 
     public static void main(String... args) {

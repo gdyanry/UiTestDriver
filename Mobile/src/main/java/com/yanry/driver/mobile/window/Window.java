@@ -24,7 +24,6 @@ public abstract class Window extends ViewContainer {
         super(graph);
         this.manager = manager;
         previousWindow = new PreviousWindow(graph, this);
-        previousWindow.handleExpectation(manager.noWindow, false);
         visibility = new VisibilityState(graph, this);
         visibility.handleExpectation(Visibility.NotCreated, false);
         createEvent = new TransitionEvent<>(visibility, Visibility.NotCreated, Visibility.Foreground);
@@ -33,11 +32,11 @@ public abstract class Window extends ViewContainer {
         pauseEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.Background);
         ReflectionUtil.initStaticStringFields(getClass());
         // visibility->Foreground
-        graph.createPath(new NegationEvent<>(manager.currentWindow, new Equals<>(this).not()),
+        graph.createPath(new NegationEvent<>(manager, new Equals<>(this).not()),
                 visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground));
         // 退出进程时visibility->NotCreated
         graph.createPath(new TransitionEvent<>(manager.getProcessState(), true, false),
-                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, this == manager.noWindow ? Visibility.Foreground : Visibility.NotCreated));
+                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated));
 
         Equals<Visibility> foreground = new Equals<>(Visibility.Foreground);
         // 进入前台时visible->true
@@ -49,15 +48,15 @@ public abstract class Window extends ViewContainer {
     }
 
     public Path showOnLaunch(Timing timing) {
-        return getGraph().createPath(ClickLauncher.get(), manager.currentWindow.getStaticExpectation(timing, true, this)
-                .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow)))
-                .addContextState(manager.currentWindow, manager.noWindow)
+        return getGraph().createPath(ClickLauncher.get(), manager.getStaticExpectation(timing, true, this)
+                .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, null)))
+                .addContextState(manager, null)
                 .setBaseUnsatisfiedDegree(10000);
     }
 
     public Path popWindow(Class<? extends Window> windowType, Event inputEvent, Timing timing, boolean closeCurrent) {
         Window newWindow = getWindow(windowType);
-        return getGraph().createPath(inputEvent, manager.currentWindow.getStaticExpectation(timing, true, newWindow)
+        return getGraph().createPath(inputEvent, manager.getStaticExpectation(timing, true, newWindow)
                 .addFollowingExpectation(new ActionExpectation() {
                     @Override
                     protected void run() {
@@ -65,9 +64,9 @@ public abstract class Window extends ViewContainer {
                     }
 
                     private void handleSingleInstance(Window queriedWindow, Window kickWindow) {
-                        if (queriedWindow != null && !queriedWindow.equals(manager.noWindow) && queriedWindow.previousWindow != null) {
+                        if (queriedWindow != null && queriedWindow.previousWindow != null) {
                             Window previous = queriedWindow.previousWindow.getCurrentValue();
-                            if (previous.equals(manager.noWindow)) {
+                            if (previous == null) {
                                 return;
                             } else if (previous.equals(kickWindow)) {
                                 queriedWindow.previousWindow.handleExpectation(previous.previousWindow.getCurrentValue(), false);
@@ -85,8 +84,8 @@ public abstract class Window extends ViewContainer {
     }
 
     public Path close(Event inputEvent, Timing timing) {
-        return getGraph().createPath(inputEvent, manager.currentWindow.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
-                .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, manager.noWindow))
+        return getGraph().createPath(inputEvent, manager.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
+                .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, null))
                 .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated)));
     }
 
@@ -99,7 +98,7 @@ public abstract class Window extends ViewContainer {
     }
 
     public <W extends Window> W getWindow(Class<W> windowCls) {
-        return (W) manager.windowInstances.get(windowCls);
+        return (W) manager.getWindowInstance(windowCls);
     }
 
     public WindowManager getManager() {

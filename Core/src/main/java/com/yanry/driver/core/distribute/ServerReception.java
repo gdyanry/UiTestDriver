@@ -30,7 +30,7 @@ public class ServerReception extends SerializedCommunicator {
      * @return return an array containing optional paths.
      */
     public JSONArray prepare(Graph graph) {
-        graph.registerCommunicator(this);
+        graph.setCommunicator(this);
         this.graph = graph;
         instructionQueue = new SynchronousQueue(true);
         feedbackQueue = new SynchronousQueue<>(true);

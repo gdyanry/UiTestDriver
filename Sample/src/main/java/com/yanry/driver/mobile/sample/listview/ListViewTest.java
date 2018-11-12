@@ -11,7 +11,7 @@ public class ListViewTest extends WindowManager {
         EditPage editPage = new EditPage(graph, this);
         FilterPage filterPage = new FilterPage(graph, this);
         DetailPage detailPage = new DetailPage(graph, this);
-        addWindow(mainPage, editPage, filterPage, detailPage);
+        registerWindows(mainPage, editPage, filterPage, detailPage);
     }
 
     public static void main(String... args) {

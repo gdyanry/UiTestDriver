@@ -25,7 +25,7 @@ public class PreviousWindow extends Property<Window> {
 
     @Override
     protected Window checkValue() {
-        return window.getManager().noWindow;
+        return null;
     }
 
     @Override

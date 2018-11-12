@@ -5,7 +5,7 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
-import com.yanry.driver.core.model.event.ExpectationEvent;
+import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.log.LogLevel;
@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
  */
 public class Graph {
     private List<Path> allPaths;
+    Map<Property, Object> propertyCache;
     private List<Object> records;
     private boolean isTraversing;
-    private List<Communicator> communicators;
-    Map<Property, Object> propertyCache;
+    HashSet<Property> nullCache;
     private long actionTimeFrame;
     private Set<Path> verifiedPaths;
     private AtomicInteger methodStack;
@@ -35,21 +35,24 @@ public class Graph {
     private HashSet<ExternalEvent> invalidActions;
     private List<Path> concernedPaths;
     private LinkedList<State> stateTrace;
+    private List<Path> unprocessedPaths;
+    private Communicator communicator;
 
     public Graph() {
-        this.communicators = new LinkedList<>();
         allPaths = new LinkedList<>();
+        unprocessedPaths = new LinkedList<>();
         records = new LinkedList<>();
-        propertyCache = new HashMap<>();
         verifiedPaths = new HashSet<>();
         methodStack = new AtomicInteger();
         pendingExpectations = new HashSet<>();
         invalidActions = new HashSet<>();
         stateTrace = new LinkedList<>();
+        propertyCache = new HashMap<>();
+        nullCache = new HashSet<>();
     }
 
-    public void registerCommunicator(Communicator communicator) {
-        communicators.add(communicator);
+    public void setCommunicator(Communicator communicator) {
+        this.communicator = communicator;
     }
 
     public Path createPath(Event event, Expectation expectation) {
@@ -81,6 +84,7 @@ public class Graph {
         records.clear();
         verifiedPaths.clear();
         stateTrace.clear();
+        unprocessedPaths.clear();
         return true;
     }
 
@@ -94,29 +98,32 @@ public class Graph {
     }
 
     public List<Object> traverse(Predicate<Path> pathFilter) {
-        List<Path> unprocessedPaths = concernedPaths.parallelStream()
-                .filter(p -> pathFilter == null || pathFilter.test(p))
-                .collect(Collectors.toList());
-        return traverse(unprocessedPaths);
+        if (!setup()) {
+            return null;
+        }
+        for (Path concernedPath : concernedPaths) {
+            if (pathFilter == null || pathFilter.test(concernedPath)) {
+                unprocessedPaths.add(concernedPath);
+            }
+        }
+        return traverse();
     }
 
     public List<Object> traverse(int[] selectedIndexes) {
-        List<Path> unprocessedPaths;
+        if (!setup()) {
+            return null;
+        }
         if (selectedIndexes == null) {
-            unprocessedPaths = new ArrayList<>(concernedPaths);
+            unprocessedPaths.addAll(concernedPaths);
         } else {
-            unprocessedPaths = new ArrayList<>(selectedIndexes.length);
             for (int i : selectedIndexes) {
                 unprocessedPaths.add(concernedPaths.get(i));
             }
         }
-        return traverse(unprocessedPaths);
+        return traverse();
     }
 
-    private List<Object> traverse(List<Path> unprocessedPaths) {
-        if (!setup()) {
-            return null;
-        }
+    private List<Object> traverse() {
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = null;
             int minDegree = Integer.MAX_VALUE;
@@ -203,11 +210,15 @@ public class Graph {
 
     public boolean postAction(ExternalEvent externalEvent) {
         records.add(externalEvent);
-        for (Communicator communicator : communicators) {
+        if (communicator != null) {
             if (communicator.performAction(externalEvent)) {
                 actionTimeFrame = System.currentTimeMillis();
-                if (externalEvent instanceof ExpectationEvent) {
-                    verifyExpectation(((ExpectationEvent) externalEvent).getExpectation());
+                if (externalEvent instanceof SwitchStateAction) {
+                    SwitchStateAction stateAction = (SwitchStateAction) externalEvent;
+                    Property property = stateAction.getProperty();
+                    Object currentValue = property.getCurrentValue();
+                    property.handleExpectation(stateAction.getValue(), false);
+                    verifySuperPaths(property, currentValue, stateAction.getValue());
                 }
                 for (Path path : new ArrayList<>(allPaths)) {
                     if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
@@ -255,7 +266,7 @@ public class Graph {
             // roll path for this switch event.
             Property property = event.getProperty();
             ValuePredicate from = event.getFrom();
-            if (from != null && !from.test(property.getCurrentValue())) {
+            if (!from.test(property.getCurrentValue())) {
                 stateTrace.add(property.getState(from));
                 ExternalEvent externalEvent = property.switchTo(from);
                 exitMethod(LogLevel.Verbose, externalEvent);
@@ -292,12 +303,12 @@ public class Graph {
         return result;
     }
 
-    // 兄弟路径指的是当前路径触发时顺带触发的其他路径；父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
-        if (!to.equals(from)) {
+        if (!Objects.equals(from, to)) {
             for (Path path : new ArrayList<>(allPaths)) {
                 Event event = path.getEvent();
                 if (event instanceof InternalEvent) {
+                    // 父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
                     if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
                         verify(path);
                     }
@@ -308,7 +319,13 @@ public class Graph {
 
     ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
         List<Path> sorted = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
-                .sorted(Comparator.comparingInt(p -> p.getUnsatisfiedDegree(actionTimeFrame, true)))
+                .sorted(Comparator.comparingInt(p -> {
+                    int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
+                    if (unprocessedPaths.contains(p)) {
+                        unsatisfiedDegree--;
+                    }
+                    return unsatisfiedDegree;
+                }))
                 .collect(Collectors.toList());
         for (Path path : sorted) {
             ExternalEvent externalEvent = roll(path);
@@ -347,7 +364,7 @@ public class Graph {
         if (isValueFresh(property)) {
             return property.getCurrentValue();
         }
-        for (Communicator communicator : communicators) {
+        if (communicator != null) {
             V value = communicator.fetchState(obtainable);
             if (value != null) {
                 property.communicateTimeFrame = actionTimeFrame;
@@ -359,7 +376,7 @@ public class Graph {
     }
 
     Boolean verifyExpectation(NonPropertyExpectation expectation) {
-        for (Communicator communicator : communicators) {
+        if (communicator != null) {
             Boolean result = communicator.verifyExpectation(expectation);
             if (result != null) {
                 return result;

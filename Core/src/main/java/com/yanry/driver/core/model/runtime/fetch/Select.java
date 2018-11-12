@@ -20,7 +20,7 @@ public class Select<V> extends Obtainable<V> {
 
     @Override
     public final V convert(String responseString) {
-        if (responseString.matches("^([1-9]\\d*)|0$")) {
+        if (responseString.matches("^([1-9]\\d*)|0|-1$")) {
             int index = Integer.parseInt(responseString);
             if (index < options.length) {
                 return (V) options[index];

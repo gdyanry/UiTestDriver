@@ -2,7 +2,6 @@ package com.yanry.driver.mobile.client.appium;
 
 import com.yanry.driver.core.distribute.HttpClientReception;
 import com.yanry.driver.mobile.action.Click;
-import com.yanry.driver.mobile.action.EnterText;
 import com.yanry.driver.mobile.expectation.Toast;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
@@ -62,10 +61,10 @@ public abstract class BaseAppiumClient extends HttpClientReception {
                 findElement(instruction).click();
                 return 1;
             }
-            if (type.equals(EnterText.class.getSimpleName())) {
-                findElement(instruction).sendKeys(instruction.getString("text"));
-                return 1;
-            }
+//            if (type.equals(EnterText.class.getSimpleName())) {
+//                findElement(instruction).sendKeys(instruction.getString("text"));
+//                return 1;
+//            }
 
             return handleCustomInstruction(instruction);
         }

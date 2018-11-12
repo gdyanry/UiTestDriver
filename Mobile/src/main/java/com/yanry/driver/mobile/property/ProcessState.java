@@ -15,7 +15,7 @@ public class ProcessState extends BooleanProperty {
 
     @Override
     protected Boolean checkValue() {
-        return false;
+        return null;
     }
 
     @Override

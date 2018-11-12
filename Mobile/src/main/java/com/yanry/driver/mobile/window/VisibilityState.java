@@ -25,14 +25,17 @@ public class VisibilityState extends Property<Visibility> {
 
     @Override
     protected Visibility checkValue() {
-        Window current = window.getManager().currentWindow.getCurrentValue();
-        if (current.equals(window)) {
-            return Visibility.Foreground;
-        } else if (checkExist(current.previousWindow)) {
-            return Visibility.Background;
-        } else {
+        Window current = window.getManager().getCurrentValue();
+        if (current == null) {
             return Visibility.NotCreated;
         }
+        if (current.equals(window)) {
+            return Visibility.Foreground;
+        }
+        if (checkExist(current.getPreviousWindow())) {
+            return Visibility.Background;
+        }
+        return Visibility.NotCreated;
     }
 
     @Override
@@ -47,12 +50,12 @@ public class VisibilityState extends Property<Visibility> {
 
     private boolean checkExist(PreviousWindow previousWindow) {
         Window previous = previousWindow.getCurrentValue();
+        if (previous == null) {
+            return false;
+        }
         if (window.equals(previous)) {
             return true;
-        } else if (window.getManager().noWindow.equals(previous)) {
-            return false;
-        } else {
-            return checkExist(previous.previousWindow);
         }
+        return checkExist(previous.getPreviousWindow());
     }
 }

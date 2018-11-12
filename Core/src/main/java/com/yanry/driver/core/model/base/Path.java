@@ -15,6 +15,7 @@ import java.util.HashMap;
  * Jan 5, 2017
  */
 public class Path extends VisibleObject {
+    private static final int UNSATISFIED_DEGREE_STEP = 10;
     private Event event;
     private Expectation expectation;
     private long timeFrame;
@@ -46,13 +47,13 @@ public class Path extends VisibleObject {
 
     int getUnsatisfiedDegree(long timeFrame, boolean isToRoll) {
         Property excludeProperty = null;
-        boolean addOne = false;
+        boolean addOneStep = false;
         if (event instanceof TransitionEvent) {
             TransitionEvent transitionEvent = (TransitionEvent) event;
             if (isToRoll) {
                 ValuePredicate from = transitionEvent.getFrom();
-                if (from != null && !from.test(transitionEvent.getProperty().getCurrentValue())) {
-                    addOne = true;
+                if (!from.test(transitionEvent.getProperty().getCurrentValue())) {
+                    addOneStep = true;
                 }
             } else {
                 excludeProperty = transitionEvent.getProperty();
@@ -62,10 +63,10 @@ public class Path extends VisibleObject {
             Property finalExcludeProperty = excludeProperty;
             unsatisfiedDegree = context.keySet().stream()
                     .filter(property -> !property.equals(finalExcludeProperty) && !context.get(property).test(property.getCurrentValue()))
-                    .mapToInt(prop -> 1).sum();
+                    .mapToInt(prop -> UNSATISFIED_DEGREE_STEP).sum();
             this.timeFrame = timeFrame;
         }
-        int result = unsatisfiedDegree + (addOne ? 1 : 0);
+        int result = unsatisfiedDegree + (addOneStep ? UNSATISFIED_DEGREE_STEP : 0);
         if (result > 0) {
             result += baseUnsatisfiedDegree;
         }

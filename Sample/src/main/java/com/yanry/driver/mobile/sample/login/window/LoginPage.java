@@ -43,7 +43,7 @@ public class LoginPage extends Window {
     protected void addCases(Graph graph, WindowManager manager) {
         showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextState(currentUser.getLoginState(), false);
         EditText etUser = new EditText(new View(graph, this, new ByDesc(DESC_USER)));
-        Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<>() {
+        Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<String>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;
@@ -55,7 +55,7 @@ public class LoginPage extends Window {
             }
         });
         EditText etPwd = new EditText(new View(graph, this, new ByDesc(DESC_PWD)));
-        Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<>() {
+        Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<String>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;

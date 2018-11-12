@@ -25,7 +25,7 @@ public class Tester {
         ConsoleCommunicator communicator = new ConsoleCommunicator();
         GraphWatcher watcher = new ConsoleGraphWatcher();
         Graph graph = new Graph();
-        graph.registerCommunicator(communicator);
+        graph.setCommunicator(communicator);
         setupGraph.accept(graph);
         List<Path> options = graph.getConcernedPaths();
         int i = 0;

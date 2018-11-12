@@ -38,7 +38,7 @@ public abstract class SerializedCommunicator implements Communicator {
 
     private <V> V _checkState(int repeat, Obtainable<V> req) {
         String resp = checkState(repeat, req);
-        if (resp == null) {
+        if (resp == null || resp.equals("-1")) {
             return null;
         }
         V convert = req.convert(resp);
