@@ -366,10 +366,8 @@ public class Graph {
         }
         if (communicator != null) {
             V value = communicator.fetchState(obtainable);
-            if (value != null) {
-                property.communicateTimeFrame = actionTimeFrame;
-                return value;
-            }
+            property.communicateTimeFrame = actionTimeFrame;
+            return value;
         }
         Logger.getDefault().ww("unable to check state: ", obtainable);
         return null;

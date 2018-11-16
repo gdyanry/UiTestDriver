@@ -37,6 +37,6 @@ public class TransitionEvent<V> extends InternalEvent<V> {
 
     @Override
     protected boolean matches(V fromValue, V toValue) {
-        return to.test(toValue) && (from == null || from.test(fromValue));
+        return to.test(toValue) && from.test(fromValue);
     }
 }

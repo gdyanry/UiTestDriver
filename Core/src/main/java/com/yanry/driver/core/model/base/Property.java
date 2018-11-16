@@ -80,8 +80,8 @@ public abstract class Property<V> extends HandyObject {
         }
         ExternalEvent externalEvent = graph.findPathToRoll(e -> {
             if (e instanceof PropertyExpectation) {
-                PropertyExpectation exp = (PropertyExpectation) e;
-                return equals(exp.getProperty()) && toState.test((V) exp.getExpectedValue());
+                PropertyExpectation<V> exp = (PropertyExpectation) e;
+                return equals(exp.getProperty()) && toState.test(exp.getExpectedValue());
             }
             return false;
         });

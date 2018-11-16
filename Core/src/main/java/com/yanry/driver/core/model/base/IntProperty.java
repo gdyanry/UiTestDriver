@@ -1,5 +1,6 @@
 package com.yanry.driver.core.model.base;
 
+import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
@@ -16,7 +17,10 @@ public abstract class IntProperty extends Property<Integer> {
 
     @Override
     protected final ExternalEvent doSelfSwitch(Integer to) {
-        int currentValue = getCurrentValue();
+        Integer currentValue = getCurrentValue();
+        if (currentValue == null || to == null) {
+            return null;
+        }
         return getGraph().findPathToRoll(exp -> {
             if (exp instanceof ShiftExpectation) {
                 ShiftExpectation expectation = (ShiftExpectation) exp;
@@ -28,20 +32,20 @@ public abstract class IntProperty extends Property<Integer> {
         });
     }
 
-    public class ShiftExpectation extends Expectation {
+    public class ShiftExpectation extends SDPropertyExpectation<Integer> {
         private boolean upward;
         private int step;
 
-        private ShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
-            super(timing, needCheck);
+        public ShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
+            super(timing, needCheck, IntProperty.this, () -> {
+                Integer currentValue = IntProperty.this.getCurrentValue();
+                if (currentValue != null) {
+                    return upward ? currentValue + step : currentValue - step;
+                }
+                return null;
+            });
             this.upward = upward;
             this.step = step;
-        }
-
-        @Visible
-        @EqualsPart
-        public IntProperty getProperty() {
-            return IntProperty.this;
         }
 
         @Visible
@@ -54,18 +58,6 @@ public abstract class IntProperty extends Property<Integer> {
         @EqualsPart
         public int getStep() {
             return step;
-        }
-
-        @Override
-        protected boolean doVerify() {
-            int oldValue = getCurrentValue();
-            int expectedValue = upward ? oldValue + step : oldValue - step;
-            handleExpectation(expectedValue, isNeedCheck());
-            int actualValue = getCurrentValue();
-            if (actualValue != oldValue) {
-                getGraph().verifySuperPaths(IntProperty.this, oldValue, actualValue);
-            }
-            return expectedValue == actualValue;
         }
     }
 }

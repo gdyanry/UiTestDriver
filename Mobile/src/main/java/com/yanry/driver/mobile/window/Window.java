@@ -90,7 +90,7 @@ public abstract class Window extends ViewContainer {
     }
 
     public Path closeOnPressBack() {
-        return close(PressBack.get(), Timing.IMMEDIATELY);
+        return close(PressBack.get(), Timing.IMMEDIATELY).addContextState(this, true);
     }
 
     public Path closeOnTouchOutside() {

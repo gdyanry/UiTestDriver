@@ -4,6 +4,8 @@ import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
+import java.util.Objects;
+
 /**
  * A key-value pair (aka state) expectation
  * Created by rongyu.yan on 5/10/2017.
@@ -35,9 +37,9 @@ public abstract class PropertyExpectation<V> extends Expectation {
         V oldValue = property.getCurrentValue();
         property.handleExpectation(expectedValue, isNeedCheck());
         V actualValue = property.getCurrentValue();
-        if (actualValue != null && !actualValue.equals(oldValue)) {
+        if (!Objects.equals(actualValue, oldValue)) {
             property.getGraph().verifySuperPaths(property, oldValue, actualValue);
         }
-        return expectedValue != null && expectedValue.equals(actualValue);
+        return Objects.equals(expectedValue, actualValue);
     }
 }
