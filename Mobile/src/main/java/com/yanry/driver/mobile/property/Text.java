@@ -13,7 +13,7 @@ public class Text extends ViewProperty<String> {
     }
 
     @Override
-    protected String doCheckValue() {
+    protected String checkValue() {
         return getGraph().obtainValue(new StringQuery(this));
     }
 

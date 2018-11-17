@@ -26,7 +26,7 @@ public class CheckState extends ViewProperty<Boolean> {
     }
 
     @Override
-    protected Boolean doCheckValue() {
+    protected Boolean checkValue() {
         return getGraph().obtainValue(new BooleanQuery(this));
     }
 

@@ -13,7 +13,7 @@ public class ClickedItem<I extends ListViewItem<I>> extends ViewProperty<I> {
     }
 
     @Override
-    protected I doCheckValue() {
+    protected I checkValue() {
         return null;
     }
 

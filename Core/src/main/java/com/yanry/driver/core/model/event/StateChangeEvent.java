@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public class StateChangeEvent<V> extends TransitionEvent<V> {
     public StateChangeEvent(Property<V> property) {
-        super(property, new ValuePredicate<>() {
+        super(property, new ValuePredicate<V>() {
             @Override
             public Stream<V> getConcreteValues() {
                 return null;
@@ -19,7 +19,7 @@ public class StateChangeEvent<V> extends TransitionEvent<V> {
             public boolean test(V value) {
                 return true;
             }
-        }, new ValuePredicate<>() {
+        }, new ValuePredicate<V>() {
             @Override
             public Stream<V> getConcreteValues() {
                 return null;

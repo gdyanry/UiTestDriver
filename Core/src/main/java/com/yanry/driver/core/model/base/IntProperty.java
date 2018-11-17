@@ -36,7 +36,7 @@ public abstract class IntProperty extends Property<Integer> {
         private boolean upward;
         private int step;
 
-        public ShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
+        private ShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
             super(timing, needCheck, IntProperty.this, () -> {
                 Integer currentValue = IntProperty.this.getCurrentValue();
                 if (currentValue != null) {

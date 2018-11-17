@@ -8,13 +8,17 @@ public class State<V> extends HandyObject {
     private Property<V> property;
     private ValuePredicate<V> valuePredicate;
 
-    public State(Property<V> property, ValuePredicate<V> valuePredicate) {
+    State(Property<V> property, ValuePredicate<V> valuePredicate) {
         this.property = property;
         this.valuePredicate = valuePredicate;
     }
 
     public boolean isSatisfied() {
         return valuePredicate.test(property.getCurrentValue());
+    }
+
+    public ExternalEvent switchTo() {
+        return property.switchTo(valuePredicate);
     }
 
     @Visible

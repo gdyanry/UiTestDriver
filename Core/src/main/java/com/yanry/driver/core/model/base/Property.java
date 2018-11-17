@@ -28,10 +28,15 @@ public abstract class Property<V> extends HandyObject {
      */
     long communicateTimeFrame;
     private HashSet<V> collectedValues;
+    private State[] dependentStates;
 
     public Property(Graph graph) {
         this.graph = graph;
         collectedValues = new HashSet<>();
+    }
+
+    public void setDependentStates(State... dependentStates) {
+        this.dependentStates = dependentStates;
     }
 
     public void addValue(V... value) {
@@ -65,6 +70,13 @@ public abstract class Property<V> extends HandyObject {
             return null;
         }
         graph.enterMethod(String.format("%s > %s", this, toState));
+        if (dependentStates != null) {
+            for (State dependentState : dependentStates) {
+                if (!dependentState.isSatisfied()) {
+                    return dependentState.switchTo();
+                }
+            }
+        }
         Stream<V> stream = getValueStream(collectedValues);
         if (stream == null) {
             stream = collectedValues.stream();
@@ -127,6 +139,11 @@ public abstract class Property<V> extends HandyObject {
         }
         V cacheValue = (V) getGraph().propertyCache.get(this);
         if (cacheValue == null) {
+            for (State dependentState : dependentStates) {
+                if (!dependentState.isSatisfied()) {
+                    return null;
+                }
+            }
             cacheValue = checkValue();
             updateCache(cacheValue);
         }
