@@ -216,9 +216,7 @@ public class Graph {
                 if (externalEvent instanceof SwitchStateAction) {
                     SwitchStateAction stateAction = (SwitchStateAction) externalEvent;
                     Property property = stateAction.getProperty();
-                    Object currentValue = property.getCurrentValue();
                     property.handleExpectation(stateAction.getValue(), false);
-                    verifySuperPaths(property, currentValue, stateAction.getValue());
                 }
                 for (Path path : new ArrayList<>(allPaths)) {
                     if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {

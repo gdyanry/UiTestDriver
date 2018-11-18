@@ -25,7 +25,7 @@ public abstract class Window extends ViewContainer {
         this.manager = manager;
         previousWindow = new PreviousWindow(graph, this);
         visibility = new VisibilityState(graph, this);
-        visibility.handleExpectation(Visibility.NotCreated, false);
+        visibility.setInitValue(Visibility.NotCreated);
         createEvent = new TransitionEvent<>(visibility, Visibility.NotCreated, Visibility.Foreground);
         closeEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.NotCreated);
         resumeEvent = new TransitionEvent<>(visibility, Visibility.Background, Visibility.Foreground);
@@ -63,15 +63,15 @@ public abstract class Window extends ViewContainer {
                         handleSingleInstance(newWindow.previousWindow.getCurrentValue(), newWindow);
                     }
 
-                    private void handleSingleInstance(Window queriedWindow, Window kickWindow) {
-                        if (queriedWindow != null && queriedWindow.previousWindow != null) {
-                            Window previous = queriedWindow.previousWindow.getCurrentValue();
+                    private void handleSingleInstance(Window node, Window singleInstance) {
+                        if (node != null) {
+                            Window previous = node.previousWindow.getCurrentValue();
                             if (previous == null) {
                                 return;
-                            } else if (previous.equals(kickWindow)) {
-                                queriedWindow.previousWindow.handleExpectation(previous.previousWindow.getCurrentValue(), false);
+                            } else if (previous.equals(singleInstance)) {
+                                node.previousWindow.handleExpectation(previous.previousWindow.getCurrentValue(), false);
                             } else {
-                                handleSingleInstance(previous, kickWindow);
+                                handleSingleInstance(previous, singleInstance);
                             }
                         }
                     }

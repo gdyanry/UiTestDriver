@@ -31,7 +31,7 @@ public class View extends ViewContainer {
         this.selector = selector;
         independentVisibility = new IndependentVisibility(graph);
         // 默认可见
-        independentVisibility.handleExpectation(true, false);
+        independentVisibility.setInitValue(true);
         SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
         // false -> true
         graph.createPath(parent.onShow(), showExpectation)

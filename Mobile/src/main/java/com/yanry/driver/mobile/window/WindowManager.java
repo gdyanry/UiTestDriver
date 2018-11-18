@@ -27,8 +27,8 @@ public class WindowManager extends Property<Window> {
         windowInstances = new LinkedHashMap<>();
         processState = new ProcessState(graph);
         // 初始状态
-        processState.handleExpectation(false, false);
-        handleExpectation(null, false);
+        processState.setInitValue(false);
+        setInitValue(null);
         // 开启进程
         graph.createPath(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
                 .addContextState(processState, false);

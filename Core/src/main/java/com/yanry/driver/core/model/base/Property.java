@@ -11,6 +11,7 @@ import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -113,7 +114,12 @@ public abstract class Property<V> extends HandyObject {
         return new SDPropertyExpectation<>(timing, needCheck, this, valueSupplier);
     }
 
+    public void setInitValue(V initValue) {
+        updateCache(initValue);
+    }
+
     public final void handleExpectation(V expectedValue, boolean needCheck) {
+        V oldValue = getCurrentValue();
         if (needCheck) {
             if (!graph.isValueFresh(this)) {
                 // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
@@ -124,12 +130,18 @@ public abstract class Property<V> extends HandyObject {
             // 不查询客户端，直接通过验证并更新状态值
             updateCache(expectedValue);
         }
+        V newValue = getCurrentValue();
+        if (!Objects.equals(oldValue, newValue)) {
+            graph.verifySuperPaths(this, oldValue, newValue);
+        }
     }
 
     private void updateCache(V value) {
-        graph.propertyCache.put(this, value);
         if (value == null) {
             graph.nullCache.add(this);
+            graph.propertyCache.remove(this);
+        } else {
+            graph.propertyCache.put(this, value);
         }
     }
 
@@ -139,9 +151,11 @@ public abstract class Property<V> extends HandyObject {
         }
         V cacheValue = (V) getGraph().propertyCache.get(this);
         if (cacheValue == null) {
-            for (State dependentState : dependentStates) {
-                if (!dependentState.isSatisfied()) {
-                    return null;
+            if (dependentStates != null) {
+                for (State dependentState : dependentStates) {
+                    if (!dependentState.isSatisfied()) {
+                        return null;
+                    }
                 }
             }
             cacheValue = checkValue();
