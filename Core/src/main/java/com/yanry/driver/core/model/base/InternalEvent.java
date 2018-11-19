@@ -14,7 +14,7 @@ public abstract class InternalEvent<V> extends Event {
 
     @Visible
     @EqualsPart
-    public Property getProperty() {
+    public Property<V> getProperty() {
         return property;
     }
 
@@ -23,4 +23,6 @@ public abstract class InternalEvent<V> extends Event {
     }
 
     protected abstract boolean matches(V fromValue, V toValue);
+
+    protected abstract ExternalEvent traverse();
 }

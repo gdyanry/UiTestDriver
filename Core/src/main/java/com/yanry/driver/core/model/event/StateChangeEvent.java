@@ -1,34 +1,24 @@
 package com.yanry.driver.core.model.event;
 
+import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.InternalEvent;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.base.TransitionEvent;
-import com.yanry.driver.core.model.base.ValuePredicate;
+import com.yanry.driver.core.model.predicate.Equals;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
-public class StateChangeEvent<V> extends TransitionEvent<V> {
+public class StateChangeEvent<V> extends InternalEvent<V> {
     public StateChangeEvent(Property<V> property) {
-        super(property, new ValuePredicate<V>() {
-            @Override
-            public Stream<V> getConcreteValues() {
-                return null;
-            }
+        super(property);
+    }
 
-            @Override
-            public boolean test(V value) {
-                return true;
-            }
-        }, new ValuePredicate<V>() {
-            @Override
-            public Stream<V> getConcreteValues() {
-                return null;
-            }
+    @Override
+    protected boolean matches(V fromValue, V toValue) {
+        return !Objects.equals(fromValue, toValue);
+    }
 
-            @Override
-            public boolean test(V value) {
-                return !Objects.equals(value, property.getCurrentValue());
-            }
-        });
+    @Override
+    protected ExternalEvent traverse() {
+        return getProperty().switchTo(Equals.of(getProperty().getCurrentValue()).not());
     }
 }

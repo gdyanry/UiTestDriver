@@ -4,6 +4,7 @@ import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.mobile.view.selector.ById;
+import com.yanry.driver.mobile.view.selector.ViewSelector;
 
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ import java.util.HashMap;
  * Created by rongyu.yan on 3/6/2017.
  */
 public abstract class ViewContainer extends BooleanProperty {
-    private HashMap<String, View> childViews;
+    private HashMap<ViewSelector, View> childViews;
     private TransitionEvent<Boolean> showEvent;
     private TransitionEvent<Boolean> dismissEvent;
 
@@ -30,12 +31,16 @@ public abstract class ViewContainer extends BooleanProperty {
         return dismissEvent;
     }
 
-    public View getViewById(String id) {
-        View view = childViews.get(id);
+    public View getView(ViewSelector selector) {
+        View view = childViews.get(selector);
         if (view == null) {
-            view = new View(getGraph(), this, new ById(id));
-            childViews.put(id, view);
+            view = new View(getGraph(), this, selector);
+            childViews.put(selector, view);
         }
         return view;
+    }
+
+    public View getViewById(String id) {
+        return getView(new ById(id));
     }
 }

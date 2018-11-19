@@ -39,4 +39,13 @@ public class TransitionEvent<V> extends InternalEvent<V> {
     protected boolean matches(V fromValue, V toValue) {
         return to.test(toValue) && from.test(fromValue);
     }
+
+    @Override
+    protected ExternalEvent traverse() {
+        Property<V> property = getProperty();
+        if (!from.test(property.getCurrentValue())) {
+            return property.switchTo(from);
+        }
+        return property.switchTo(to);
+    }
 }

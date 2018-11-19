@@ -3,29 +3,25 @@ package com.yanry.driver.mobile.sample.model;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
-import lib.common.model.log.Logger;
 
 import java.util.Map;
 import java.util.Set;
 
 public class ConsoleGraphWatcher implements GraphWatcher {
     @Override
-    public void onStandby(Map<Property, Object> cacheProperties, Set<Path> unprocessedPaths, Set<Path> successTemp, Set<Path> failedPaths, Path rollingPath) {
-        Logger.getDefault().d("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        Logger.getDefault().d("rolling path: %s", rollingPath);
-        Logger.getDefault().d("unprocessed paths: %s", unprocessedPaths.size());
-        for (Property property : cacheProperties.keySet()) {
-            Logger.getDefault().v(">>>>%s - %s", property, property.getCurrentValue());
+    public void onStandby(Map<Property, Object> propertyCache, Set<Property> nullCache, Set<Path> verifiedPaths) {
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        for (Property property : propertyCache.keySet()) {
+            System.out.println(String.format(">>>>%s - %s", property, property.getCurrentValue()));
         }
-        Logger.getDefault().v("success temp:");
-        for (Path path : successTemp) {
-            Logger.getDefault().v("    %s", path);
+        for (Property property : nullCache) {
+            System.out.println(String.format(">>>>%s - null", property));
         }
-        Logger.getDefault().v("failed paths:");
-        for (Path failedPath : failedPaths) {
-            Logger.getDefault().v("    %s", failedPath);
-        }
-        Logger.getDefault().d("------------------------------------------------------------------------------------------");
+//        System.out.println("verified paths:");
+//        for (Path path : verifiedPaths) {
+//            System.out.println("    " + path);
+//        }
+        System.out.println("------------------------------------------------------------------------------------------");
     }
 
 }

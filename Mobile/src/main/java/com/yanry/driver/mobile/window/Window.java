@@ -77,7 +77,8 @@ public abstract class Window extends ViewContainer {
                     }
                 })
                 // TODO 处理相同页面多个实例的情况
-                .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false, () -> closeCurrent ? previousWindow.getCurrentValue() : this))
+                .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false,
+                        () -> closeCurrent ? previousWindow.getCurrentValue() : Window.this))
                 // visibility->Background
                 .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background)))
                 .addContextState(this, true);

@@ -1,6 +1,5 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.mobile.property.ViewIntProperty;
 
 import java.util.Set;
@@ -10,8 +9,8 @@ import java.util.stream.Stream;
 public class ListViewSize extends ViewIntProperty implements Supplier<Integer> {
     private int num;
 
-    public ListViewSize(Graph graph, ListView view) {
-        super(graph, view);
+    public ListViewSize(ListView view) {
+        super(view);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
@@ -37,6 +38,7 @@ public class Graph {
     private LinkedList<State> stateTrace;
     private List<Path> unprocessedPaths;
     private Communicator communicator;
+    private GraphWatcher watcher;
 
     public Graph() {
         allPaths = new LinkedList<>();
@@ -55,6 +57,10 @@ public class Graph {
         this.communicator = communicator;
     }
 
+    public void setWatcher(GraphWatcher watcher) {
+        this.watcher = watcher;
+    }
+
     public Path createPath(Event event, Expectation expectation) {
         Path path = new Path(event, expectation);
         allPaths.add(path);
@@ -63,6 +69,10 @@ public class Graph {
 
     void addPendingExpectation(Expectation expectation) {
         pendingExpectations.add(expectation);
+    }
+
+    void addStateTrace(State state) {
+        stateTrace.add(state);
     }
 
     private boolean needCheck(Expectation expectation) {
@@ -236,6 +246,9 @@ public class Graph {
                         }
                     }
                 }
+                if (watcher != null) {
+                    watcher.onStandby(propertyCache, nullCache, verifiedPaths);
+                }
                 return true;
             }
         }
@@ -250,7 +263,6 @@ public class Graph {
         for (Property property : path.getContext().keySet()) {
             ValuePredicate valuePredicate = path.getContext().get(property);
             if (!valuePredicate.test(property.getCurrentValue())) {
-                stateTrace.add(property.getState(valuePredicate));
                 ExternalEvent externalEvent = property.switchTo(valuePredicate);
                 exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
@@ -259,20 +271,8 @@ public class Graph {
         // all context states are satisfied by now.
         // trigger event
         Event inputEvent = path.getEvent();
-        if (inputEvent instanceof TransitionEvent) {
-            TransitionEvent event = (TransitionEvent) inputEvent;
-            // roll path for this switch event.
-            Property property = event.getProperty();
-            ValuePredicate from = event.getFrom();
-            if (!from.test(property.getCurrentValue())) {
-                stateTrace.add(property.getState(from));
-                ExternalEvent externalEvent = property.switchTo(from);
-                exitMethod(LogLevel.Verbose, externalEvent);
-                return externalEvent;
-            }
-            ValuePredicate to = event.getTo();
-            stateTrace.add(property.getState(to));
-            ExternalEvent externalEvent = property.switchTo(to);
+        if (inputEvent instanceof InternalEvent) {
+            ExternalEvent externalEvent = ((InternalEvent) inputEvent).traverse();
             exitMethod(LogLevel.Verbose, externalEvent);
             return externalEvent;
         } else if (inputEvent instanceof ExternalEvent) {

@@ -71,10 +71,19 @@ public abstract class Property<V> extends HandyObject {
             return null;
         }
         graph.enterMethod(String.format("%s > %s", this, toState));
-        if (dependentStates != null) {
-            for (State dependentState : dependentStates) {
-                if (!dependentState.isSatisfied()) {
-                    return dependentState.switchTo();
+        graph.addStateTrace(getState(toState));
+        V cacheValue = (V) graph.propertyCache.get(this);
+        if (cacheValue == null) {
+            if (!graph.nullCache.contains(this)) {
+                // 属性值未知,认为dependentStates未满足
+                if (dependentStates != null) {
+                    for (State dependentState : dependentStates) {
+                        if (!dependentState.isSatisfied()) {
+                            ExternalEvent externalEvent = dependentState.switchTo();
+                            graph.exitMethod(LogLevel.Verbose, externalEvent);
+                            return externalEvent;
+                        }
+                    }
                 }
             }
         }
@@ -141,8 +150,14 @@ public abstract class Property<V> extends HandyObject {
             graph.nullCache.add(this);
             graph.propertyCache.remove(this);
         } else {
+            graph.nullCache.remove(this);
             graph.propertyCache.put(this, value);
         }
+    }
+
+    public void clean() {
+        graph.nullCache.remove(this);
+        graph.propertyCache.remove(this);
     }
 
     public final V getCurrentValue() {

@@ -26,11 +26,12 @@ public class Tester {
         GraphWatcher watcher = new ConsoleGraphWatcher();
         Graph graph = new Graph();
         graph.setCommunicator(communicator);
+        graph.setWatcher(watcher);
         setupGraph.accept(graph);
         List<Path> options = graph.getConcernedPaths();
         int i = 0;
         for (Path option : options) {
-            Logger.getDefault().d("%05d - %s", i++, option);
+            System.out.println(String.format("%05d - %s", i++, option));
         }
         String input = communicator.readLine("请选择需要测试的path：").trim();
         int[] pathIndexes = null;
@@ -43,7 +44,7 @@ public class Tester {
         int passCount = 0;
         int failCount = 0;
         int missCount = 0;
-        Logger.getDefault().d("-------------------------------------RECORD----------------------------------");
+        System.out.println("-------------------------------------RECORD----------------------------------");
         for (Object record : records) {
             boolean fail = false;
             if (record instanceof Assertion) {

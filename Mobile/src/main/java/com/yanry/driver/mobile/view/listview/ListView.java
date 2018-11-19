@@ -1,7 +1,10 @@
 package com.yanry.driver.mobile.view.listview;
 
+import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.Event;
+import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.event.StateChangeEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -11,6 +14,8 @@ import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ViewContainer;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 import lib.common.model.Singletons;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -27,14 +32,17 @@ public class ListView<I extends ListViewItem<I>> extends View {
     private ClickedItem<I> clickedItem;
     private Event clickItemEvent;
     private ListViewItemCreator<I> itemCreator;
+    private ItemClick itemClick;
 
     public ListView(Graph graph, ViewContainer parent, ViewSelector selector, ListViewItemCreator<I> itemCreator) {
         super(graph, parent, selector);
         this.itemCreator = itemCreator;
-        size = new ListViewSize(graph, this);
+        size = new ListViewSize(this);
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
-        clickItemEvent = new StateChangeEvent<>(clickedItem);
+        itemClick = new ItemClick(graph);
+        clickItemEvent = new TransitionEvent<>(itemClick, false, true);
+        graph.createPath(clickItemEvent, itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         // size变化时重新初始化item
         graph.createPath(new StateChangeEvent<>(size), new ActionExpectation() {
             @Override
@@ -57,7 +65,8 @@ public class ListView<I extends ListViewItem<I>> extends View {
         I child = items.get(index);
         if (child == null) {
             child = itemCreator.create(getGraph(), this, index);
-            getGraph().createPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child))
+            getGraph().createPath(new Click(child), itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, true)
+                    .addFollowingExpectation(clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)))
                     .addContextState(child, true)
                     .addContextStatePredicate(size, new GreaterThan<>(index));
             items.put(index, child);
@@ -102,5 +111,27 @@ public class ListView<I extends ListViewItem<I>> extends View {
             }
             return null;
         };
+    }
+
+    public class ItemClick extends BooleanProperty {
+        private ItemClick(Graph graph) {
+            super(graph);
+        }
+
+        @EqualsPart
+        @Visible
+        public ListView<I> getListView() {
+            return ListView.this;
+        }
+
+        @Override
+        protected Boolean checkValue() {
+            return false;
+        }
+
+        @Override
+        protected ExternalEvent doSelfSwitch(Boolean to) {
+            return null;
+        }
     }
 }
