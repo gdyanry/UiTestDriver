@@ -1,30 +1,29 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.*;
+import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 import com.yanry.driver.mobile.action.ClickLauncher;
-import com.yanry.driver.mobile.action.ViewAction;
 import com.yanry.driver.mobile.property.ProcessState;
-import com.yanry.driver.mobile.view.View;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
  * Created by rongyu.yan on 4/17/2017.
  */
-public class WindowManager extends Property<Window> implements Consumer<Path> {
+public class WindowManager extends Property<Window> {
     private Map<Class<? extends Window>, Window> windowInstances;
     private ProcessState processState;
 
     public WindowManager(Graph graph) {
         super(graph);
-        graph.setPathAdjuster(this);
         windowInstances = new LinkedHashMap<>();
         processState = new ProcessState(graph);
         // 初始状态
@@ -76,21 +75,5 @@ public class WindowManager extends Property<Window> implements Consumer<Path> {
     @Override
     protected Stream<Window> getValueStream(Set<Window> collectedValues) {
         return collectedValues.stream();
-    }
-
-    @Override
-    public void accept(Path path) {
-        Event event = path.getEvent();
-        if (event instanceof ViewAction) {
-            ViewAction viewAction = (ViewAction) event;
-            path.addContextState(viewAction.getView(), true);
-        } else if (event instanceof SwitchStateAction) {
-            SwitchStateAction switchStateAction = (SwitchStateAction) event;
-            Property property = switchStateAction.getProperty();
-            if (property instanceof View) {
-                View view = (View) property;
-                path.addContextState(view, true);
-            }
-        }
     }
 }

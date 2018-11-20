@@ -15,7 +15,6 @@ import lib.common.util.CollectionUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,6 @@ public class Graph {
     private List<Path> unprocessedPaths;
     private Communicator communicator;
     private GraphWatcher watcher;
-    private Consumer<Path> pathAdjuster;
 
     public Graph() {
         allPaths = new LinkedList<>();
@@ -63,15 +61,8 @@ public class Graph {
         this.watcher = watcher;
     }
 
-    public void setPathAdjuster(Consumer<Path> pathAdjuster) {
-        this.pathAdjuster = pathAdjuster;
-    }
-
     public Path createPath(Event event, Expectation expectation) {
         Path path = new Path(event, expectation);
-        if (pathAdjuster != null) {
-            pathAdjuster.accept(path);
-        }
         allPaths.add(path);
         return path;
     }
@@ -287,6 +278,15 @@ public class Graph {
         } else if (inputEvent instanceof ExternalEvent) {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
             if (isValidAction(externalEvent)) {
+                if (externalEvent.preconditions != null) {
+                    for (State precondition : externalEvent.preconditions) {
+                        if (!precondition.isSatisfied()) {
+                            ExternalEvent event = precondition.switchTo();
+                            exitMethod(LogLevel.Verbose, event);
+                            return event;
+                        }
+                    }
+                }
                 exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
