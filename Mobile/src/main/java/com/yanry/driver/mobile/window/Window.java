@@ -44,6 +44,13 @@ public abstract class Window extends ViewContainer {
         // 退出前台时visible->false
         getGraph().createPath(new NegationEvent<>(visibility, foreground),
                 getStaticExpectation(Timing.IMMEDIATELY, false, false));
+        // clean
+        getGraph().createPath(closeEvent, new ActionExpectation() {
+            @Override
+            protected void run() {
+                clean();
+            }
+        });
     }
 
     public Path showOnLaunch(Timing timing) {

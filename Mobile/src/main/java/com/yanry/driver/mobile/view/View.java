@@ -44,6 +44,8 @@ public class View extends ViewContainer {
                 .addContextValue(independentVisibility, true);
         graph.createPath(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
                 .addContextValue(parent, true);
+        // clean
+        parent.addOnCleanListener(() -> clean());
     }
 
     public Window getWindow() {
