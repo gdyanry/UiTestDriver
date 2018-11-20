@@ -17,7 +17,7 @@ public class State<V> extends HandyObject {
         return valuePredicate.test(property.getCurrentValue());
     }
 
-    public ExternalEvent switchTo() {
+    public ExternalEvent trySatisfy() {
         return property.switchTo(valuePredicate);
     }
 

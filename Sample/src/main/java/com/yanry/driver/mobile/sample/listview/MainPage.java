@@ -9,13 +9,13 @@ import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.listview.ListView;
 import com.yanry.driver.mobile.view.listview.ListViewItem;
 import com.yanry.driver.mobile.view.selector.ById;
+import com.yanry.driver.mobile.window.Application;
 import com.yanry.driver.mobile.window.Window;
-import com.yanry.driver.mobile.window.WindowManager;
 
 public class MainPage extends Window {
     private ListView<MainListItem> listView;
 
-    public MainPage(Graph graph, WindowManager manager) {
+    public MainPage(Graph graph, Application manager) {
         super(graph, manager);
         listView = new ListView<>(graph, this, new ById("lv"), (g, l, i) -> new MainListItem(g, l, i));
     }
@@ -25,12 +25,12 @@ public class MainPage extends Window {
     }
 
     @Override
-    protected void addCases(Graph graph, WindowManager manager) {
+    protected void addCases(Graph graph, Application manager) {
         showOnLaunch(Timing.IMMEDIATELY);
         closeOnPressBack();
         // 点击列表项进入详情页
         popWindow(DetailPage.class, listView.getClickItemEvent(), Timing.IMMEDIATELY, false)
-                .addContextStatePredicate(listView.getSize(), new GreaterThan<>(0));
+                .addContextPredicate(listView.getSize(), new GreaterThan<>(0));
         // 筛选
         popWindow(FilterPage.class, new Click(new View(graph, this, new ById("filter"))), Timing.IMMEDIATELY, false);
         // 添加

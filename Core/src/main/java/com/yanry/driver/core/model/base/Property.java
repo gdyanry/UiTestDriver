@@ -25,7 +25,7 @@ public abstract class Property<V> extends HandyObject {
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
-    long communicateTimeFrame;
+    long graphFrameMark;
     private HashSet<V> collectedValues;
     private State[] dependentStates;
     private LinkedList<Consumer<V>> onCheckValueListeners;
@@ -93,7 +93,7 @@ public abstract class Property<V> extends HandyObject {
                 if (dependentStates != null) {
                     for (State dependentState : dependentStates) {
                         if (!dependentState.isSatisfied()) {
-                            ExternalEvent externalEvent = dependentState.switchTo();
+                            ExternalEvent externalEvent = dependentState.trySatisfy();
                             graph.exitMethod(LogLevel.Verbose, externalEvent);
                             return externalEvent;
                         }
@@ -144,7 +144,7 @@ public abstract class Property<V> extends HandyObject {
     public final void handleExpectation(V expectedValue, boolean needCheck) {
         V oldValue = getCurrentValue();
         if (needCheck) {
-            if (!graph.isValueFresh(this)) {
+            if (!isValueFresh()) {
                 // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
                 clean();
             }
@@ -156,6 +156,10 @@ public abstract class Property<V> extends HandyObject {
         if (!Objects.equals(oldValue, newValue)) {
             graph.verifySuperPaths(this, oldValue, newValue);
         }
+    }
+
+    boolean isValueFresh() {
+        return graph.frameMark > 0 && graphFrameMark == graph.frameMark;
     }
 
     private void updateCache(V value) {

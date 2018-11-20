@@ -18,24 +18,26 @@ import java.util.stream.Stream;
 /**
  * Created by rongyu.yan on 4/17/2017.
  */
-public class WindowManager extends Property<Window> {
+public class Application extends Property<Window> {
     private Map<Class<? extends Window>, Window> windowInstances;
     private ProcessState processState;
+    private ClickLauncher clickLauncher;
 
-    public WindowManager(Graph graph) {
+    public Application(Graph graph) {
         super(graph);
         windowInstances = new LinkedHashMap<>();
         processState = new ProcessState(graph);
         // 初始状态
         processState.setInitValue(false);
         setInitValue(null);
+        clickLauncher = new ClickLauncher(this);
         // 开启进程
-        graph.createPath(ClickLauncher.get(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
-                .addContextState(processState, false);
+        graph.createPath(clickLauncher, processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
+                .addContextValue(processState, false);
         // 退出进程
         graph.createPath(new SwitchStateAction<>(processState, false),
                 processState.getStaticExpectation(Timing.IMMEDIATELY, false, false))
-                .addContextState(processState, true);
+                .addContextValue(processState, true);
         // 退出进程时清理当前窗口
         graph.createPath(new TransitionEvent<>(processState, true, false),
                 getStaticExpectation(Timing.IMMEDIATELY, false, null));
@@ -60,6 +62,10 @@ public class WindowManager extends Property<Window> {
 
     public ProcessState getProcessState() {
         return processState;
+    }
+
+    public ClickLauncher clickLauncher() {
+        return clickLauncher;
     }
 
     @Override

@@ -29,7 +29,7 @@ public class Graph {
     private List<Object> records;
     private boolean isTraversing;
     HashSet<Property> nullCache;
-    private long actionTimeFrame;
+    long frameMark;
     private Set<Path> verifiedPaths;
     private AtomicInteger methodStack;
     private Set<Expectation> pendingExpectations;
@@ -138,7 +138,7 @@ public class Graph {
             Path path = null;
             int minDegree = Integer.MAX_VALUE;
             for (Path p : unprocessedPaths) {
-                int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
+                int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark, true);
                 if (unsatisfiedDegree == 0) {
                     path = p;
                     break;
@@ -222,14 +222,14 @@ public class Graph {
         records.add(externalEvent);
         if (communicator != null) {
             if (communicator.performAction(externalEvent)) {
-                actionTimeFrame = System.currentTimeMillis();
+                frameMark++;
                 if (externalEvent instanceof SwitchStateAction) {
                     SwitchStateAction stateAction = (SwitchStateAction) externalEvent;
                     Property property = stateAction.getProperty();
                     property.handleExpectation(stateAction.getValue(), false);
                 }
                 for (Path path : new ArrayList<>(allPaths)) {
-                    if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
+                    if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
                         verify(path);
                     }
                 }
@@ -260,13 +260,11 @@ public class Graph {
     private ExternalEvent roll(Path path) {
         enterMethod(path);
         // make sure context states are satisfied.
-        for (Property property : path.getContext().keySet()) {
-            ValuePredicate valuePredicate = path.getContext().get(property);
-            if (!valuePredicate.test(property.getCurrentValue())) {
-                ExternalEvent externalEvent = property.switchTo(valuePredicate);
-                exitMethod(LogLevel.Verbose, externalEvent);
-                return externalEvent;
-            }
+        Context context = path.getContext();
+        ExternalEvent e = context.trySatisfy();
+        if (e != null || !context.isSatisfied()) {
+            exitMethod(LogLevel.Verbose, e);
+            return e;
         }
         // all context states are satisfied by now.
         // trigger event
@@ -277,16 +275,15 @@ public class Graph {
             return externalEvent;
         } else if (inputEvent instanceof ExternalEvent) {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
-            if (isValidAction(externalEvent)) {
-                if (externalEvent.preconditions != null) {
-                    for (State precondition : externalEvent.preconditions) {
-                        if (!precondition.isSatisfied()) {
-                            ExternalEvent event = precondition.switchTo();
-                            exitMethod(LogLevel.Verbose, event);
-                            return event;
-                        }
-                    }
+            Context precondition = externalEvent.getPrecondition();
+            if (precondition != null) {
+                ExternalEvent event = precondition.trySatisfy();
+                if (event != null || !precondition.isSatisfied()) {
+                    exitMethod(LogLevel.Verbose, event);
+                    return event;
                 }
+            }
+            if (isValidAction(externalEvent)) {
                 exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
@@ -316,7 +313,7 @@ public class Graph {
                 Event event = path.getEvent();
                 if (event instanceof InternalEvent) {
                     // 父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-                    if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(actionTimeFrame, false) == 0) {
+                    if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
                         verify(path);
                     }
                 }
@@ -327,7 +324,7 @@ public class Graph {
     ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
         List<Path> sorted = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
-                    int unsatisfiedDegree = p.getUnsatisfiedDegree(actionTimeFrame, true);
+                    int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark, true);
                     if (unprocessedPaths.contains(p)) {
                         unsatisfiedDegree--;
                     }
@@ -362,18 +359,14 @@ public class Graph {
         return !invalidActions.contains(externalEvent) && !CollectionUtil.checkLoop(records, externalEvent);
     }
 
-    boolean isValueFresh(Property property) {
-        return actionTimeFrame > 0 && property.communicateTimeFrame == actionTimeFrame;
-    }
-
     public <V> V obtainValue(Obtainable<V> obtainable) {
         Property<V> property = obtainable.getProperty();
-        if (isValueFresh(property)) {
+        if (property.isValueFresh()) {
             return property.getCurrentValue();
         }
         if (communicator != null) {
             V value = communicator.fetchState(obtainable);
-            property.communicateTimeFrame = actionTimeFrame;
+            property.graphFrameMark = frameMark;
             return value;
         }
         Logger.getDefault().ww("unable to check state: ", obtainable);

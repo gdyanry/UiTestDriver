@@ -7,9 +7,9 @@ import com.yanry.driver.mobile.sample.Tester;
 import com.yanry.driver.mobile.sample.login.window.AboutPage;
 import com.yanry.driver.mobile.sample.login.window.LoginPage;
 import com.yanry.driver.mobile.sample.login.window.MainPage;
-import com.yanry.driver.mobile.window.WindowManager;
+import com.yanry.driver.mobile.window.Application;
 
-public class LoginTest extends WindowManager {
+public class LoginTest extends Application {
     public LoginTest(Graph graph) {
         super(graph);
         CurrentUser currentUser = new CurrentUser(graph);

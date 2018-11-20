@@ -7,8 +7,8 @@ import com.yanry.driver.mobile.property.CurrentUser;
 import com.yanry.driver.mobile.sample.login.Const;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.selector.ByText;
+import com.yanry.driver.mobile.window.Application;
 import com.yanry.driver.mobile.window.Window;
-import com.yanry.driver.mobile.window.WindowManager;
 
 /**
  * Created by rongyu.yan on 5/10/2017.
@@ -16,14 +16,14 @@ import com.yanry.driver.mobile.window.WindowManager;
 public class MainPage extends Window {
     private CurrentUser currentUser;
 
-    public MainPage(Graph graph, WindowManager manager, CurrentUser currentUser) {
+    public MainPage(Graph graph, Application manager, CurrentUser currentUser) {
         super(graph, manager);
         this.currentUser = currentUser;
     }
 
     @Override
-    protected void addCases(Graph graph, WindowManager manager) {
-        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextState(currentUser.getLoginState(), true);
+    protected void addCases(Graph graph, Application manager) {
+        showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextValue(currentUser.getLoginState(), true);
         Click clickLogout = new Click(new View(graph, this, new ByText("退出登录")));
         popWindow(LoginPage.class, clickLogout, Timing.IMMEDIATELY, true)
                 .getExpectation().addFollowingExpectation(currentUser.getStaticExpectation(Timing.IMMEDIATELY, false, ""));

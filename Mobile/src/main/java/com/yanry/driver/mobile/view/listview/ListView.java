@@ -61,8 +61,8 @@ public class ListView<I extends ListViewItem<I>> extends View {
             getGraph().createPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)
                     .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, true)
                             .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, false))))
-                    .addContextState(child, true)
-                    .addContextStatePredicate(size, new GreaterThan<>(index));
+                    .addContextValue(child, true)
+                    .addContextPredicate(size, new GreaterThan<>(index));
             items.put(index, child);
         }
         return child;

@@ -5,15 +5,15 @@ import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
 import com.yanry.driver.mobile.view.listview.ListView;
+import com.yanry.driver.mobile.window.Application;
 import com.yanry.driver.mobile.window.Window;
-import com.yanry.driver.mobile.window.WindowManager;
 
 public class DetailPage extends Window {
     private Text tvPrincipal;
     private Text tvFinishDate;
     private Text tvTotalRate;
 
-    public DetailPage(Graph graph, WindowManager manager) {
+    public DetailPage(Graph graph, Application manager) {
         super(graph, manager);
         tvPrincipal = new Text(getViewById("tv_principal"));
         tvFinishDate = new Text(getViewById("tv_finish_date"));
@@ -21,7 +21,7 @@ public class DetailPage extends Window {
     }
 
     @Override
-    protected void addCases(Graph graph, WindowManager manager) {
+    protected void addCases(Graph graph, Application manager) {
         closeOnPressBack();
         ListView<MainPage.MainListItem> listView = getWindow(MainPage.class).getListView();
         graph.createPath(getCreateEvent(), tvPrincipal.getDynamicExpectation(Timing.IMMEDIATELY, true,

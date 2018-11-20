@@ -7,39 +7,31 @@ import com.yanry.driver.core.model.predicate.Equals;
 import lib.common.util.object.Visible;
 import lib.common.util.object.VisibleObject;
 
-import java.util.HashMap;
-
 /**
  * @author yanry
  * <p>
  * Jan 5, 2017
  */
 public class Path extends VisibleObject {
-    private static final int UNSATISFIED_DEGREE_STEP = 10;
+    private static final int UNSATISFIED_DEGREE_STEP_LENGTH = 10;
     private Event event;
     private Expectation expectation;
-    private long timeFrame;
-    private int unsatisfiedDegree;
     private int baseUnsatisfiedDegree;
-    private HashMap<Property, ValuePredicate> context;
+    private Context context;
 
     Path(Event event, Expectation expectation) {
         this.event = event;
         this.expectation = expectation;
-        context = new HashMap<>();
+        context = new Context();
     }
 
-    public <V> Path addContextState(Property<V> property, V value) {
-        return addContextStatePredicate(property, Equals.of(value));
+    public <V> Path addContextValue(Property<V> property, V value) {
+        context.add(property, Equals.of(value));
+        return this;
     }
 
-    public <V> Path addContextStatePredicate(Property<V> property, ValuePredicate<V> predicate) {
-        property.findValueToAdd(predicate);
-        ValuePredicate valuePredicate = context.get(property);
-        if (valuePredicate != null) {
-            predicate = predicate.and(valuePredicate);
-        }
-        context.put(property, predicate);
+    public <V> Path addContextPredicate(Property<V> property, ValuePredicate<V> predicate) {
+        context.add(property, predicate);
         return this;
     }
 
@@ -48,28 +40,27 @@ public class Path extends VisibleObject {
         return this;
     }
 
-    int getUnsatisfiedDegree(long timeFrame, boolean isToRoll) {
+    int getUnsatisfiedDegree(long frameMark, boolean isToRoll) {
         Property excludeProperty = null;
-        boolean addOneStep = false;
+        int result = 0;
         if (event instanceof TransitionEvent) {
             TransitionEvent transitionEvent = (TransitionEvent) event;
             if (isToRoll) {
                 ValuePredicate from = transitionEvent.getFrom();
                 if (!from.test(transitionEvent.getProperty().getCurrentValue())) {
-                    addOneStep = true;
+                    result = UNSATISFIED_DEGREE_STEP_LENGTH;
                 }
             } else {
                 excludeProperty = transitionEvent.getProperty();
             }
+        } else if (event instanceof ExternalEvent) {
+            ExternalEvent externalEvent = (ExternalEvent) event;
+            Context precondition = externalEvent.getPrecondition();
+            if (precondition != null) {
+                result = precondition.getUnsatisfiedDegree(frameMark, null, UNSATISFIED_DEGREE_STEP_LENGTH);
+            }
         }
-        if (timeFrame == 0 || timeFrame != this.timeFrame) {
-            Property finalExcludeProperty = excludeProperty;
-            unsatisfiedDegree = context.keySet().stream()
-                    .filter(property -> !property.equals(finalExcludeProperty) && !context.get(property).test(property.getCurrentValue()))
-                    .mapToInt(prop -> UNSATISFIED_DEGREE_STEP).sum();
-            this.timeFrame = timeFrame;
-        }
-        int result = unsatisfiedDegree + (addOneStep ? UNSATISFIED_DEGREE_STEP : 0);
+        result += context.getUnsatisfiedDegree(frameMark, excludeProperty, UNSATISFIED_DEGREE_STEP_LENGTH);
         if (result > 0) {
             result += baseUnsatisfiedDegree;
         }
@@ -77,7 +68,7 @@ public class Path extends VisibleObject {
     }
 
     @Visible
-    public HashMap<Property, ValuePredicate> getContext() {
+    public Context getContext() {
         return context;
     }
 

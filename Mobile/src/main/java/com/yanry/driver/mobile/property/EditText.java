@@ -13,7 +13,7 @@ public class EditText extends Text {
     @Override
     protected ExternalEvent doSelfSwitch(String to) {
         SwitchStateAction<String> action = new SwitchStateAction<>(this, to);
-        action.addPrecondition(getView().getState(Equals.of(true)));
+        action.addPrecondition(getView(), Equals.of(true));
         return action;
     }
 }

@@ -2,9 +2,9 @@ package com.yanry.driver.mobile.sample.listview;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.mobile.sample.Tester;
-import com.yanry.driver.mobile.window.WindowManager;
+import com.yanry.driver.mobile.window.Application;
 
-public class ListViewTest extends WindowManager {
+public class ListViewTest extends Application {
     public ListViewTest(Graph graph) {
         super(graph);
         MainPage mainPage = new MainPage(graph, this);

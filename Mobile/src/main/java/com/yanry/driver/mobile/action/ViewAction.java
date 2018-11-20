@@ -11,7 +11,7 @@ public class ViewAction extends ExternalEvent {
 
     public ViewAction(ViewContainer view) {
         this.view = view;
-        addPrecondition(view.getState(Equals.of(true)));
+        addPrecondition(view, Equals.of(true));
     }
 
     @EqualsPart

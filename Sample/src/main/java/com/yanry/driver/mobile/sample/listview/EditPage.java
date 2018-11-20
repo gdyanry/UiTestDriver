@@ -10,16 +10,16 @@ import com.yanry.driver.mobile.sample.listview.MainPage.MainListItem;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.listview.ListView;
 import com.yanry.driver.mobile.view.selector.ById;
+import com.yanry.driver.mobile.window.Application;
 import com.yanry.driver.mobile.window.Window;
-import com.yanry.driver.mobile.window.WindowManager;
 
 public class EditPage extends Window {
-    public EditPage(Graph graph, WindowManager manager) {
+    public EditPage(Graph graph, Application manager) {
         super(graph, manager);
     }
 
     @Override
-    protected void addCases(Graph graph, WindowManager manager) {
+    protected void addCases(Graph graph, Application manager) {
         ValuePredicate<String> notEmpty = Equals.of("").not();
         closeOnPressBack();
         EditText et_principal = new EditText(getViewById("et_principal"));
@@ -38,19 +38,19 @@ public class EditPage extends Window {
         ListView<MainListItem> listView = getWindow(MainPage.class).getListView();
         graph.createPath(clickFinish, listView.getSize().getShiftExpectation(Timing.IMMEDIATELY, true, true, 1)
                 .setTrigger(listView, Equals.of(true)))
-                .addContextState(getPreviousWindow(), getWindow(MainPage.class))
-                .addContextStatePredicate(et_principal, notEmpty)
-                .addContextStatePredicate(etBonus, notEmpty)
-                .addContextStatePredicate(etRawInterestRate, notEmpty)
-                .addContextStatePredicate(etPassDays, notEmpty)
-                .addContextStatePredicate(etTotalDays, notEmpty)
-                .addContextState(this, true);
+                .addContextValue(getPreviousWindow(), getWindow(MainPage.class))
+                .addContextPredicate(et_principal, notEmpty)
+                .addContextPredicate(etBonus, notEmpty)
+                .addContextPredicate(etRawInterestRate, notEmpty)
+                .addContextPredicate(etPassDays, notEmpty)
+                .addContextPredicate(etTotalDays, notEmpty)
+                .addContextValue(this, true);
         close(clickFinish, Timing.IMMEDIATELY)
-                .addContextStatePredicate(et_principal, notEmpty)
-                .addContextStatePredicate(etBonus, notEmpty)
-                .addContextStatePredicate(etRawInterestRate, notEmpty)
-                .addContextStatePredicate(etPassDays, notEmpty)
-                .addContextStatePredicate(etTotalDays, notEmpty)
-                .addContextState(this, true);
+                .addContextPredicate(et_principal, notEmpty)
+                .addContextPredicate(etBonus, notEmpty)
+                .addContextPredicate(etRawInterestRate, notEmpty)
+                .addContextPredicate(etPassDays, notEmpty)
+                .addContextPredicate(etTotalDays, notEmpty)
+                .addContextValue(this, true);
     }
 }

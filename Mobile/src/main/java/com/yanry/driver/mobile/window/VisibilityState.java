@@ -25,7 +25,7 @@ public class VisibilityState extends Property<Visibility> {
 
     @Override
     protected Visibility checkValue() {
-        Window current = window.getManager().getCurrentValue();
+        Window current = window.getApplication().getCurrentValue();
         if (current == null) {
             return Visibility.NotCreated;
         }

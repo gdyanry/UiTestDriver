@@ -35,15 +35,15 @@ public class View extends ViewContainer {
         SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
         // false -> true
         graph.createPath(parent.onShow(), showExpectation)
-                .addContextState(independentVisibility, true);
+                .addContextValue(independentVisibility, true);
         graph.createPath(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
-                .addContextState(parent, true);
+                .addContextValue(parent, true);
         SSPropertyExpectation<Boolean> dismissExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, false);
         // true -> false
         graph.createPath(parent.onDismiss(), dismissExpectation)
-                .addContextState(independentVisibility, true);
+                .addContextValue(independentVisibility, true);
         graph.createPath(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
-                .addContextState(parent, true);
+                .addContextValue(parent, true);
     }
 
     public Window getWindow() {

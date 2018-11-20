@@ -3,20 +3,22 @@
  */
 package com.yanry.driver.core.model.base;
 
-import java.util.LinkedList;
-
 /**
  * @author yanry
  * <p>
  * Jan 6, 2017
  */
 public class ExternalEvent extends Event {
-    LinkedList<State> preconditions;
+    private Context precondition;
 
-    public void addPrecondition(State state) {
-        if (preconditions == null) {
-            preconditions = new LinkedList<>();
+    public void addPrecondition(Property property, ValuePredicate predicate) {
+        if (precondition == null) {
+            precondition = new Context();
         }
-        preconditions.add(state);
+        precondition.add(property, predicate);
+    }
+
+    Context getPrecondition() {
+        return precondition;
     }
 }
