@@ -5,8 +5,6 @@ import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.TransitionEvent;
-import com.yanry.driver.core.model.event.StateChangeEvent;
-import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.GreaterThan;
 import com.yanry.driver.mobile.action.Click;
@@ -19,6 +17,7 @@ import lib.common.util.object.Visible;
 
 import java.util.HashMap;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -42,14 +41,8 @@ public class ListView<I extends ListViewItem<I>> extends View {
         clickedItem = new ClickedItem(this);
         itemClick = new ItemClick(graph);
         clickItemEvent = new TransitionEvent<>(itemClick, false, true);
-        graph.createPath(clickItemEvent, itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, false));
         // size变化时重新初始化item
-        graph.createPath(new StateChangeEvent<>(size), new ActionExpectation() {
-            @Override
-            protected void run() {
-                initItems();
-            }
-        }).addContextState(this, true);
+        size.addOnCheckValueListener(size -> initItems());
     }
 
     public void initItems() {
@@ -65,8 +58,9 @@ public class ListView<I extends ListViewItem<I>> extends View {
         I child = items.get(index);
         if (child == null) {
             child = itemCreator.create(getGraph(), this, index);
-            getGraph().createPath(new Click(child), itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, true)
-                    .addFollowingExpectation(clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)))
+            getGraph().createPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)
+                    .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, true)
+                            .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, false))))
                     .addContextState(child, true)
                     .addContextStatePredicate(size, new GreaterThan<>(index));
             items.put(index, child);
@@ -84,6 +78,14 @@ public class ListView<I extends ListViewItem<I>> extends View {
 
     public Event getClickItemEvent() {
         return clickItemEvent;
+    }
+
+    public <V> V getValueFromClickedItem(Function<I, V> function) {
+        I item = clickedItem.getCurrentValue();
+        if (item != null) {
+            return function.apply(item);
+        }
+        return null;
     }
 
     public Supplier<I> getItem(IntFunction<Integer> index) {

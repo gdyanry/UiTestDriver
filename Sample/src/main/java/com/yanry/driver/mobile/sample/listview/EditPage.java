@@ -20,7 +20,7 @@ public class EditPage extends Window {
 
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
-        ValuePredicate<String> notEmpty = new Equals<>("").not();
+        ValuePredicate<String> notEmpty = Equals.of("").not();
         closeOnPressBack();
         EditText et_principal = new EditText(getViewById("et_principal"));
         et_principal.addValue("40000", "28800");
@@ -37,7 +37,7 @@ public class EditPage extends Window {
         // 添加
         ListView<MainListItem> listView = getWindow(MainPage.class).getListView();
         graph.createPath(clickFinish, listView.getSize().getShiftExpectation(Timing.IMMEDIATELY, true, true, 1)
-                .setTrigger(listView, new Equals<>(true)))
+                .setTrigger(listView, Equals.of(true)))
                 .addContextState(getPreviousWindow(), getWindow(MainPage.class))
                 .addContextStatePredicate(et_principal, notEmpty)
                 .addContextStatePredicate(etBonus, notEmpty)

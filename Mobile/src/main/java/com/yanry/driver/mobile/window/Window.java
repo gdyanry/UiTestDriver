@@ -27,18 +27,18 @@ public abstract class Window extends ViewContainer {
         visibility = new VisibilityState(graph, this);
         visibility.setInitValue(Visibility.NotCreated);
         createEvent = new TransitionEvent<>(visibility, Visibility.NotCreated, Visibility.Foreground);
-        closeEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.NotCreated);
+        closeEvent = new NegationEvent<>(visibility, Equals.of(Visibility.NotCreated).not());
         resumeEvent = new TransitionEvent<>(visibility, Visibility.Background, Visibility.Foreground);
         pauseEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.Background);
         ReflectionUtil.initStaticStringFields(getClass());
         // visibility->Foreground
-        graph.createPath(new NegationEvent<>(manager, new Equals<>(this).not()),
+        graph.createPath(new NegationEvent<>(manager, Equals.of(this).not()),
                 visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground));
         // 退出进程时visibility->NotCreated
         graph.createPath(new TransitionEvent<>(manager.getProcessState(), true, false),
                 visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated));
 
-        Equals<Visibility> foreground = new Equals<>(Visibility.Foreground);
+        Equals<Visibility> foreground = Equals.of(Visibility.Foreground);
         // 进入前台时visible->true
         getGraph().createPath(new NegationEvent<>(visibility, foreground.not()),
                 getStaticExpectation(Timing.IMMEDIATELY, false, true));

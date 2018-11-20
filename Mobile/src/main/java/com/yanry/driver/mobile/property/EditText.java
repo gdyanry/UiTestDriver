@@ -11,10 +11,6 @@ public class EditText extends Text {
 
     @Override
     protected ExternalEvent doSelfSwitch(String to) {
-        ExternalEvent externalEvent = getView().switchToValue(true);
-        if (externalEvent == null) {
-            externalEvent = new SwitchStateAction<>(this, to);
-        }
-        return externalEvent;
+        return new SwitchStateAction<>(this, to);
     }
 }

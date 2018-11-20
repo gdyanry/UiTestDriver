@@ -26,6 +26,8 @@ public class Divider<V> extends BooleanProperty {
         // -> true
         getGraph().createPath(new NegationEvent<>(property, predicate.not()),
                 getStaticExpectation(Timing.IMMEDIATELY, false, true));
+        // clean
+        property.addOnCleanListener(() -> clean());
     }
 
     @EqualsPart

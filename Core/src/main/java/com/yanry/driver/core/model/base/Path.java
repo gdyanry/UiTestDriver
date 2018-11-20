@@ -30,13 +30,16 @@ public class Path extends VisibleObject {
     }
 
     public <V> Path addContextState(Property<V> property, V value) {
-        context.put(property, new Equals(value));
-        return this;
+        return addContextStatePredicate(property, Equals.of(value));
     }
 
     public <V> Path addContextStatePredicate(Property<V> property, ValuePredicate<V> predicate) {
-        context.put(property, predicate);
         property.findValueToAdd(predicate);
+        ValuePredicate valuePredicate = context.get(property);
+        if (valuePredicate != null) {
+            predicate = predicate.and(valuePredicate);
+        }
+        context.put(property, predicate);
         return this;
     }
 

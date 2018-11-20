@@ -2,6 +2,8 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.StaticPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
+import lib.common.util.object.EqualsPart;
+import lib.common.util.object.Visible;
 
 public class SSPropertyExpectation<V> extends StaticPropertyExpectation<V> {
     private V value;
@@ -12,8 +14,10 @@ public class SSPropertyExpectation<V> extends StaticPropertyExpectation<V> {
         property.addValue(value);
     }
 
+    @EqualsPart
+    @Visible
     @Override
-    protected V doGetExpectedValue() {
+    public V getExpectedValue() {
         return value;
     }
 }

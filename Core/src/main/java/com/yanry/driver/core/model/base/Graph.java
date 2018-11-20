@@ -15,6 +15,7 @@ import lib.common.util.CollectionUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ public class Graph {
     private List<Path> unprocessedPaths;
     private Communicator communicator;
     private GraphWatcher watcher;
+    private Consumer<Path> pathAdjuster;
 
     public Graph() {
         allPaths = new LinkedList<>();
@@ -61,8 +63,15 @@ public class Graph {
         this.watcher = watcher;
     }
 
+    public void setPathAdjuster(Consumer<Path> pathAdjuster) {
+        this.pathAdjuster = pathAdjuster;
+    }
+
     public Path createPath(Event event, Expectation expectation) {
         Path path = new Path(event, expectation);
+        if (pathAdjuster != null) {
+            pathAdjuster.accept(path);
+        }
         allPaths.add(path);
         return path;
     }
@@ -213,7 +222,7 @@ public class Graph {
     }
 
     public <V> boolean achieveState(Property<V> property, V value) {
-        boolean success = setup() && achieveStatePredicate(property, new Equals<>(value));
+        boolean success = setup() && achieveStatePredicate(property, Equals.of(value));
         isTraversing = false;
         return success;
     }

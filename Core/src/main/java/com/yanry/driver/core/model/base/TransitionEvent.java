@@ -20,7 +20,7 @@ public class TransitionEvent<V> extends InternalEvent<V> {
     }
 
     public TransitionEvent(Property<V> property, V from, V to) {
-        this(property, new Equals<>(from), new Equals<>(to));
+        this(property, Equals.of(from), Equals.of(to));
     }
 
     @EqualsPart

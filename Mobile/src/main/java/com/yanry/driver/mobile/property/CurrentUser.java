@@ -21,7 +21,7 @@ public class CurrentUser extends Property<String> {
     public CurrentUser(Graph graph) {
         super(graph);
         userPasswordMap = new HashMap<>();
-        loginState = new Divider<>(this, new Equals<>("").not());
+        loginState = new Divider<>(this, Equals.of("").not());
     }
 
     public CurrentUser addUserPassword(String user, String pwd) {

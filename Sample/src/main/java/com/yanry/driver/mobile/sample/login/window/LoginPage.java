@@ -43,7 +43,7 @@ public class LoginPage extends Window {
     protected void addCases(Graph graph, WindowManager manager) {
         showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextState(currentUser.getLoginState(), false);
         EditText etUser = new EditText(new View(graph, this, new ByDesc(DESC_USER)));
-        Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<String>() {
+        Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;
@@ -55,7 +55,7 @@ public class LoginPage extends Window {
             }
         });
         EditText etPwd = new EditText(new View(graph, this, new ByDesc(DESC_PWD)));
-        Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<String>() {
+        Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;
@@ -119,7 +119,7 @@ public class LoginPage extends Window {
             graph.createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "密码错误"))
                     .addContextState(networkState, NetworkState.Network.Normal)
                     .addContextState(etUser, entry.getKey())
-                    .addContextStatePredicate(etPwd, new Equals<>(entry.getValue()).not())
+                    .addContextStatePredicate(etPwd, Equals.of(entry.getValue()).not())
                     .addContextState(pwdValidity, true);
         }
         // user not exist

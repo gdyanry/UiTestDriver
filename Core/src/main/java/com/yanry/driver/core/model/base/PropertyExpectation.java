@@ -1,8 +1,6 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
 
 import java.util.Objects;
 
@@ -16,19 +14,9 @@ public abstract class PropertyExpectation<V> extends Expectation {
         super(timing, needCheck);
     }
 
-    @Visible
-    @EqualsPart
-    public final V getExpectedValue() {
-        try {
-            return doGetExpectedValue();
-        } catch (Exception e) {
-            return null;
-        }
-    }
+    public abstract V getExpectedValue();
 
     public abstract Property<V> getProperty();
-
-    protected abstract V doGetExpectedValue();
 
     @Override
     protected final boolean doVerify() {

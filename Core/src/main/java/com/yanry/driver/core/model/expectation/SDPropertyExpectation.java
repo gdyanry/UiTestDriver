@@ -1,6 +1,7 @@
 package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Property;
+import lib.common.util.object.EqualsPart;
 
 import java.util.function.Supplier;
 
@@ -16,7 +17,12 @@ public class SDPropertyExpectation<V> extends StaticPropertyExpectation<V> {
     }
 
     @Override
-    protected V doGetExpectedValue() {
+    public V getExpectedValue() {
         return valueSupplier.get();
+    }
+
+    @EqualsPart
+    public Supplier<V> getValueSupplier() {
+        return valueSupplier;
     }
 }

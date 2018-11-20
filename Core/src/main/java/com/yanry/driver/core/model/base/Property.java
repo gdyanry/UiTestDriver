@@ -10,10 +10,8 @@ import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -30,6 +28,8 @@ public abstract class Property<V> extends HandyObject {
     long communicateTimeFrame;
     private HashSet<V> collectedValues;
     private State[] dependentStates;
+    private LinkedList<Consumer<V>> onCheckValueListeners;
+    private LinkedList<Runnable> onCleanListeners;
 
     public Property(Graph graph) {
         this.graph = graph;
@@ -48,6 +48,20 @@ public abstract class Property<V> extends HandyObject {
         }
     }
 
+    public void addOnCheckValueListener(Consumer<V> listener) {
+        if (onCheckValueListeners == null) {
+            onCheckValueListeners = new LinkedList<>();
+        }
+        onCheckValueListeners.add(listener);
+    }
+
+    public void addOnCleanListener(Runnable listener) {
+        if (onCleanListeners == null) {
+            onCleanListeners = new LinkedList<>();
+        }
+        onCleanListeners.add(listener);
+    }
+
     void findValueToAdd(ValuePredicate<V> predicate) {
         if (predicate != null) {
             Stream<V> concreteValues = predicate.getConcreteValues();
@@ -63,7 +77,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final ExternalEvent switchToValue(V toState) {
-        return switchTo(new Equals<>(toState));
+        return switchTo(Equals.of(toState));
     }
 
     public final ExternalEvent switchTo(ValuePredicate<V> toState) {
@@ -132,8 +146,7 @@ public abstract class Property<V> extends HandyObject {
         if (needCheck) {
             if (!graph.isValueFresh(this)) {
                 // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
-                graph.propertyCache.remove(this);
-                graph.nullCache.remove(this);
+                clean();
             }
         } else {
             // 不查询客户端，直接通过验证并更新状态值
@@ -158,6 +171,11 @@ public abstract class Property<V> extends HandyObject {
     public void clean() {
         graph.nullCache.remove(this);
         graph.propertyCache.remove(this);
+        if (onCleanListeners != null) {
+            for (Runnable listener : onCleanListeners) {
+                listener.run();
+            }
+        }
     }
 
     public final V getCurrentValue() {
@@ -175,6 +193,11 @@ public abstract class Property<V> extends HandyObject {
             }
             cacheValue = checkValue();
             updateCache(cacheValue);
+            if (onCheckValueListeners != null) {
+                for (Consumer<V> listener : onCheckValueListeners) {
+                    listener.accept(cacheValue);
+                }
+            }
         }
         return cacheValue;
     }

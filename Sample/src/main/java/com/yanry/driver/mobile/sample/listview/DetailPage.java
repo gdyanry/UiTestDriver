@@ -4,6 +4,7 @@ import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.property.Text;
+import com.yanry.driver.mobile.view.listview.ListView;
 import com.yanry.driver.mobile.window.Window;
 import com.yanry.driver.mobile.window.WindowManager;
 
@@ -22,18 +23,19 @@ public class DetailPage extends Window {
     @Override
     protected void addCases(Graph graph, WindowManager manager) {
         closeOnPressBack();
+        ListView<MainPage.MainListItem> listView = getWindow(MainPage.class).getListView();
         graph.createPath(getCreateEvent(), tvPrincipal.getDynamicExpectation(Timing.IMMEDIATELY, true,
-                () -> getWindow(MainPage.class).getListView().getClickedItem().getCurrentValue().getTvMoney().getCurrentValue()));
+                () -> listView.getValueFromClickedItem(item -> item.getTvMoney().getCurrentValue())));
         graph.createPath(getCreateEvent(), tvFinishDate.getDynamicExpectation(Timing.IMMEDIATELY, true,
-                () -> getWindow(MainPage.class).getListView().getClickedItem().getCurrentValue().getTvFinishDate().getCurrentValue()));
+                () -> listView.getValueFromClickedItem(item -> item.getTvFinishDate().getCurrentValue())));
         graph.createPath(getCreateEvent(), tvTotalRate.getDynamicExpectation(Timing.IMMEDIATELY, true,
-                () -> getWindow(MainPage.class).getListView().getClickedItem().getCurrentValue().getTvTotalRate().getCurrentValue()));
+                () -> listView.getValueFromClickedItem(item -> item.getTvTotalRate().getCurrentValue())));
         // 编辑
         Click clickEdit = new Click(getViewById("edit"));
         popWindow(EditPage.class, clickEdit, Timing.IMMEDIATELY, false);
         // 删除
         Click clickDel = new Click(getViewById("delete"));
         close(clickDel, Timing.IMMEDIATELY).getExpectation()
-                .addFollowingExpectation(getWindow(MainPage.class).getListView().getSize().getShiftExpectation(Timing.IMMEDIATELY, true, false, 1));
+                .addFollowingExpectation(listView.getSize().getShiftExpectation(Timing.IMMEDIATELY, true, false, 1));
     }
 }
