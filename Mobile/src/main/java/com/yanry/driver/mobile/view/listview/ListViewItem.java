@@ -9,5 +9,5 @@ public abstract class ListViewItem<I extends ListViewItem<I>> extends View {
         super(graph, parent, new ByIndex(index));
     }
 
-    protected abstract void fetchViewPropertyValues();
+    protected abstract void queryViewStates();
 }

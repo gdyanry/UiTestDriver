@@ -134,6 +134,7 @@ public class Graph {
     }
 
     private List<Object> traverse() {
+        int size = unprocessedPaths.size();
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = null;
             int minDegree = Integer.MAX_VALUE;
@@ -147,7 +148,7 @@ public class Graph {
                     minDegree = unsatisfiedDegree;
                 }
             }
-            Logger.getDefault().dd("traverse path: ", path);
+            Logger.getDefault().d("traverse path %s/%s: %s", size - unprocessedPaths.size() + 1, size, path);
             ExternalEvent externalEvent;
             while (isTraversing && (externalEvent = getNextAction(path)) != null && isTraversing) {
                 if (postAction(externalEvent) && verifiedPaths.contains(path)) {
@@ -221,6 +222,12 @@ public class Graph {
     public boolean postAction(ExternalEvent externalEvent) {
         records.add(externalEvent);
         if (communicator != null) {
+            LinkedList<Runnable> preActions = externalEvent.getPreActions();
+            if (preActions != null) {
+                for (Runnable action : preActions) {
+                    action.run();
+                }
+            }
             if (communicator.performAction(externalEvent)) {
                 frameMark++;
                 if (externalEvent instanceof SwitchStateAction) {

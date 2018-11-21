@@ -49,7 +49,8 @@ public class ListView<I extends ListViewItem<I>> extends View {
         if (getCurrentValue()) {
             int listSize = size.getCurrentValue();
             for (int i = 0; i < listSize; i++) {
-                getViewByIndex(i).fetchViewPropertyValues();
+                I itemView = getViewByIndex(i);
+                itemView.clean();
             }
         }
     }
@@ -58,7 +59,10 @@ public class ListView<I extends ListViewItem<I>> extends View {
         I child = items.get(index);
         if (child == null) {
             child = itemCreator.create(getGraph(), this, index);
-            getGraph().createPath(new Click(child), clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)
+            Click click = new Click(child);
+            I finalChild = child;
+            click.addPreAction(() -> finalChild.queryViewStates());
+            getGraph().createPath(click, clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)
                     .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, true)
                             .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, false))))
                     .addContextValue(child, true)

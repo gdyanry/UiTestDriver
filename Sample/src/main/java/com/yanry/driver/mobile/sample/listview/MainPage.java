@@ -62,7 +62,7 @@ public class MainPage extends Window {
         }
 
         @Override
-        protected void fetchViewPropertyValues() {
+        protected void queryViewStates() {
             tvFinishDate.getCurrentValue();
             tvMoney.getCurrentValue();
             tvTotalRate.getCurrentValue();

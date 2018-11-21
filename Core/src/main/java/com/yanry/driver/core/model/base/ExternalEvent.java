@@ -3,6 +3,8 @@
  */
 package com.yanry.driver.core.model.base;
 
+import java.util.LinkedList;
+
 /**
  * @author yanry
  * <p>
@@ -10,6 +12,7 @@ package com.yanry.driver.core.model.base;
  */
 public class ExternalEvent extends Event {
     private Context precondition;
+    private LinkedList<Runnable> preActions;
 
     public void addPrecondition(Property property, ValuePredicate predicate) {
         if (precondition == null) {
@@ -18,7 +21,18 @@ public class ExternalEvent extends Event {
         precondition.add(property, predicate);
     }
 
+    public void addPreAction(Runnable action) {
+        if (preActions == null) {
+            preActions = new LinkedList<>();
+        }
+        preActions.add(action);
+    }
+
     Context getPrecondition() {
         return precondition;
+    }
+
+    public LinkedList<Runnable> getPreActions() {
+        return preActions;
     }
 }
