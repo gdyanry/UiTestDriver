@@ -43,7 +43,7 @@ public class LoginPage extends Window {
     protected void addCases(Graph graph, Application manager) {
         showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextValue(currentUser.getLoginState(), false);
         EditText etUser = new EditText(new View(graph, this, new ByDesc(DESC_USER)));
-        Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<>() {
+        Divider userValidity = new Divider(etUser.getState(new ValuePredicate<>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;
@@ -53,9 +53,9 @@ public class LoginPage extends Window {
             public boolean test(String value) {
                 return value != null && value.length() > 0 && !value.contains(" ");
             }
-        });
+        }));
         EditText etPwd = new EditText(new View(graph, this, new ByDesc(DESC_PWD)));
-        Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<>() {
+        Divider pwdValidity = new Divider(etPwd.getState(new ValuePredicate<>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;
@@ -65,7 +65,7 @@ public class LoginPage extends Window {
             public boolean test(String value) {
                 return value != null && value.length() >= 6;
             }
-        });
+        }));
         // 页面打开时输入框内容为空
         graph.createPath(getCreateEvent(), etUser.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
         graph.createPath(getCreateEvent(), etPwd.getStaticExpectation(Timing.IMMEDIATELY, true, ""));

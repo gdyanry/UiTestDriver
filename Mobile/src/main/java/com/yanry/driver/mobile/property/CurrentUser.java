@@ -16,12 +16,12 @@ import java.util.stream.Stream;
  */
 public class CurrentUser extends Property<String> {
     private HashMap<String, String> userPasswordMap;
-    private Divider<String> loginState;
+    private Divider loginState;
 
     public CurrentUser(Graph graph) {
         super(graph);
         userPasswordMap = new HashMap<>();
-        loginState = new Divider<>(this, Equals.of("").not());
+        loginState = new Divider(getState(Equals.of("").not()));
     }
 
     public CurrentUser addUserPassword(String user, String pwd) {
@@ -29,7 +29,7 @@ public class CurrentUser extends Property<String> {
         return this;
     }
 
-    public Divider<String> getLoginState() {
+    public Divider getLoginState() {
         return loginState;
     }
 

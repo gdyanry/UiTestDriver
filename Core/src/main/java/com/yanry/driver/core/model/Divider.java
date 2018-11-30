@@ -1,8 +1,8 @@
 package com.yanry.driver.core.model;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.base.ValuePredicate;
+import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.State;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.EqualsPart;
@@ -12,39 +12,48 @@ import lib.common.util.object.Visible;
  * @Author: yanry
  * @Date: 2018/10/31 23:10
  */
-public class Divider<V> extends BooleanProperty {
-    private Property<V> property;
-    private ValuePredicate<V> predicate;
+public class Divider extends BooleanProperty {
+    private State[] states;
 
-    public Divider(Property<V> property, ValuePredicate<V> predicate) {
-        super(property.getGraph());
-        this.property = property;
-        this.predicate = predicate;
-        // -> false
-        getGraph().createPath(new NegationEvent<>(property, predicate),
-                getStaticExpectation(Timing.IMMEDIATELY, false, false));
-        // -> true
-        getGraph().createPath(new NegationEvent<>(property, predicate.not()),
-                getStaticExpectation(Timing.IMMEDIATELY, false, true));
-        // clean
-        property.addOnCleanListener(() -> clean());
+    public Divider(State... states) {
+        super(states[0].getProperty().getGraph());
+        this.states = states;
+        for (State state : states) {
+            // -> false
+            Path toFalse = getGraph().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate()),
+                    getStaticExpectation(Timing.IMMEDIATELY, false, false));
+            for (State s : states) {
+                if (s != state) {
+                    toFalse.addContextPredicate(s.getProperty(), s.getValuePredicate());
+                }
+            }
+            // -> true
+            Path toTrue = getGraph().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate().not()),
+                    getStaticExpectation(Timing.IMMEDIATELY, false, true));
+            for (State s : states) {
+                if (s != state) {
+                    toTrue.addContextPredicate(s.getProperty(), s.getValuePredicate());
+                }
+            }
+            // clean
+            state.getProperty().addOnCleanListener(() -> clean());
+        }
     }
 
-    @EqualsPart
     @Visible
-    public Property<V> getProperty() {
-        return property;
-    }
-
     @EqualsPart
-    @Visible
-    public ValuePredicate<V> getPredicate() {
-        return predicate;
+    public State[] getStates() {
+        return states;
     }
 
     @Override
     protected Boolean checkValue() {
-        return predicate.test(property.getCurrentValue());
+        for (State state : states) {
+            if (!state.isSatisfied()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

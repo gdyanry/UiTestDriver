@@ -107,7 +107,7 @@ public class Graph {
         return concernedPaths;
     }
 
-    public List<Object> traverse(Predicate<Path> pathFilter) {
+    public synchronized List<Object> traverse(Predicate<Path> pathFilter) {
         if (!setup()) {
             return null;
         }
@@ -119,7 +119,7 @@ public class Graph {
         return traverse();
     }
 
-    public List<Object> traverse(int[] selectedIndexes) {
+    public synchronized List<Object> traverse(int[] selectedIndexes) {
         if (!setup()) {
             return null;
         }
@@ -213,13 +213,13 @@ public class Graph {
         return valuePredicate.test(property.getCurrentValue());
     }
 
-    public <V> boolean achieveState(Property<V> property, V value) {
+    public synchronized <V> boolean achieveState(Property<V> property, V value) {
         boolean success = setup() && achieveStatePredicate(property, Equals.of(value));
         isTraversing = false;
         return success;
     }
 
-    public boolean postAction(ExternalEvent externalEvent) {
+    public synchronized boolean postAction(ExternalEvent externalEvent) {
         records.add(externalEvent);
         if (communicator != null) {
             LinkedList<Runnable> preActions = externalEvent.getPreActions();
