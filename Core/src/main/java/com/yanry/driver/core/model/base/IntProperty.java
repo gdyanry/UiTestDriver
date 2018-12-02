@@ -1,9 +1,7 @@
 package com.yanry.driver.core.model.base;
 
-import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
+import com.yanry.driver.core.model.expectation.ShiftExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
 
 public abstract class IntProperty extends Property<Integer> {
 
@@ -12,7 +10,7 @@ public abstract class IntProperty extends Property<Integer> {
     }
 
     public ShiftExpectation getShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
-        return new ShiftExpectation(timing, needCheck, upward, step);
+        return new ShiftExpectation(timing, needCheck, this, upward, step);
     }
 
     @Override
@@ -25,39 +23,10 @@ public abstract class IntProperty extends Property<Integer> {
             if (exp instanceof ShiftExpectation) {
                 ShiftExpectation expectation = (ShiftExpectation) exp;
                 if (expectation.getProperty() == this) {
-                    return expectation.upward == currentValue < to;
+                    return expectation.isUpward() == currentValue < to;
                 }
             }
             return false;
         });
-    }
-
-    public class ShiftExpectation extends SDPropertyExpectation<Integer> {
-        private boolean upward;
-        private int step;
-
-        private ShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
-            super(timing, needCheck, IntProperty.this, () -> {
-                Integer currentValue = IntProperty.this.getCurrentValue();
-                if (currentValue != null) {
-                    return upward ? currentValue + step : currentValue - step;
-                }
-                return null;
-            });
-            this.upward = upward;
-            this.step = step;
-        }
-
-        @Visible
-        @EqualsPart
-        public boolean isUpward() {
-            return upward;
-        }
-
-        @Visible
-        @EqualsPart
-        public int getStep() {
-            return step;
-        }
     }
 }

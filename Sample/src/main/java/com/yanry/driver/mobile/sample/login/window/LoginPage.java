@@ -1,11 +1,11 @@
 package com.yanry.driver.mobile.sample.login.window;
 
-import com.yanry.driver.core.model.Divider;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.predicate.Within;
+import com.yanry.driver.core.model.property.Divider;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.RequestDialog;
 import com.yanry.driver.mobile.expectation.Toast;
@@ -43,7 +43,7 @@ public class LoginPage extends Window {
     protected void addCases(Graph graph, Application manager) {
         showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextValue(currentUser.getLoginState(), false);
         EditText etUser = new EditText(new View(graph, this, new ByDesc(DESC_USER)));
-        Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<>() {
+        Divider<String> userValidity = new Divider<>(etUser, new ValuePredicate<String>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;
@@ -55,7 +55,7 @@ public class LoginPage extends Window {
             }
         });
         EditText etPwd = new EditText(new View(graph, this, new ByDesc(DESC_PWD)));
-        Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<>() {
+        Divider<String> pwdValidity = new Divider<>(etPwd, new ValuePredicate<String>() {
             @Override
             public Stream<String> getConcreteValues() {
                 return null;

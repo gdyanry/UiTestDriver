@@ -1,12 +1,12 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.GreaterThan;
+import com.yanry.driver.core.model.property.BooleanProperty;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ViewContainer;

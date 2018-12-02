@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 public abstract class ActionPredicate<V> extends ValuePredicate<V> {
 
     public static <V> ActionPredicate<V> get(Runnable runnable) {
-        return new ActionPredicate<>() {
+        return new ActionPredicate<V>() {
             @Override
             protected void run() {
                 runnable.run();

@@ -1,4 +1,4 @@
-package com.yanry.driver.core.model;
+package com.yanry.driver.core.model.property;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
