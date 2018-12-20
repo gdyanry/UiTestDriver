@@ -1,16 +1,16 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.base.IntProperty;
+import com.yanry.driver.core.model.base.IntegerProperty;
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.runtime.fetch.NonNegativeIntegerQuery;
+import com.yanry.driver.core.model.runtime.fetch.IntegerQuery;
 import com.yanry.driver.mobile.view.View;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
-public abstract class ViewIntProperty extends IntProperty {
+public abstract class ViewIntegerProperty extends IntegerProperty {
     private View view;
 
-    public ViewIntProperty(View view) {
+    public ViewIntegerProperty(View view) {
         super(view.getGraph());
         this.view = view;
         setDependentStates(view.getState(Equals.of(true)));
@@ -25,6 +25,6 @@ public abstract class ViewIntProperty extends IntProperty {
 
     @Override
     protected final Integer checkValue() {
-        return getGraph().obtainValue(new NonNegativeIntegerQuery(this));
+        return getGraph().obtainValue(new IntegerQuery(this));
     }
 }

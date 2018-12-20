@@ -34,7 +34,7 @@ public class Divider extends BooleanProperty {
             // cleanCache
             state.getProperty().addOnCleanListener(this::cleanCache);
             // check value
-            state.getProperty().addOnChangeValueListener((o, n) -> refresh());
+            state.getProperty().addOnValueUpdateListener(v -> refresh());
         }
     }
 

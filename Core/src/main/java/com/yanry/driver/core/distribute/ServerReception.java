@@ -4,7 +4,7 @@ import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.communicator.SerializedCommunicator;
+import com.yanry.driver.core.model.runtime.communicator.SerializedCommunicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;

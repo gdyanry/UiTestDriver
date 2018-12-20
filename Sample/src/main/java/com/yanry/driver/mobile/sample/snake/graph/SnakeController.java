@@ -4,7 +4,6 @@ import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.NonPropertyExpectation;
 import com.yanry.driver.core.model.base.ValuePredicate;
-import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.event.StateChangeEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
@@ -13,6 +12,7 @@ import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.predicate.Within;
 import com.yanry.driver.core.model.property.CombinedProperty;
 import com.yanry.driver.core.model.property.StateSnapShoot;
+import com.yanry.driver.core.model.runtime.communicator.Communicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.mobile.sample.snake.GameConfigure;
 import com.yanry.driver.mobile.sample.snake.SnakeModel;
@@ -111,10 +111,14 @@ public class SnakeController extends Graph implements Communicator {
                     snakeModel.removeLast();
                 }
                 snakeModel.push(new Point(snakeHeadX.getCurrentValue(), snakeHeadY.getCurrentValue()));
+                Point pos = snakeModel.getFruitPos();
+                ExternalEvent event = snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, pos.x).append(snakeHeadY, pos.y).build()));
+                if (!SnakeEvent.MoveAhead.get().equals(event)) {
+                    fire(event);
+                }
             }
         };
-        createPath(new StateChangeEvent<>(snakeHeadX), expectation).addContextValue(gameState, GameState.MOVE);
-        createPath(new StateChangeEvent<>(snakeHeadY), expectation).addContextValue(gameState, GameState.MOVE);
+        createPath(new StateChangeEvent<>(snakeHead), expectation).addContextValue(gameState, GameState.MOVE);
     }
 
     public String getCurrentState() {

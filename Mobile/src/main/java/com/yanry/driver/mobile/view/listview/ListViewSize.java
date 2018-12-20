@@ -1,12 +1,12 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.mobile.property.ViewIntProperty;
+import com.yanry.driver.mobile.property.ViewIntegerProperty;
 
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class ListViewSize extends ViewIntProperty implements Supplier<Integer> {
+public class ListViewSize extends ViewIntegerProperty implements Supplier<Integer> {
     private int num;
 
     public ListViewSize(ListView view) {

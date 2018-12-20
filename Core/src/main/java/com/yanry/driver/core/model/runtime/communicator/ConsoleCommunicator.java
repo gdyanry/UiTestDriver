@@ -1,4 +1,4 @@
-package com.yanry.driver.core.model.communicator;
+package com.yanry.driver.core.model.runtime.communicator;
 
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.ExternalEvent;

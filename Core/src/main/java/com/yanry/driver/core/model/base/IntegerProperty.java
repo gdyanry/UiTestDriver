@@ -5,9 +5,9 @@ import com.yanry.driver.core.model.expectation.Timing;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
-public abstract class IntProperty extends Property<Integer> {
+public abstract class IntegerProperty extends Property<Integer> {
 
-    public IntProperty(Graph graph) {
+    public IntegerProperty(Graph graph) {
         super(graph);
     }
 
@@ -37,8 +37,8 @@ public abstract class IntProperty extends Property<Integer> {
         private int step;
 
         private ShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
-            super(timing, needCheck, IntProperty.this, () -> {
-                Integer currentValue = IntProperty.this.getCurrentValue();
+            super(timing, needCheck, IntegerProperty.this, () -> {
+                Integer currentValue = IntegerProperty.this.getCurrentValue();
                 if (currentValue != null) {
                     return upward ? currentValue + step : currentValue - step;
                 }

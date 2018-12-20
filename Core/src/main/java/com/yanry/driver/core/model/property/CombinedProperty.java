@@ -19,7 +19,7 @@ public class CombinedProperty extends Property<StateSnapShoot> {
         this.properties = properties;
         for (Property property : properties) {
             property.addOnCleanListener(this::cleanCache);
-            property.addOnChangeValueListener((o, n) -> refresh());
+            property.addOnValueUpdateListener(v -> refresh());
         }
     }
 

@@ -4,14 +4,18 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
-import com.yanry.driver.core.model.communicator.Communicator;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
+import com.yanry.driver.core.model.runtime.communicator.Communicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
+import com.yanry.driver.core.model.runtime.record.ActionRecord;
+import com.yanry.driver.core.model.runtime.record.CommunicateRecord;
+import com.yanry.driver.core.model.runtime.record.VerificationRecord;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
 import lib.common.util.CollectionUtil;
+import lib.common.util.object.ObjectUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +37,7 @@ public class Graph {
     private AtomicInteger methodStack;
 
     Map<Property, Object> propertyCache;
-    private List<Object> records;
+    private List<CommunicateRecord> records;
     HashSet<Property> nullCache;
     long frameMark;
     private boolean hasChanged;
@@ -234,17 +238,18 @@ public class Graph {
         return success;
     }
 
-    public synchronized void fire(ExternalEvent externalEvent) {
+    public synchronized void fire(ExternalEvent event) {
+        Logger.getDefault().dd(event);
         frameMark++;
-        if (externalEvent instanceof SwitchStateAction) {
-            SwitchStateAction stateAction = (SwitchStateAction) externalEvent;
+        if (event instanceof SwitchStateAction) {
+            SwitchStateAction stateAction = (SwitchStateAction) event;
             Property property = stateAction.getProperty();
             property.handleExpectation(stateAction.getValue(), false);
         }
         // 为了避免使用相同事件来切换状态（如播放/暂停）的路径被连续触发，所以先把path放入容器中。
         LinkedList<Path> pathsToVerify = new LinkedList<>();
         for (Path path : new ArrayList<>(allPaths)) {
-            if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
+            if (path.getEvent().equals(event) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
                 pathsToVerify.add(path);
             }
         }
@@ -258,7 +263,7 @@ public class Graph {
                 VerifyResult result = expectation.verify(this);
                 if (result != VerifyResult.Pending) {
                     if (expectation.isNeedCheck()) {
-                        records.add(expectation);
+                        records.add(new VerificationRecord(expectation, result));
                     }
                     pendingExpectations.remove(expectation);
                 }
@@ -270,23 +275,34 @@ public class Graph {
         }
     }
 
-    private boolean postAction(ExternalEvent externalEvent) {
-        records.add(externalEvent);
+    private boolean postAction(ExternalEvent event) {
+        String snapShoot = getGraphSnapShoot();
         if (communicator != null) {
-            LinkedList<Runnable> preActions = externalEvent.getPreActions();
+            LinkedList<Runnable> preActions = event.getPreActions();
             if (preActions != null) {
                 for (Runnable action : preActions) {
                     action.run();
                 }
             }
-            if (communicator.performAction(externalEvent)) {
-                fire(externalEvent);
+            if (communicator.performAction(event)) {
+                records.add(new ActionRecord(event, true, snapShoot));
+                fire(event);
                 return true;
             }
         }
-        Logger.getDefault().ee("cannot perform action: ", externalEvent);
-        invalidActions.add(externalEvent);
+        records.add(new ActionRecord(event, false, snapShoot));
+        Logger.getDefault().ee("cannot perform action: ", event);
+        invalidActions.add(event);
         return false;
+    }
+
+    private String getGraphSnapShoot() {
+        try {
+            return ObjectUtil.getSnapShootMd5(propertyCache) + ObjectUtil.getSnapShootMd5(nullCache);
+        } catch (Exception e) {
+            Logger.getDefault().catches(e);
+        }
+        return null;
     }
 
     private ExternalEvent roll(Path path) {
@@ -333,7 +349,7 @@ public class Graph {
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
-                records.add(expectation);
+                records.add(new VerificationRecord(expectation, result));
             }
         }
         return result;
@@ -388,11 +404,11 @@ public class Graph {
             Logger.getDefault().ii("action is invalid: ", externalEvent);
             return false;
         }
-        if (CollectionUtil.checkLoop(records, externalEvent)) {
+        if (CollectionUtil.checkLoop(records, new ActionRecord(externalEvent, false, getGraphSnapShoot()))) {
             Logger.getDefault().ii("skip action to avoid loop: ", externalEvent);
             return false;
         }
-        return !invalidActions.contains(externalEvent) && !CollectionUtil.checkLoop(records, externalEvent);
+        return true;
     }
 
     public <V> V obtainValue(Obtainable<V> obtainable) {

@@ -11,7 +11,7 @@ import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
 import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -28,7 +28,7 @@ public abstract class Property<V> extends HandyObject {
     long graphFrameMark;
     private HashSet<V> collectedValues;
     private State[] dependentStates;
-    private LinkedList<BiConsumer<V, V>> onValueChangeListeners;
+    private LinkedList<Consumer<V>> onValueUpdateListeners;
     private LinkedList<Runnable> onCleanListeners;
 
     public Property(Graph graph) {
@@ -48,11 +48,11 @@ public abstract class Property<V> extends HandyObject {
         }
     }
 
-    public void addOnChangeValueListener(BiConsumer<V, V> listener) {
-        if (onValueChangeListeners == null) {
-            onValueChangeListeners = new LinkedList<>();
+    public void addOnValueUpdateListener(Consumer<V> listener) {
+        if (onValueUpdateListeners == null) {
+            onValueUpdateListeners = new LinkedList<>();
         }
-        onValueChangeListeners.add(listener);
+        onValueUpdateListeners.add(listener);
     }
 
     public void addOnCleanListener(Runnable listener) {
@@ -81,6 +81,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final ExternalEvent switchTo(ValuePredicate<V> toState) {
+        findValueToAdd(toState);
         if (toState.test(getCurrentValue())) {
             return null;
         }
@@ -158,11 +159,6 @@ public abstract class Property<V> extends HandyObject {
 
     private void handleChange(V oldValue, V newValue) {
         if (!Objects.equals(oldValue, newValue)) {
-            if (onValueChangeListeners != null) {
-                for (BiConsumer<V, V> listener : onValueChangeListeners) {
-                    listener.accept(oldValue, newValue);
-                }
-            }
             graph.verifySuperPaths(this, oldValue, newValue);
         }
     }
@@ -173,11 +169,22 @@ public abstract class Property<V> extends HandyObject {
 
     private void updateCache(V value) {
         if (value == null) {
+            if (graph.nullCache.contains(this)) {
+                return;
+            }
             graph.nullCache.add(this);
             graph.propertyCache.remove(this);
         } else {
+            if (Objects.equals(graph.propertyCache.get(this), value)) {
+                return;
+            }
             graph.nullCache.remove(this);
             graph.propertyCache.put(this, value);
+        }
+        if (onValueUpdateListeners != null) {
+            for (Consumer<V> listener : onValueUpdateListeners) {
+                listener.accept(value);
+            }
         }
     }
 

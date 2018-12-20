@@ -42,7 +42,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         itemClick = new ItemClick(graph);
         clickItemEvent = new TransitionEvent<>(itemClick, false, true);
         // size变化时重新初始化item
-        size.addOnChangeValueListener((o, n) -> initItems());
+        size.addOnValueUpdateListener(v -> initItems());
     }
 
     public void initItems() {

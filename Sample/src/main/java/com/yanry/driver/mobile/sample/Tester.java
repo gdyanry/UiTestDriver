@@ -2,10 +2,10 @@ package com.yanry.driver.mobile.sample;
 
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
-import com.yanry.driver.core.model.communicator.ConsoleCommunicator;
 import com.yanry.driver.core.model.runtime.Assertion;
 import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.MissedPath;
+import com.yanry.driver.core.model.runtime.communicator.ConsoleCommunicator;
 import com.yanry.driver.mobile.sample.model.ConsoleGraphWatcher;
 import lib.common.model.log.ConsoleHandler;
 import lib.common.model.log.LogLevel;
