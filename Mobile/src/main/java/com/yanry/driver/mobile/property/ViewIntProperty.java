@@ -14,7 +14,7 @@ public abstract class ViewIntProperty extends IntProperty {
         super(view.getGraph());
         this.view = view;
         setDependentStates(view.getState(Equals.of(true)));
-        view.addOnCleanListener(() -> clean());
+        view.addOnCleanListener(() -> cleanCache());
     }
 
     @Visible

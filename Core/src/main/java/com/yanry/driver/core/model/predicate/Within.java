@@ -4,6 +4,7 @@ import com.yanry.driver.core.model.base.ValuePredicate;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -12,6 +13,10 @@ public class Within<V> extends ValuePredicate<V> {
 
     public Within(Collection<V> values) {
         this.values = values;
+    }
+
+    public Within(V... values) {
+        this.values = Arrays.asList(values);
     }
 
     @Visible

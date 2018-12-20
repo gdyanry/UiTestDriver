@@ -7,7 +7,7 @@ import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.fetch.Select;
-import com.yanry.driver.mobile.action.ClickLauncher;
+import com.yanry.driver.mobile.action.GlobalActions;
 import com.yanry.driver.mobile.property.ProcessState;
 
 import java.util.LinkedHashMap;
@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 public class Application extends Property<Window> {
     private Map<Class<? extends Window>, Window> windowInstances;
     private ProcessState processState;
-    private ClickLauncher clickLauncher;
 
     public Application(Graph graph) {
         super(graph);
@@ -30,9 +29,8 @@ public class Application extends Property<Window> {
         // 初始状态
         processState.setInitValue(false);
         setInitValue(null);
-        clickLauncher = new ClickLauncher(this);
         // 开启进程
-        graph.createPath(clickLauncher, processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
+        graph.createPath(GlobalActions.clickLauncher(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
                 .addContextValue(processState, false);
         // 退出进程
         graph.createPath(new SwitchStateAction<>(processState, false),
@@ -62,10 +60,6 @@ public class Application extends Property<Window> {
 
     public ProcessState getProcessState() {
         return processState;
-    }
-
-    public ClickLauncher clickLauncher() {
-        return clickLauncher;
     }
 
     @Override

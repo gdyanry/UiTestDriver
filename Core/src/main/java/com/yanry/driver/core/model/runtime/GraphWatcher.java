@@ -14,5 +14,7 @@ public interface GraphWatcher {
      * @param nullCache
      * @param verifiedPaths
      */
-    void onStandby(Map<Property, Object> propertyCache, Set<Property> nullCache, Set<Path> verifiedPaths);
+    void onTransitionComplete(Map<Property, Object> propertyCache, Set<Property> nullCache, Set<Path> verifiedPaths);
+
+    <V> void onStateChange(Property<V> property, V fromVal, V toVal);
 }

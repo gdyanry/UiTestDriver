@@ -1,4 +1,4 @@
-package com.yanry.driver.core.model;
+package com.yanry.driver.core.model.extension;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Path;
@@ -13,34 +13,37 @@ import lib.common.util.object.Visible;
  * @Date: 2018/10/31 23:10
  */
 public class Divider extends BooleanProperty {
+    private String name;
     private State[] states;
 
-    public Divider(State... states) {
+    public Divider(String name, State... states) {
         super(states[0].getProperty().getGraph());
+        this.name = name;
         this.states = states;
         for (State state : states) {
-            // -> false
             Path toFalse = getGraph().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate()),
                     getStaticExpectation(Timing.IMMEDIATELY, false, false));
-            for (State s : states) {
-                if (s != state) {
-                    toFalse.addContextPredicate(s.getProperty(), s.getValuePredicate());
-                }
-            }
-            // -> true
             Path toTrue = getGraph().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate().not()),
                     getStaticExpectation(Timing.IMMEDIATELY, false, true));
             for (State s : states) {
                 if (s != state) {
+                    toFalse.addContextPredicate(s.getProperty(), s.getValuePredicate());
                     toTrue.addContextPredicate(s.getProperty(), s.getValuePredicate());
                 }
             }
-            // clean
-            state.getProperty().addOnCleanListener(() -> clean());
+            // cleanCache
+            state.getProperty().addOnCleanListener(this::cleanCache);
+            // check value
+            state.getProperty().addOnChangeValueListener((o, n) -> refresh());
         }
     }
 
+    @EqualsPart
     @Visible
+    public String getName() {
+        return name;
+    }
+
     @EqualsPart
     public State[] getStates() {
         return states;

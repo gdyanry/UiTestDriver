@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.TransitionEvent;
+import com.yanry.driver.core.model.extension.BooleanProperty;
 import com.yanry.driver.mobile.view.selector.ById;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 

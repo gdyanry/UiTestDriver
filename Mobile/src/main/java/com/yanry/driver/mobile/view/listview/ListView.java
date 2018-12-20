@@ -1,11 +1,11 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.core.model.BooleanProperty;
 import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
+import com.yanry.driver.core.model.extension.BooleanProperty;
 import com.yanry.driver.core.model.predicate.GreaterThan;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
@@ -42,7 +42,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         itemClick = new ItemClick(graph);
         clickItemEvent = new TransitionEvent<>(itemClick, false, true);
         // size变化时重新初始化item
-        size.addOnCheckValueListener(size -> initItems());
+        size.addOnChangeValueListener((o, n) -> initItems());
     }
 
     public void initItems() {
@@ -50,7 +50,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
             int listSize = size.getCurrentValue();
             for (int i = 0; i < listSize; i++) {
                 I itemView = getViewByIndex(i);
-                itemView.clean();
+                itemView.cleanCache();
             }
         }
     }

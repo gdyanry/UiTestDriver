@@ -13,7 +13,7 @@ public abstract class ViewProperty<V> extends Property<V> {
         super(view.getGraph());
         this.view = view;
         setDependentStates(view.getState(Equals.of(true)));
-        view.addOnCleanListener(() -> clean());
+        view.addOnCleanListener(() -> cleanCache());
     }
 
     @Visible

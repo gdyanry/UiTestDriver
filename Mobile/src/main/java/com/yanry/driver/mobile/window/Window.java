@@ -6,7 +6,7 @@ import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.mobile.action.ClickOutside;
-import com.yanry.driver.mobile.action.PressBack;
+import com.yanry.driver.mobile.action.GlobalActions;
 import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
@@ -44,17 +44,17 @@ public abstract class Window extends ViewContainer {
         // 退出前台时visible->false
         getGraph().createPath(new NegationEvent<>(visibility, foreground),
                 getStaticExpectation(Timing.IMMEDIATELY, false, false));
-        // clean
+        // cleanCache
         getGraph().createPath(closeEvent, new ActionExpectation() {
             @Override
             protected void run() {
-                clean();
+                cleanCache();
             }
         });
     }
 
     public Path showOnLaunch(Timing timing) {
-        return getGraph().createPath(application.clickLauncher(), application.getStaticExpectation(timing, true, this)
+        return getGraph().createPath(GlobalActions.clickLauncher(), application.getStaticExpectation(timing, true, this)
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, null)))
                 .setBaseUnsatisfiedDegree(10000);
     }
@@ -96,7 +96,7 @@ public abstract class Window extends ViewContainer {
     }
 
     public Path closeOnPressBack() {
-        return close(PressBack.get(), Timing.IMMEDIATELY).addContextValue(this, true);
+        return close(GlobalActions.pressBack(), Timing.IMMEDIATELY).addContextValue(this, true);
     }
 
     public Path closeOnTouchOutside() {

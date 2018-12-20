@@ -1,9 +1,9 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.Divider;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.extension.Divider;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 
@@ -21,7 +21,7 @@ public class CurrentUser extends Property<String> {
     public CurrentUser(Graph graph) {
         super(graph);
         userPasswordMap = new HashMap<>();
-        loginState = new Divider(getState(Equals.of("").not()));
+        loginState = new Divider("isLogin", getState(Equals.of("").not()));
     }
 
     public CurrentUser addUserPassword(String user, String pwd) {

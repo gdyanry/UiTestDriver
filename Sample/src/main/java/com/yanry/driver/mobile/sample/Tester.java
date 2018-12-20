@@ -45,6 +45,7 @@ public class Tester {
         int failCount = 0;
         int missCount = 0;
         System.out.println("-------------------------------------RECORD----------------------------------");
+        int n = 0;
         for (Object record : records) {
             boolean fail = false;
             if (record instanceof Assertion) {
@@ -62,9 +63,9 @@ public class Tester {
                 missCount++;
             }
             if (fail) {
-                Logger.getDefault().ee(record);
+                System.err.println(String.format("%s: %s", n++, record));
             } else {
-                Logger.getDefault().dd(record);
+                System.out.println(String.format("%s: %s", n++, record));
             }
         }
         Logger.getDefault().d("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);

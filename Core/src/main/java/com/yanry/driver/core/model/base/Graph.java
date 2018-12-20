@@ -25,20 +25,23 @@ import java.util.stream.Collectors;
  */
 public class Graph {
     private List<Path> allPaths;
-    Map<Property, Object> propertyCache;
-    private List<Object> records;
-    private boolean isTraversing;
-    HashSet<Property> nullCache;
-    long frameMark;
-    private Set<Path> verifiedPaths;
-    private AtomicInteger methodStack;
-    private Set<Expectation> pendingExpectations;
-    private HashSet<ExternalEvent> invalidActions;
     private List<Path> concernedPaths;
-    private LinkedList<State> stateTrace;
-    private List<Path> unprocessedPaths;
     private Communicator communicator;
     private GraphWatcher watcher;
+
+    private boolean isTraversing;
+    private AtomicInteger methodStack;
+
+    Map<Property, Object> propertyCache;
+    private List<Object> records;
+    HashSet<Property> nullCache;
+    long frameMark;
+    private boolean hasChanged;
+    private Set<Path> verifiedPaths;
+    private Set<Expectation> pendingExpectations;
+    private HashSet<ExternalEvent> invalidActions;
+    private LinkedList<State> stateTrace;
+    private List<Path> unprocessedPaths;
 
     public Graph() {
         allPaths = new LinkedList<>();
@@ -51,6 +54,18 @@ public class Graph {
         stateTrace = new LinkedList<>();
         propertyCache = new HashMap<>();
         nullCache = new HashSet<>();
+    }
+
+    public void reset() {
+        propertyCache.clear();
+        records.clear();
+        nullCache.clear();
+        frameMark = 0;
+        verifiedPaths.clear();
+        pendingExpectations.clear();
+        invalidActions.clear();
+        stateTrace.clear();
+        unprocessedPaths.clear();
     }
 
     public void setCommunicator(Communicator communicator) {
@@ -219,7 +234,43 @@ public class Graph {
         return success;
     }
 
-    public synchronized boolean postAction(ExternalEvent externalEvent) {
+    public synchronized void fire(ExternalEvent externalEvent) {
+        frameMark++;
+        if (externalEvent instanceof SwitchStateAction) {
+            SwitchStateAction stateAction = (SwitchStateAction) externalEvent;
+            Property property = stateAction.getProperty();
+            property.handleExpectation(stateAction.getValue(), false);
+        }
+        // 为了避免使用相同事件来切换状态（如播放/暂停）的路径被连续触发，所以先把path放入容器中。
+        LinkedList<Path> pathsToVerify = new LinkedList<>();
+        for (Path path : new ArrayList<>(allPaths)) {
+            if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
+                pathsToVerify.add(path);
+            }
+        }
+        for (Path path : pathsToVerify) {
+            verify(path);
+        }
+        // process pending expectation
+        if (pendingExpectations.size() > 0) {
+            ArrayList<Expectation> pending = new ArrayList<>(pendingExpectations);
+            for (Expectation expectation : pending) {
+                VerifyResult result = expectation.verify(this);
+                if (result != VerifyResult.Pending) {
+                    if (expectation.isNeedCheck()) {
+                        records.add(expectation);
+                    }
+                    pendingExpectations.remove(expectation);
+                }
+            }
+        }
+        if (watcher != null && hasChanged) {
+            watcher.onTransitionComplete(propertyCache, nullCache, verifiedPaths);
+            hasChanged = false;
+        }
+    }
+
+    private boolean postAction(ExternalEvent externalEvent) {
         records.add(externalEvent);
         if (communicator != null) {
             LinkedList<Runnable> preActions = externalEvent.getPreActions();
@@ -229,33 +280,7 @@ public class Graph {
                 }
             }
             if (communicator.performAction(externalEvent)) {
-                frameMark++;
-                if (externalEvent instanceof SwitchStateAction) {
-                    SwitchStateAction stateAction = (SwitchStateAction) externalEvent;
-                    Property property = stateAction.getProperty();
-                    property.handleExpectation(stateAction.getValue(), false);
-                }
-                for (Path path : new ArrayList<>(allPaths)) {
-                    if (path.getEvent().equals(externalEvent) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
-                        verify(path);
-                    }
-                }
-                // process pending expectation
-                if (pendingExpectations.size() > 0) {
-                    ArrayList<Expectation> pending = new ArrayList<>(pendingExpectations);
-                    for (Expectation expectation : pending) {
-                        VerifyResult result = expectation.verify(this);
-                        if (result != VerifyResult.Pending) {
-                            if (expectation.isNeedCheck()) {
-                                records.add(expectation);
-                            }
-                            pendingExpectations.remove(expectation);
-                        }
-                    }
-                }
-                if (watcher != null) {
-                    watcher.onStandby(propertyCache, nullCache, verifiedPaths);
-                }
+                fire(externalEvent);
                 return true;
             }
         }
@@ -316,6 +341,10 @@ public class Graph {
 
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!Objects.equals(from, to)) {
+            if (watcher != null) {
+                hasChanged = true;
+                watcher.onStateChange(property, from, to);
+            }
             for (Path path : new ArrayList<>(allPaths)) {
                 Event event = path.getEvent();
                 if (event instanceof InternalEvent) {

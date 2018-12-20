@@ -11,7 +11,7 @@ import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -28,7 +28,7 @@ public abstract class Property<V> extends HandyObject {
     long graphFrameMark;
     private HashSet<V> collectedValues;
     private State[] dependentStates;
-    private LinkedList<Consumer<V>> onCheckValueListeners;
+    private LinkedList<BiConsumer<V, V>> onValueChangeListeners;
     private LinkedList<Runnable> onCleanListeners;
 
     public Property(Graph graph) {
@@ -48,11 +48,11 @@ public abstract class Property<V> extends HandyObject {
         }
     }
 
-    public void addOnCheckValueListener(Consumer<V> listener) {
-        if (onCheckValueListeners == null) {
-            onCheckValueListeners = new LinkedList<>();
+    public void addOnChangeValueListener(BiConsumer<V, V> listener) {
+        if (onValueChangeListeners == null) {
+            onValueChangeListeners = new LinkedList<>();
         }
-        onCheckValueListeners.add(listener);
+        onValueChangeListeners.add(listener);
     }
 
     public void addOnCleanListener(Runnable listener) {
@@ -146,14 +146,23 @@ public abstract class Property<V> extends HandyObject {
         if (needCheck) {
             if (!isValueFresh()) {
                 // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
-                clean();
+                cleanCache();
             }
         } else {
             // 不查询客户端，直接通过验证并更新状态值
             updateCache(expectedValue);
         }
         V newValue = getCurrentValue();
+        handleChange(oldValue, newValue);
+    }
+
+    private void handleChange(V oldValue, V newValue) {
         if (!Objects.equals(oldValue, newValue)) {
+            if (onValueChangeListeners != null) {
+                for (BiConsumer<V, V> listener : onValueChangeListeners) {
+                    listener.accept(oldValue, newValue);
+                }
+            }
             graph.verifySuperPaths(this, oldValue, newValue);
         }
     }
@@ -172,7 +181,18 @@ public abstract class Property<V> extends HandyObject {
         }
     }
 
-    public void clean() {
+    public void refresh() {
+        boolean hasCache = graph.nullCache.contains(this) || graph.propertyCache.containsKey(this);
+        if (hasCache) {
+            V oldValue = getCurrentValue();
+            V newValue = doCheckValue();
+            handleChange(oldValue, newValue);
+        } else {
+            doCheckValue();
+        }
+    }
+
+    public void cleanCache() {
         graph.nullCache.remove(this);
         graph.propertyCache.remove(this);
         if (onCleanListeners != null) {
@@ -188,22 +208,25 @@ public abstract class Property<V> extends HandyObject {
         }
         V cacheValue = (V) getGraph().propertyCache.get(this);
         if (cacheValue == null) {
-            if (dependentStates != null) {
-                for (State dependentState : dependentStates) {
-                    if (!dependentState.isSatisfied()) {
-                        return null;
-                    }
-                }
-            }
-            cacheValue = checkValue();
-            updateCache(cacheValue);
-            if (onCheckValueListeners != null) {
-                for (Consumer<V> listener : onCheckValueListeners) {
-                    listener.accept(cacheValue);
+            cacheValue = doCheckValue();
+        }
+        return cacheValue;
+    }
+
+    private V doCheckValue() {
+        if (dependentStates != null) {
+            for (State dependentState : dependentStates) {
+                if (!dependentState.isSatisfied()) {
+                    return null;
                 }
             }
         }
-        return cacheValue;
+        V value = checkValue();
+        updateCache(value);
+        if (value != null) {
+            collectedValues.add(value);
+        }
+        return value;
     }
 
     public Object[] getValues() {
