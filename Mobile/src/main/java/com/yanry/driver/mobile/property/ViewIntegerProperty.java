@@ -11,7 +11,7 @@ public abstract class ViewIntegerProperty extends IntegerProperty {
     private View view;
 
     public ViewIntegerProperty(View view) {
-        super(view.getGraph());
+        super(view.getStateSpace());
         this.view = view;
         setDependentStates(view.getState(Equals.of(true)));
         view.addOnCleanListener(() -> cleanCache());
@@ -25,6 +25,6 @@ public abstract class ViewIntegerProperty extends IntegerProperty {
 
     @Override
     protected final Integer checkValue() {
-        return getGraph().obtainValue(new IntegerQuery(this));
+        return getStateSpace().obtainValue(new IntegerQuery(this));
     }
 }

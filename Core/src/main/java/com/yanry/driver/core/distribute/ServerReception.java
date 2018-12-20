@@ -2,8 +2,8 @@ package com.yanry.driver.core.distribute;
 
 import com.yanry.driver.core.model.base.Expectation;
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.runtime.communicator.SerializedCommunicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import lib.common.model.json.JSONArray;
@@ -18,7 +18,7 @@ import java.util.concurrent.SynchronousQueue;
  * Created by rongyu.yan on 3/14/2017.
  */
 public class ServerReception extends SerializedCommunicator {
-    private Graph graph;
+    private StateSpace stateSpace;
     private long timestamp;
     private JSONObject lastInstruction;
     private SynchronousQueue<JSONObject> instructionQueue;
@@ -26,15 +26,15 @@ public class ServerReception extends SerializedCommunicator {
     private boolean isAbort;
 
     /**
-     * @param graph
+     * @param stateSpace
      * @return return an array containing optional paths.
      */
-    public JSONArray prepare(Graph graph) {
-        graph.setCommunicator(this);
-        this.graph = graph;
+    public JSONArray prepare(StateSpace stateSpace) {
+        stateSpace.setCommunicator(this);
+        this.stateSpace = stateSpace;
         instructionQueue = new SynchronousQueue(true);
         feedbackQueue = new SynchronousQueue<>(true);
-        List<Path> paths = graph.getConcernedPaths();
+        List<Path> paths = stateSpace.getConcernedPaths();
         JSONArray jsonArray = new JSONArray();
         for (Path path : paths) {
             jsonArray.put(ObjectUtil.getPresentation(path));
@@ -59,7 +59,7 @@ public class ServerReception extends SerializedCommunicator {
         }
         int[] finalIndexes = indexes;
         executor.execute(() -> {
-            List<Object> result = graph.traverse(finalIndexes);
+            List<Object> result = stateSpace.traverse(finalIndexes);
             JSONArray ja = new JSONArray();
             for (Object o : result) {
                 ja.put(ObjectUtil.getPresentation(o));
@@ -104,7 +104,7 @@ public class ServerReception extends SerializedCommunicator {
      */
     public JSONObject abort() {
         isAbort = true;
-        graph.abort();
+        stateSpace.abort();
         try {
             feedbackQueue.put("1");
             return instructionQueue.take();

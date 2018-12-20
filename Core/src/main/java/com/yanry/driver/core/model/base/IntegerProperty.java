@@ -7,8 +7,8 @@ import lib.common.util.object.Visible;
 
 public abstract class IntegerProperty extends Property<Integer> {
 
-    public IntegerProperty(Graph graph) {
-        super(graph);
+    public IntegerProperty(StateSpace stateSpace) {
+        super(stateSpace);
     }
 
     public ShiftExpectation getShiftExpectation(Timing timing, boolean needCheck, boolean upward, int step) {
@@ -21,7 +21,7 @@ public abstract class IntegerProperty extends Property<Integer> {
         if (currentValue == null || to == null) {
             return null;
         }
-        return getGraph().findPathToRoll(exp -> {
+        return getStateSpace().findPathToRoll(exp -> {
             if (exp instanceof ShiftExpectation) {
                 ShiftExpectation expectation = (ShiftExpectation) exp;
                 if (expectation.getProperty() == this) {

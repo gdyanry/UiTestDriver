@@ -2,7 +2,7 @@ package com.yanry.driver.server.springboot;
 
 import com.yanry.driver.core.distribute.Const;
 import com.yanry.driver.core.distribute.ServerReception;
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.model.Singletons;
 import lib.common.model.cache.TimedCache;
 import lib.common.model.json.JSONArray;
@@ -32,17 +32,17 @@ public abstract class CommunicatorController {
         executor = Executors.newCachedThreadPool();
     }
 
-    protected abstract void populateGraph(Graph graph);
+    protected abstract void populateGraph(StateSpace stateSpace);
 
     @GetMapping(Const.HTTP_PATH_PREPARE)
     public String prepare(HttpServletResponse response) {
         String token = UUID.randomUUID().toString();
         ServerReception reception = new ServerReception();
-        Graph graph = new Graph();
-        populateGraph(graph);
+        StateSpace stateSpace = new StateSpace();
+        populateGraph(stateSpace);
         receptionMap.put(token, reception);
         response.setHeader(Const.HTTP_HEADER_TOKEN, token);
-        return reception.prepare(graph).toString();
+        return reception.prepare(stateSpace).toString();
     }
 
     @GetMapping(Const.HTTP_PATH_TRAVERSE)

@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 public class PreviousWindow extends Property<Window> {
     private Window window;
 
-    PreviousWindow(Graph graph, Window window) {
-        super(graph);
+    PreviousWindow(StateSpace stateSpace, Window window) {
+        super(stateSpace);
         this.window = window;
     }
 

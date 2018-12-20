@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.sample.login;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.runtime.fetch.Select;
 import lib.common.util.ReflectionUtil;
@@ -22,13 +22,13 @@ public class NetworkState extends Property<String> {
     public static String Abnormal;
     public static String Disconnected;
 
-    public NetworkState(Graph graph) {
-        super(graph);
+    public NetworkState(StateSpace stateSpace) {
+        super(stateSpace);
     }
 
     @Override
     protected String checkValue() {
-        return getGraph().obtainValue(new Select<>(this));
+        return getStateSpace().obtainValue(new Select<>(this));
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.sample.snake.graph;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.NonPropertyExpectation;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.event.StateChangeEvent;
@@ -21,7 +21,7 @@ import lib.common.model.log.Logger;
 import java.awt.*;
 import java.util.stream.Stream;
 
-public class SnakeController extends Graph implements Communicator {
+public class SnakeController extends StateSpace implements Communicator {
     private GameState gameState;
 
     public SnakeController(SnakeModel snakeModel, boolean autoEat) {

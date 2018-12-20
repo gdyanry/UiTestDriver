@@ -4,8 +4,8 @@
 package com.yanry.driver.mobile.view;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.SSPropertyExpectation;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.property.BooleanProperty;
@@ -25,24 +25,24 @@ public class View extends ViewContainer {
     private ViewSelector selector;
     private IndependentVisibility independentVisibility;
 
-    public View(Graph graph, ViewContainer parent, ViewSelector selector) {
-        super(graph);
+    public View(StateSpace stateSpace, ViewContainer parent, ViewSelector selector) {
+        super(stateSpace);
         this.parent = parent;
         this.selector = selector;
-        independentVisibility = new IndependentVisibility(graph);
+        independentVisibility = new IndependentVisibility(stateSpace);
         // 默认可见
         independentVisibility.setInitValue(true);
         SSPropertyExpectation<Boolean> showExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, true);
         // false -> true
-        graph.createPath(parent.onShow(), showExpectation)
+        stateSpace.createPath(parent.onShow(), showExpectation)
                 .addContextValue(independentVisibility, true);
-        graph.createPath(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
+        stateSpace.createPath(new TransitionEvent<>(independentVisibility, false, true), showExpectation)
                 .addContextValue(parent, true);
         SSPropertyExpectation<Boolean> dismissExpectation = getStaticExpectation(Timing.IMMEDIATELY, false, false);
         // true -> false
-        graph.createPath(parent.onDismiss(), dismissExpectation)
+        stateSpace.createPath(parent.onDismiss(), dismissExpectation)
                 .addContextValue(independentVisibility, true);
-        graph.createPath(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
+        stateSpace.createPath(new TransitionEvent<>(independentVisibility, true, false), dismissExpectation)
                 .addContextValue(parent, true);
         // cleanCache
         parent.addOnCleanListener(() -> cleanCache());
@@ -85,8 +85,8 @@ public class View extends ViewContainer {
 
     public class IndependentVisibility extends BooleanProperty {
 
-        public IndependentVisibility(Graph graph) {
-            super(graph);
+        public IndependentVisibility(StateSpace stateSpace) {
+            super(stateSpace);
         }
 
         @Visible
@@ -97,7 +97,7 @@ public class View extends ViewContainer {
 
         @Override
         protected Boolean checkValue() {
-            return getGraph().obtainValue(new BooleanQuery(this));
+            return getStateSpace().obtainValue(new BooleanQuery(this));
         }
 
         @Override

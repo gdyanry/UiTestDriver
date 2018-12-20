@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.property;
 
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 
 import java.util.Set;
 import java.util.stream.Stream;
@@ -11,8 +11,8 @@ import java.util.stream.Stream;
  * @Date: 2018/11/7 0:01
  */
 public abstract class BooleanProperty extends Property<Boolean> {
-    public BooleanProperty(Graph graph) {
-        super(graph);
+    public BooleanProperty(StateSpace stateSpace) {
+        super(stateSpace);
     }
 
     @Override

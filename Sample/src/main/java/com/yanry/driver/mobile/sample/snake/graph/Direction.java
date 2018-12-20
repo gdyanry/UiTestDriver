@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.sample.snake.graph;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.util.ReflectionUtil;
 
 import java.util.Set;
@@ -18,8 +18,8 @@ public class Direction extends Property<String> {
     public static String LEFT;
     public static String RIGHT;
 
-    public Direction(Graph graph) {
-        super(graph);
+    public Direction(StateSpace stateSpace) {
+        super(stateSpace);
     }
 
     @Override

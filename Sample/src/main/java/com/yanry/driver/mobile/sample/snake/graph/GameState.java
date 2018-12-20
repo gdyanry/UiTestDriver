@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.sample.snake.graph;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.util.ReflectionUtil;
 
 import java.util.Set;
@@ -18,8 +18,8 @@ public class GameState extends Property<String> {
     public static String PAUSE;
     public static String GAME_OVER;
 
-    public GameState(Graph graph) {
-        super(graph);
+    public GameState(StateSpace stateSpace) {
+        super(stateSpace);
     }
 
     @Override

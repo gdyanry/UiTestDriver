@@ -14,7 +14,7 @@ public class Text extends ViewProperty<String> {
 
     @Override
     protected String checkValue() {
-        return getGraph().obtainValue(new StringQuery(this));
+        return getStateSpace().obtainValue(new StringQuery(this));
     }
 
     @Override

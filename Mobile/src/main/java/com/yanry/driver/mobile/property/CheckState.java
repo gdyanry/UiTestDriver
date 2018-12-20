@@ -16,18 +16,18 @@ public class CheckState extends ViewProperty<Boolean> {
 
     public void switchCheckStateOnClick(boolean needCheck) {
         // to checked
-        getGraph().createPath(new Click(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, true))
+        getStateSpace().createPath(new Click(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, true))
                 .addContextValue(getView(), true)
                 .addContextValue(this, false);
         // to unchecked
-        getGraph().createPath(new Click(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, false))
+        getStateSpace().createPath(new Click(getView()), getStaticExpectation(Timing.IMMEDIATELY, needCheck, false))
                 .addContextValue(getView(), true)
                 .addContextValue(this, true);
     }
 
     @Override
     protected Boolean checkValue() {
-        return getGraph().obtainValue(new BooleanQuery(this));
+        return getStateSpace().obtainValue(new BooleanQuery(this));
     }
 
     @Override

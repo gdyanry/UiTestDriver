@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.property.BooleanProperty;
 import com.yanry.driver.mobile.view.selector.ById;
@@ -16,8 +16,8 @@ public abstract class ViewContainer extends BooleanProperty {
     private TransitionEvent<Boolean> showEvent;
     private TransitionEvent<Boolean> dismissEvent;
 
-    public ViewContainer(Graph graph) {
-        super(graph);
+    public ViewContainer(StateSpace stateSpace) {
+        super(stateSpace);
         childViews = new HashMap<>();
         showEvent = new TransitionEvent<>(this, false, true);
         dismissEvent = new TransitionEvent<>(this, true, false);
@@ -34,7 +34,7 @@ public abstract class ViewContainer extends BooleanProperty {
     public View getView(ViewSelector selector) {
         View view = childViews.get(selector);
         if (view == null) {
-            view = new View(getGraph(), this, selector);
+            view = new View(getStateSpace(), this, selector);
             childViews.put(selector, view);
         }
         return view;

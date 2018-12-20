@@ -1,7 +1,7 @@
 package com.yanry.driver.mobile.property;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.property.BooleanProperty;
 
 /**
@@ -9,8 +9,8 @@ import com.yanry.driver.core.model.property.BooleanProperty;
  */
 public class ProcessState extends BooleanProperty {
 
-    public ProcessState(Graph graph) {
-        super(graph);
+    public ProcessState(StateSpace stateSpace) {
+        super(stateSpace);
     }
 
     @Override

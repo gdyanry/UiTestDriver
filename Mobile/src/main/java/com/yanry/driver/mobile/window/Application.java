@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
@@ -22,22 +22,22 @@ public class Application extends Property<Window> {
     private Map<Class<? extends Window>, Window> windowInstances;
     private ProcessState processState;
 
-    public Application(Graph graph) {
-        super(graph);
+    public Application(StateSpace stateSpace) {
+        super(stateSpace);
         windowInstances = new LinkedHashMap<>();
-        processState = new ProcessState(graph);
+        processState = new ProcessState(stateSpace);
         // 初始状态
         processState.setInitValue(false);
         setInitValue(null);
         // 开启进程
-        graph.createPath(GlobalActions.clickLauncher(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
+        stateSpace.createPath(GlobalActions.clickLauncher(), processState.getStaticExpectation(Timing.IMMEDIATELY, false, true))
                 .addContextValue(processState, false);
         // 退出进程
-        graph.createPath(new SwitchStateAction<>(processState, false),
+        stateSpace.createPath(new SwitchStateAction<>(processState, false),
                 processState.getStaticExpectation(Timing.IMMEDIATELY, false, false))
                 .addContextValue(processState, true);
         // 退出进程时清理当前窗口
-        graph.createPath(new TransitionEvent<>(processState, true, false),
+        stateSpace.createPath(new TransitionEvent<>(processState, true, false),
                 getStaticExpectation(Timing.IMMEDIATELY, false, null));
     }
 
@@ -53,7 +53,7 @@ public class Application extends Property<Window> {
             windowInstances.put(window.getClass(), window);
         }
         for (Window window : windowInstances.values()) {
-            window.addCases(window.getGraph(), this);
+            window.addCases(window.getStateSpace(), this);
         }
         addValue(windows);
     }
@@ -64,7 +64,7 @@ public class Application extends Property<Window> {
 
     @Override
     protected Window checkValue() {
-        return getGraph().obtainValue(new Select<>(this));
+        return getStateSpace().obtainValue(new Select<>(this));
     }
 
     @Override

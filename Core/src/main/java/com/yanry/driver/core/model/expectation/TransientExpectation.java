@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.expectation;
 
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.NonPropertyExpectation;
+import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.util.object.Visible;
 
 /**
@@ -10,8 +10,8 @@ import lib.common.util.object.Visible;
 public class TransientExpectation extends NonPropertyExpectation {
     private int duration;
 
-    public TransientExpectation(Timing timing, Graph graph, int duration) {
-        super(timing, graph);
+    public TransientExpectation(Timing timing, StateSpace stateSpace, int duration) {
+        super(timing, stateSpace);
         this.duration = duration;
     }
 

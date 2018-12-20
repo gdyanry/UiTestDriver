@@ -1,14 +1,14 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 
 public class NoWindow extends Window {
-    public NoWindow(Graph graph, Application manager) {
-        super(graph, manager);
+    public NoWindow(StateSpace stateSpace, Application manager) {
+        super(stateSpace, manager);
     }
 
     @Override
-    protected void addCases(Graph graph, Application manager) {
+    protected void addCases(StateSpace stateSpace, Application manager) {
 
     }
 }

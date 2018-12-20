@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.sample.snake;
 
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.GraphWatcher;
+import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.mobile.sample.snake.graph.SnakeController;
 import lib.common.model.log.ConsoleHandler;
 import lib.common.model.log.LogLevel;
@@ -21,7 +21,7 @@ public class Main {
         final SnakeModel gameModel = new SnakeModel();
         SnakeController controller = new SnakeController(gameModel, AUTO);
         final SnakeGame game = new SnakeGame(controller, gameModel);
-        controller.setWatcher(new GraphWatcher() {
+        controller.setWatcher(new Watcher() {
             @Override
             public void onTransitionComplete(Map<Property, Object> propertyCache, Set<Property> nullCache, Set<Path> verifiedPaths) {
                 SwingUtilities.invokeLater(() -> {

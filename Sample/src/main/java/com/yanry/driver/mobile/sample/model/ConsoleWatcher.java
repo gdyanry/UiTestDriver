@@ -2,12 +2,12 @@ package com.yanry.driver.mobile.sample.model;
 
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.runtime.GraphWatcher;
+import com.yanry.driver.core.model.runtime.Watcher;
 
 import java.util.Map;
 import java.util.Set;
 
-public class ConsoleGraphWatcher implements GraphWatcher {
+public class ConsoleWatcher implements Watcher {
     @Override
     public void onTransitionComplete(Map<Property, Object> propertyCache, Set<Property> nullCache, Set<Path> verifiedPaths) {
         System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");

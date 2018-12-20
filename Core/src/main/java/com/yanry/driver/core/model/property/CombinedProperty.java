@@ -1,8 +1,8 @@
 package com.yanry.driver.core.model.property;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
@@ -13,8 +13,8 @@ public class CombinedProperty extends Property<StateSnapShoot> {
     private String name;
     private Property[] properties;
 
-    public CombinedProperty(Graph graph, String name, Property... properties) {
-        super(graph);
+    public CombinedProperty(StateSpace stateSpace, String name, Property... properties) {
+        super(stateSpace);
         this.name = name;
         this.properties = properties;
         for (Property property : properties) {

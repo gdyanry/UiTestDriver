@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.listview;
 
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.GreaterThan;
 import com.yanry.driver.mobile.action.Click;
@@ -15,9 +15,9 @@ import com.yanry.driver.mobile.window.Window;
 public class MainPage extends Window {
     private ListView<MainListItem> listView;
 
-    public MainPage(Graph graph, Application manager) {
-        super(graph, manager);
-        listView = new ListView<>(graph, this, new ById("lv"), (g, l, i) -> new MainListItem(g, l, i));
+    public MainPage(StateSpace stateSpace, Application manager) {
+        super(stateSpace, manager);
+        listView = new ListView<>(stateSpace, this, new ById("lv"), (g, l, i) -> new MainListItem(g, l, i));
     }
 
     public ListView<MainListItem> getListView() {
@@ -25,16 +25,16 @@ public class MainPage extends Window {
     }
 
     @Override
-    protected void addCases(Graph graph, Application manager) {
+    protected void addCases(StateSpace stateSpace, Application manager) {
         showOnLaunch(Timing.IMMEDIATELY);
         closeOnPressBack();
         // 点击列表项进入详情页
         popWindow(DetailPage.class, listView.getClickItemEvent(), Timing.IMMEDIATELY, false)
                 .addContextPredicate(listView.getSize(), new GreaterThan<>(0));
         // 筛选
-        popWindow(FilterPage.class, new Click(new View(graph, this, new ById("filter"))), Timing.IMMEDIATELY, false);
+        popWindow(FilterPage.class, new Click(new View(stateSpace, this, new ById("filter"))), Timing.IMMEDIATELY, false);
         // 添加
-        popWindow(EditPage.class, new Click(new View(graph, this, new ById("add"))), Timing.IMMEDIATELY, false);
+        popWindow(EditPage.class, new Click(new View(stateSpace, this, new ById("add"))), Timing.IMMEDIATELY, false);
     }
 
     public class MainListItem extends ListViewItem<MainListItem> {
@@ -42,8 +42,8 @@ public class MainPage extends Window {
         private Text tvMoney;
         private Text tvTotalRate;
 
-        public MainListItem(Graph graph, ListView<MainListItem> parent, int index) {
-            super(graph, parent, index);
+        public MainListItem(StateSpace stateSpace, ListView<MainListItem> parent, int index) {
+            super(stateSpace, parent, index);
             tvFinishDate = new Text(getViewById("tv_finish_date"));
             tvMoney = new Text(getViewById("tv_money"));
             tvTotalRate = new Text(getViewById("tv_bonus_interest_rate"));

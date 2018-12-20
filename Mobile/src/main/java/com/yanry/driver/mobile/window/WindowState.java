@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.window;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.util.ReflectionUtil;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
@@ -21,8 +21,8 @@ public class WindowState extends Property<String> {
 
     private Window window;
 
-    WindowState(Graph graph, Window window) {
-        super(graph);
+    WindowState(StateSpace stateSpace, Window window) {
+        super(stateSpace);
         this.window = window;
     }
 

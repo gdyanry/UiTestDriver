@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.login;
 
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.mobile.property.CurrentUser;
 import com.yanry.driver.mobile.sample.Tester;
@@ -10,16 +10,16 @@ import com.yanry.driver.mobile.sample.login.window.MainPage;
 import com.yanry.driver.mobile.window.Application;
 
 public class LoginTest extends Application {
-    public LoginTest(Graph graph) {
-        super(graph);
-        CurrentUser currentUser = new CurrentUser(graph);
+    public LoginTest(StateSpace stateSpace) {
+        super(stateSpace);
+        CurrentUser currentUser = new CurrentUser(stateSpace);
         currentUser.addUserPassword("xiaoming.wang", "aaa111");
         currentUser.addUserPassword("rongyu.yan", "88888888");
-        NetworkState networkState = new NetworkState(graph);
-        graph.createPath(new TransitionEvent<>(getProcessState(), false, true), new ShowSplash(graph));
-        LoginPage loginPage = new LoginPage(graph, this, currentUser, networkState);
-        MainPage mainPage = new MainPage(graph, this, currentUser);
-        AboutPage aboutPage = new AboutPage(graph, this);
+        NetworkState networkState = new NetworkState(stateSpace);
+        stateSpace.createPath(new TransitionEvent<>(getProcessState(), false, true), new ShowSplash(stateSpace));
+        LoginPage loginPage = new LoginPage(stateSpace, this, currentUser, networkState);
+        MainPage mainPage = new MainPage(stateSpace, this, currentUser);
+        AboutPage aboutPage = new AboutPage(stateSpace, this);
         registerWindows(loginPage, mainPage, aboutPage);
     }
 

@@ -7,15 +7,15 @@ import com.yanry.driver.core.model.expectation.Timing;
  * Created by rongyu.yan on 3/9/2017.
  */
 public abstract class NonPropertyExpectation extends Expectation {
-    private Graph graph;
+    private StateSpace stateSpace;
 
-    public NonPropertyExpectation(Timing timing, Graph graph) {
+    public NonPropertyExpectation(Timing timing, StateSpace stateSpace) {
         super(timing, true);
-        this.graph = graph;
+        this.stateSpace = stateSpace;
     }
 
     @Override
     protected final boolean doVerify() {
-        return graph.verifyExpectation(this);
+        return stateSpace.verifyExpectation(this);
     }
 }

@@ -2,7 +2,7 @@ package com.yanry.driver.mobile.view.listview;
 
 import com.yanry.driver.core.model.base.Event;
 import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.GreaterThan;
@@ -33,13 +33,13 @@ public class ListView<I extends ListViewItem<I>> extends View {
     private ListViewItemCreator<I> itemCreator;
     private ItemClick itemClick;
 
-    public ListView(Graph graph, ViewContainer parent, ViewSelector selector, ListViewItemCreator<I> itemCreator) {
-        super(graph, parent, selector);
+    public ListView(StateSpace stateSpace, ViewContainer parent, ViewSelector selector, ListViewItemCreator<I> itemCreator) {
+        super(stateSpace, parent, selector);
         this.itemCreator = itemCreator;
         size = new ListViewSize(this);
         items = new HashMap<>();
         clickedItem = new ClickedItem(this);
-        itemClick = new ItemClick(graph);
+        itemClick = new ItemClick(stateSpace);
         clickItemEvent = new TransitionEvent<>(itemClick, false, true);
         // size变化时重新初始化item
         size.addOnValueUpdateListener(v -> initItems());
@@ -58,11 +58,11 @@ public class ListView<I extends ListViewItem<I>> extends View {
     private I getViewByIndex(int index) {
         I child = items.get(index);
         if (child == null) {
-            child = itemCreator.create(getGraph(), this, index);
+            child = itemCreator.create(getStateSpace(), this, index);
             Click click = new Click(child);
             I finalChild = child;
             click.addPreAction(() -> finalChild.queryViewStates());
-            getGraph().createPath(click, clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)
+            getStateSpace().createPath(click, clickedItem.getStaticExpectation(Timing.IMMEDIATELY, false, child)
                     .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, true)
                             .addFollowingExpectation(itemClick.getStaticExpectation(Timing.IMMEDIATELY, false, false))))
                     .addContextValue(child, true)
@@ -120,8 +120,8 @@ public class ListView<I extends ListViewItem<I>> extends View {
     }
 
     public class ItemClick extends BooleanProperty {
-        private ItemClick(Graph graph) {
-            super(graph);
+        private ItemClick(StateSpace stateSpace) {
+            super(stateSpace);
         }
 
         @EqualsPart

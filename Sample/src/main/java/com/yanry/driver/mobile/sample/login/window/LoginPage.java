@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.login.window;
 
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
@@ -33,16 +33,16 @@ public class LoginPage extends Window {
     private CurrentUser currentUser;
     private NetworkState networkState;
 
-    public LoginPage(Graph graph, Application manager, CurrentUser currentUser, NetworkState networkState) {
-        super(graph, manager);
+    public LoginPage(StateSpace stateSpace, Application manager, CurrentUser currentUser, NetworkState networkState) {
+        super(stateSpace, manager);
         this.currentUser = currentUser;
         this.networkState = networkState;
     }
 
     @Override
-    protected void addCases(Graph graph, Application manager) {
+    protected void addCases(StateSpace stateSpace, Application manager) {
         showOnLaunch(new Timing(false, Const.PLASH_DURATION)).addContextValue(currentUser.getLoginState(), false);
-        EditText etUser = new EditText(new View(graph, this, new ByDesc(DESC_USER)));
+        EditText etUser = new EditText(new View(stateSpace, this, new ByDesc(DESC_USER)));
         Divider userValidity = new Divider("isUserValid", etUser.getState(new ValuePredicate<>() {
             @Override
             public Stream<String> getConcreteValues() {
@@ -54,7 +54,7 @@ public class LoginPage extends Window {
                 return value != null && value.length() > 0 && !value.contains(" ");
             }
         }));
-        EditText etPwd = new EditText(new View(graph, this, new ByDesc(DESC_PWD)));
+        EditText etPwd = new EditText(new View(stateSpace, this, new ByDesc(DESC_PWD)));
         Divider pwdValidity = new Divider("isPasswordValid", etPwd.getState(new ValuePredicate<>() {
             @Override
             public Stream<String> getConcreteValues() {
@@ -67,44 +67,44 @@ public class LoginPage extends Window {
             }
         }));
         // 页面打开时输入框内容为空
-        graph.createPath(getCreateEvent(), etUser.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
-        graph.createPath(getCreateEvent(), etPwd.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
+        stateSpace.createPath(getCreateEvent(), etUser.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
+        stateSpace.createPath(getCreateEvent(), etPwd.getStaticExpectation(Timing.IMMEDIATELY, true, ""));
 
-        Click clickLogin = new Click(new View(graph, this, new ByText("登录")));
+        Click clickLogin = new Click(new View(stateSpace, this, new ByText("登录")));
         // 添加输入框用例
         etUser.addValue("daming.wang", "huang.xian");
-        graph.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "用户名不能为空"))
+        stateSpace.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, stateSpace, Const.TOAST_DURATION, "用户名不能为空"))
                 .addContextValue(etUser, "")
                 .addContextValue(this, true);
-        graph.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "用户名不能包含空格"))
+        stateSpace.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, stateSpace, Const.TOAST_DURATION, "用户名不能包含空格"))
                 .addContextPredicate(etUser, new Within<>(Arrays.asList("A lan", " haha", "yanry ")))
                 .addContextValue(this, true);
         etPwd.addValue("123456", "654321");
-        graph.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "密码不能为空"))
+        stateSpace.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, stateSpace, Const.TOAST_DURATION, "密码不能为空"))
                 .addContextValue(userValidity, true)
                 .addContextValue(etPwd, "")
                 .addContextValue(this, true);
-        graph.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "密码长度不能小于6"))
+        stateSpace.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, stateSpace, Const.TOAST_DURATION, "密码长度不能小于6"))
                 .addContextValue(userValidity, true)
                 .addContextPredicate(etPwd, new Within<>(Arrays.asList("124", "05324")))
                 .addContextValue(this, true);
         // 无网络连接
-        graph.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "无网络连接"))
+        stateSpace.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, stateSpace, Const.TOAST_DURATION, "无网络连接"))
                 .addContextValue(networkState, NetworkState.Disconnected)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
         // 请求对话框
-        graph.createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
+        stateSpace.createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, stateSpace, Const.HTTP_TIMEOUT))
                 .addContextValue(networkState, NetworkState.Abnormal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
-        graph.createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
+        stateSpace.createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, stateSpace, Const.HTTP_TIMEOUT))
                 .addContextValue(networkState, NetworkState.Normal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
         // 连接超时
         Timing withinTimeout = new Timing(true, Const.HTTP_TIMEOUT);
-        graph.createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "网络错误"))
+        stateSpace.createPath(clickLogin, new Toast(withinTimeout, stateSpace, Const.TOAST_DURATION, "网络错误"))
                 .addContextValue(networkState, NetworkState.Abnormal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
@@ -116,14 +116,14 @@ public class LoginPage extends Window {
                     .addContextValue(etPwd, entry.getValue())
                     .getExpectation().addFollowingExpectation(currentUser.getStaticExpectation(Timing.IMMEDIATELY, false, entry.getKey()));
             // wrong password
-            graph.createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "密码错误"))
+            stateSpace.createPath(clickLogin, new Toast(withinTimeout, stateSpace, Const.TOAST_DURATION, "密码错误"))
                     .addContextValue(networkState, NetworkState.Normal)
                     .addContextValue(etUser, entry.getKey())
                     .addContextPredicate(etPwd, Equals.of(entry.getValue()).not())
                     .addContextValue(pwdValidity, true);
         }
         // user not exist
-        graph.createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "用户不存在"))
+        stateSpace.createPath(clickLogin, new Toast(withinTimeout, stateSpace, Const.TOAST_DURATION, "用户不存在"))
                 .addContextValue(networkState, NetworkState.Normal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true)

@@ -1,12 +1,12 @@
 package com.yanry.driver.mobile.sample;
 
-import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Path;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.runtime.Assertion;
-import com.yanry.driver.core.model.runtime.GraphWatcher;
 import com.yanry.driver.core.model.runtime.MissedPath;
+import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.core.model.runtime.communicator.ConsoleCommunicator;
-import com.yanry.driver.mobile.sample.model.ConsoleGraphWatcher;
+import com.yanry.driver.mobile.sample.model.ConsoleWatcher;
 import lib.common.model.log.ConsoleHandler;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
@@ -20,15 +20,15 @@ import java.util.function.Consumer;
  */
 public class Tester {
 
-    public static void test(boolean verbose, Consumer<Graph> setupGraph) {
+    public static void test(boolean verbose, Consumer<StateSpace> setupGraph) {
         Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().method(2).sequenceNumber(), verbose ? LogLevel.Verbose : LogLevel.Debug));
         ConsoleCommunicator communicator = new ConsoleCommunicator();
-        GraphWatcher watcher = new ConsoleGraphWatcher();
-        Graph graph = new Graph();
-        graph.setCommunicator(communicator);
-        graph.setWatcher(watcher);
-        setupGraph.accept(graph);
-        List<Path> options = graph.getConcernedPaths();
+        Watcher watcher = new ConsoleWatcher();
+        StateSpace stateSpace = new StateSpace();
+        stateSpace.setCommunicator(communicator);
+        stateSpace.setWatcher(watcher);
+        setupGraph.accept(stateSpace);
+        List<Path> options = stateSpace.getConcernedPaths();
         int i = 0;
         for (Path option : options) {
             System.out.println(String.format("%05d - %s", i++, option));
@@ -40,7 +40,7 @@ public class Tester {
         }
 
         // 打印测试记录
-        List<Object> records = graph.traverse(pathIndexes);
+        List<Object> records = stateSpace.traverse(pathIndexes);
         int passCount = 0;
         int failCount = 0;
         int missCount = 0;

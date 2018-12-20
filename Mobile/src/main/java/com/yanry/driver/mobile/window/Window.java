@@ -19,11 +19,11 @@ public abstract class Window extends ViewContainer {
     private PreviousWindow previousWindow;
     private Application application;
 
-    public Window(Graph graph, Application application) {
-        super(graph);
+    public Window(StateSpace stateSpace, Application application) {
+        super(stateSpace);
         this.application = application;
-        previousWindow = new PreviousWindow(graph, this);
-        windowState = new WindowState(graph, this);
+        previousWindow = new PreviousWindow(stateSpace, this);
+        windowState = new WindowState(stateSpace, this);
         windowState.setInitValue(WindowState.NOT_CREATED);
         createEvent = new TransitionEvent<>(windowState, WindowState.NOT_CREATED, WindowState.FOREGROUND);
         closeEvent = new NegationEvent<>(windowState, Equals.of(WindowState.NOT_CREATED).not());
@@ -31,21 +31,21 @@ public abstract class Window extends ViewContainer {
         pauseEvent = new TransitionEvent<>(windowState, WindowState.FOREGROUND, WindowState.BACKGROUND);
         ReflectionUtil.initStaticStringFields(getClass());
         // windowState->FOREGROUND
-        graph.createPath(new NegationEvent<>(application, Equals.of(this).not()),
+        stateSpace.createPath(new NegationEvent<>(application, Equals.of(this).not()),
                 windowState.getStaticExpectation(Timing.IMMEDIATELY, false, WindowState.FOREGROUND));
         // 退出进程时visibility->NOT_CREATED
-        graph.createPath(new TransitionEvent<>(application.getProcessState(), true, false),
+        stateSpace.createPath(new TransitionEvent<>(application.getProcessState(), true, false),
                 windowState.getStaticExpectation(Timing.IMMEDIATELY, false, WindowState.NOT_CREATED));
 
         Equals<String> foreground = Equals.of(WindowState.FOREGROUND);
         // 进入前台时visible->true
-        getGraph().createPath(new NegationEvent<>(windowState, foreground.not()),
+        getStateSpace().createPath(new NegationEvent<>(windowState, foreground.not()),
                 getStaticExpectation(Timing.IMMEDIATELY, false, true));
         // 退出前台时visible->false
-        getGraph().createPath(new NegationEvent<>(windowState, foreground),
+        getStateSpace().createPath(new NegationEvent<>(windowState, foreground),
                 getStaticExpectation(Timing.IMMEDIATELY, false, false));
         // cleanCache
-        getGraph().createPath(closeEvent, new ActionExpectation() {
+        getStateSpace().createPath(closeEvent, new ActionExpectation() {
             @Override
             protected void run() {
                 cleanCache();
@@ -54,14 +54,14 @@ public abstract class Window extends ViewContainer {
     }
 
     public Path showOnLaunch(Timing timing) {
-        return getGraph().createPath(GlobalActions.clickLauncher(), application.getStaticExpectation(timing, true, this)
+        return getStateSpace().createPath(GlobalActions.clickLauncher(), application.getStaticExpectation(timing, true, this)
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, null)))
                 .setBaseUnsatisfiedDegree(10000);
     }
 
     public Path popWindow(Class<? extends Window> windowType, Event inputEvent, Timing timing, boolean closeCurrent) {
         Window newWindow = getWindow(windowType);
-        return getGraph().createPath(inputEvent, application.getStaticExpectation(timing, true, newWindow)
+        return getStateSpace().createPath(inputEvent, application.getStaticExpectation(timing, true, newWindow)
                 .addFollowingExpectation(new ActionExpectation() {
                     @Override
                     protected void run() {
@@ -90,7 +90,7 @@ public abstract class Window extends ViewContainer {
     }
 
     public Path close(Event inputEvent, Timing timing) {
-        return getGraph().createPath(inputEvent, application.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
+        return getStateSpace().createPath(inputEvent, application.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, null))
                 .addFollowingExpectation(windowState.getStaticExpectation(Timing.IMMEDIATELY, false, WindowState.NOT_CREATED)));
     }
@@ -135,7 +135,7 @@ public abstract class Window extends ViewContainer {
         return pauseEvent;
     }
 
-    protected abstract void addCases(Graph graph, Application manager);
+    protected abstract void addCases(StateSpace stateSpace, Application manager);
 
     @Override
     protected Boolean checkValue() {

@@ -6,7 +6,7 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.runtime.GraphWatcher;
+import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.core.model.runtime.communicator.Communicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.runtime.record.ActionRecord;
@@ -27,11 +27,11 @@ import java.util.stream.Collectors;
  * <p>
  * Jan 5, 2017
  */
-public class Graph {
+public class StateSpace {
     private List<Path> allPaths;
     private List<Path> concernedPaths;
     private Communicator communicator;
-    private GraphWatcher watcher;
+    private Watcher watcher;
 
     private boolean isTraversing;
     private AtomicInteger methodStack;
@@ -47,7 +47,7 @@ public class Graph {
     private LinkedList<State> stateTrace;
     private List<Path> unprocessedPaths;
 
-    public Graph() {
+    public StateSpace() {
         allPaths = new LinkedList<>();
         unprocessedPaths = new LinkedList<>();
         records = new LinkedList<>();
@@ -76,7 +76,7 @@ public class Graph {
         this.communicator = communicator;
     }
 
-    public void setWatcher(GraphWatcher watcher) {
+    public void setWatcher(Watcher watcher) {
         this.watcher = watcher;
     }
 

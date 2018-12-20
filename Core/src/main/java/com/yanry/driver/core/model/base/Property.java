@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * Jan 5, 2017
  */
 public abstract class Property<V> extends HandyObject {
-    private Graph graph;
+    private StateSpace stateSpace;
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
@@ -31,8 +31,8 @@ public abstract class Property<V> extends HandyObject {
     private LinkedList<Consumer<V>> onValueUpdateListeners;
     private LinkedList<Runnable> onCleanListeners;
 
-    public Property(Graph graph) {
-        this.graph = graph;
+    public Property(StateSpace stateSpace) {
+        this.stateSpace = stateSpace;
         collectedValues = new HashSet<>();
     }
 
@@ -72,8 +72,8 @@ public abstract class Property<V> extends HandyObject {
     }
 
     @EqualsPart
-    public Graph getGraph() {
-        return graph;
+    public StateSpace getStateSpace() {
+        return stateSpace;
     }
 
     public final ExternalEvent switchToValue(V toState) {
@@ -85,17 +85,17 @@ public abstract class Property<V> extends HandyObject {
         if (toState.test(getCurrentValue())) {
             return null;
         }
-        graph.enterMethod(String.format("%s > %s", this, toState));
-        graph.addStateTrace(getState(toState));
-        V cacheValue = (V) graph.propertyCache.get(this);
+        stateSpace.enterMethod(String.format("%s > %s", this, toState));
+        stateSpace.addStateTrace(getState(toState));
+        V cacheValue = (V) stateSpace.propertyCache.get(this);
         if (cacheValue == null) {
-            if (!graph.nullCache.contains(this)) {
+            if (!stateSpace.nullCache.contains(this)) {
                 // 属性值未知,认为dependentStates未满足
                 if (dependentStates != null) {
                     for (State dependentState : dependentStates) {
                         if (!dependentState.isSatisfied()) {
                             ExternalEvent externalEvent = dependentState.trySatisfy();
-                            graph.exitMethod(LogLevel.Verbose, externalEvent);
+                            stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
                             return externalEvent;
                         }
                     }
@@ -108,21 +108,21 @@ public abstract class Property<V> extends HandyObject {
         }
         Optional<ExternalEvent> any = stream.filter(v -> toState.test(v))
                 .map(v -> doSelfSwitch(v))
-                .filter(a -> a != null && graph.isValidAction(a))
+                .filter(a -> a != null && stateSpace.isValidAction(a))
                 .findAny();
         if (any.isPresent()) {
             ExternalEvent externalEvent = any.get();
-            graph.exitMethod(LogLevel.Verbose, externalEvent);
+            stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
             return externalEvent;
         }
-        ExternalEvent externalEvent = graph.findPathToRoll(e -> {
+        ExternalEvent externalEvent = stateSpace.findPathToRoll(e -> {
             if (e instanceof PropertyExpectation) {
                 PropertyExpectation<V> exp = (PropertyExpectation) e;
                 return equals(exp.getProperty()) && toState.test(exp.getExpectedValue());
             }
             return false;
         });
-        graph.exitMethod(LogLevel.Verbose, externalEvent);
+        stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
         return externalEvent;
     }
 
@@ -159,27 +159,27 @@ public abstract class Property<V> extends HandyObject {
 
     private void handleChange(V oldValue, V newValue) {
         if (!Objects.equals(oldValue, newValue)) {
-            graph.verifySuperPaths(this, oldValue, newValue);
+            stateSpace.verifySuperPaths(this, oldValue, newValue);
         }
     }
 
     boolean isValueFresh() {
-        return graph.frameMark > 0 && graphFrameMark == graph.frameMark;
+        return stateSpace.frameMark > 0 && graphFrameMark == stateSpace.frameMark;
     }
 
     private void updateCache(V value) {
         if (value == null) {
-            if (graph.nullCache.contains(this)) {
+            if (stateSpace.nullCache.contains(this)) {
                 return;
             }
-            graph.nullCache.add(this);
-            graph.propertyCache.remove(this);
+            stateSpace.nullCache.add(this);
+            stateSpace.propertyCache.remove(this);
         } else {
-            if (Objects.equals(graph.propertyCache.get(this), value)) {
+            if (Objects.equals(stateSpace.propertyCache.get(this), value)) {
                 return;
             }
-            graph.nullCache.remove(this);
-            graph.propertyCache.put(this, value);
+            stateSpace.nullCache.remove(this);
+            stateSpace.propertyCache.put(this, value);
         }
         if (onValueUpdateListeners != null) {
             for (Consumer<V> listener : onValueUpdateListeners) {
@@ -189,7 +189,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public void refresh() {
-        boolean hasCache = graph.nullCache.contains(this) || graph.propertyCache.containsKey(this);
+        boolean hasCache = stateSpace.nullCache.contains(this) || stateSpace.propertyCache.containsKey(this);
         if (hasCache) {
             V oldValue = getCurrentValue();
             V newValue = doCheckValue();
@@ -200,8 +200,8 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public void cleanCache() {
-        graph.nullCache.remove(this);
-        graph.propertyCache.remove(this);
+        stateSpace.nullCache.remove(this);
+        stateSpace.propertyCache.remove(this);
         if (onCleanListeners != null) {
             for (Runnable listener : onCleanListeners) {
                 listener.run();
@@ -210,10 +210,10 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final V getCurrentValue() {
-        if (graph.nullCache.contains(this)) {
+        if (stateSpace.nullCache.contains(this)) {
             return null;
         }
-        V cacheValue = (V) getGraph().propertyCache.get(this);
+        V cacheValue = (V) getStateSpace().propertyCache.get(this);
         if (cacheValue == null) {
             cacheValue = doCheckValue();
         }

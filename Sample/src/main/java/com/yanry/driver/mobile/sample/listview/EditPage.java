@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.listview;
 
-import com.yanry.driver.core.model.base.Graph;
+import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
@@ -14,12 +14,12 @@ import com.yanry.driver.mobile.window.Application;
 import com.yanry.driver.mobile.window.Window;
 
 public class EditPage extends Window {
-    public EditPage(Graph graph, Application manager) {
-        super(graph, manager);
+    public EditPage(StateSpace stateSpace, Application manager) {
+        super(stateSpace, manager);
     }
 
     @Override
-    protected void addCases(Graph graph, Application manager) {
+    protected void addCases(StateSpace stateSpace, Application manager) {
         ValuePredicate<String> notEmpty = Equals.of("").not();
         closeOnPressBack();
         EditText et_principal = new EditText(getViewById("et_principal"));
@@ -33,10 +33,10 @@ public class EditPage extends Window {
         EditText etTotalDays = new EditText(getViewById("et_total_days"));
         etTotalDays.addValue("90", "60");
 //        EditText etRemark = new EditText(getViewById("et_remark"));
-        Click clickFinish = new Click(new View(graph, this, new ById("finish")));
+        Click clickFinish = new Click(new View(stateSpace, this, new ById("finish")));
         // 添加
         ListView<MainListItem> listView = getWindow(MainPage.class).getListView();
-        graph.createPath(clickFinish, listView.getSize().getShiftExpectation(Timing.IMMEDIATELY, true, true, 1)
+        stateSpace.createPath(clickFinish, listView.getSize().getShiftExpectation(Timing.IMMEDIATELY, true, true, 1)
                 .setTrigger(listView, Equals.of(true)))
                 .addContextValue(getPreviousWindow(), getWindow(MainPage.class))
                 .addContextPredicate(et_principal, notEmpty)

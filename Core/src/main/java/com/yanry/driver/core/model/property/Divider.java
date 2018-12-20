@@ -17,13 +17,13 @@ public class Divider extends BooleanProperty {
     private State[] states;
 
     public Divider(String name, State... states) {
-        super(states[0].getProperty().getGraph());
+        super(states[0].getProperty().getStateSpace());
         this.name = name;
         this.states = states;
         for (State state : states) {
-            Path toFalse = getGraph().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate()),
+            Path toFalse = getStateSpace().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate()),
                     getStaticExpectation(Timing.IMMEDIATELY, false, false));
-            Path toTrue = getGraph().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate().not()),
+            Path toTrue = getStateSpace().createPath(new NegationEvent<>(state.getProperty(), state.getValuePredicate().not()),
                     getStaticExpectation(Timing.IMMEDIATELY, false, true));
             for (State s : states) {
                 if (s != state) {
