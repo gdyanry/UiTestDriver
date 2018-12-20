@@ -11,7 +11,7 @@ subprojects {
     }
 
     dependencies {
-        implementation 'com.github.gdyanry:CommonLib:v0.1812.120'
+        implementation 'com.github.gdyanry:CommonLib:v0.1812.200'
     }
 
     tasks.withType(JavaCompile) {

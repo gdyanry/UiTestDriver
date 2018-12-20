@@ -3,9 +3,9 @@ package com.yanry.driver.mobile.sample.login.window;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.extension.Divider;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.predicate.Within;
+import com.yanry.driver.core.model.property.Divider;
 import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.RequestDialog;
 import com.yanry.driver.mobile.expectation.Toast;
@@ -90,41 +90,41 @@ public class LoginPage extends Window {
                 .addContextValue(this, true);
         // 无网络连接
         graph.createPath(clickLogin, new Toast(Timing.IMMEDIATELY, graph, Const.TOAST_DURATION, "无网络连接"))
-                .addContextValue(networkState, NetworkState.Network.Disconnected)
+                .addContextValue(networkState, NetworkState.Disconnected)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
         // 请求对话框
         graph.createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
-                .addContextValue(networkState, NetworkState.Network.Abnormal)
+                .addContextValue(networkState, NetworkState.Abnormal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
         graph.createPath(clickLogin, new RequestDialog(Timing.IMMEDIATELY, graph, Const.HTTP_TIMEOUT))
-                .addContextValue(networkState, NetworkState.Network.Normal)
+                .addContextValue(networkState, NetworkState.Normal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
         // 连接超时
         Timing withinTimeout = new Timing(true, Const.HTTP_TIMEOUT);
         graph.createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "网络错误"))
-                .addContextValue(networkState, NetworkState.Network.Abnormal)
+                .addContextValue(networkState, NetworkState.Abnormal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true);
         for (Map.Entry<String, String> entry : currentUser.getUserPasswordMap().entrySet()) {
             // pop main page
             popWindow(MainPage.class, clickLogin, withinTimeout, true)
-                    .addContextValue(networkState, NetworkState.Network.Normal)
+                    .addContextValue(networkState, NetworkState.Normal)
                     .addContextValue(etUser, entry.getKey())
                     .addContextValue(etPwd, entry.getValue())
                     .getExpectation().addFollowingExpectation(currentUser.getStaticExpectation(Timing.IMMEDIATELY, false, entry.getKey()));
             // wrong password
             graph.createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "密码错误"))
-                    .addContextValue(networkState, NetworkState.Network.Normal)
+                    .addContextValue(networkState, NetworkState.Normal)
                     .addContextValue(etUser, entry.getKey())
                     .addContextPredicate(etPwd, Equals.of(entry.getValue()).not())
                     .addContextValue(pwdValidity, true);
         }
         // user not exist
         graph.createPath(clickLogin, new Toast(withinTimeout, graph, Const.TOAST_DURATION, "用户不存在"))
-                .addContextValue(networkState, NetworkState.Network.Normal)
+                .addContextValue(networkState, NetworkState.Normal)
                 .addContextValue(userValidity, true)
                 .addContextValue(pwdValidity, true)
                 .addContextPredicate(etUser, new Within<>(currentUser.getUserPasswordMap().keySet()).not());

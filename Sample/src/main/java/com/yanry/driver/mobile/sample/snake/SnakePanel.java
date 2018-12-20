@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.sample.snake;
 
-import com.yanry.driver.mobile.sample.snake.graph.GameStateValue;
+import com.yanry.driver.mobile.sample.snake.graph.GameState;
 import com.yanry.driver.mobile.sample.snake.graph.SnakeController;
 
 import javax.swing.*;
@@ -61,9 +61,9 @@ public class SnakePanel extends JPanel {
         /*
          * Show a message on the screen based on the current game state.
          */
-        if (controller.getCurrentState() == GameStateValue.GameOver ||
-                controller.getCurrentState() == GameStateValue.New ||
-                controller.getCurrentState() == GameStateValue.Pause) {
+        if (controller.getCurrentState() == GameState.GAME_OVER ||
+                controller.getCurrentState() == GameState.NEW ||
+                controller.getCurrentState() == GameState.PAUSE) {
             g.setColor(Color.WHITE);
 
             int centerX = getWidth() / 2;
@@ -71,13 +71,13 @@ public class SnakePanel extends JPanel {
 
             String largeMessage = null;
             String smallMessage = null;
-            if (controller.getCurrentState() == GameStateValue.New) {
+            if (controller.getCurrentState() == GameState.NEW) {
                 largeMessage = "Snake Game!";
                 smallMessage = "Press Enter to Start";
-            } else if (controller.getCurrentState() == GameStateValue.GameOver) {
+            } else if (controller.getCurrentState() == GameState.GAME_OVER) {
                 largeMessage = "Game Over!";
                 smallMessage = "Press Enter to Restart";
-            } else if (controller.getCurrentState() == GameStateValue.Pause) {
+            } else if (controller.getCurrentState() == GameState.PAUSE) {
                 largeMessage = "Paused";
                 smallMessage = "Press P to Resume";
             }

@@ -1,4 +1,4 @@
-package com.yanry.driver.core.model.extension;
+package com.yanry.driver.core.model.property;
 
 import com.yanry.driver.core.model.base.Property;
 import lib.common.util.object.EqualsPart;

@@ -3,16 +3,25 @@ package com.yanry.driver.mobile.window;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.Property;
+import lib.common.util.ReflectionUtil;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class VisibilityState extends Property<Visibility> {
+public class WindowState extends Property<String> {
+    static {
+        ReflectionUtil.initStaticStringFields(WindowState.class);
+    }
+
+    public static String NOT_CREATED;
+    public static String FOREGROUND;
+    public static String BACKGROUND;
+
     private Window window;
 
-    VisibilityState(Graph graph, Window window) {
+    WindowState(Graph graph, Window window) {
         super(graph);
         this.window = window;
     }
@@ -24,28 +33,28 @@ public class VisibilityState extends Property<Visibility> {
     }
 
     @Override
-    protected Visibility checkValue() {
+    protected String checkValue() {
         Window current = window.getApplication().getCurrentValue();
         if (current == null) {
-            return Visibility.NotCreated;
+            return NOT_CREATED;
         }
         if (current.equals(window)) {
-            return Visibility.Foreground;
+            return FOREGROUND;
         }
         if (checkExist(current.getPreviousWindow())) {
-            return Visibility.Background;
+            return BACKGROUND;
         }
-        return Visibility.NotCreated;
+        return NOT_CREATED;
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Visibility to) {
+    protected ExternalEvent doSelfSwitch(String to) {
         return null;
     }
 
     @Override
-    protected Stream<Visibility> getValueStream(Set<Visibility> collectedValues) {
-        return Stream.of(Visibility.values());
+    protected Stream<String> getValueStream(Set<String> collectedValues) {
+        return ReflectionUtil.getStaticStringFieldNames(getClass()).stream();
     }
 
     private boolean checkExist(PreviousWindow previousWindow) {

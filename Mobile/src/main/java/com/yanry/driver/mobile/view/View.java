@@ -8,7 +8,7 @@ import com.yanry.driver.core.model.base.Graph;
 import com.yanry.driver.core.model.base.SSPropertyExpectation;
 import com.yanry.driver.core.model.base.TransitionEvent;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.extension.BooleanProperty;
+import com.yanry.driver.core.model.property.BooleanProperty;
 import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 import com.yanry.driver.mobile.window.Window;

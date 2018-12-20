@@ -11,11 +11,11 @@ import com.yanry.driver.mobile.view.ViewContainer;
 import lib.common.util.ReflectionUtil;
 
 public abstract class Window extends ViewContainer {
-    private VisibilityState visibility;
-    private TransitionEvent<Visibility> createEvent;
-    private TransitionEvent<Visibility> closeEvent;
-    private TransitionEvent<Visibility> resumeEvent;
-    private TransitionEvent<Visibility> pauseEvent;
+    private WindowState windowState;
+    private TransitionEvent<String> createEvent;
+    private TransitionEvent<String> closeEvent;
+    private TransitionEvent<String> resumeEvent;
+    private TransitionEvent<String> pauseEvent;
     private PreviousWindow previousWindow;
     private Application application;
 
@@ -23,26 +23,26 @@ public abstract class Window extends ViewContainer {
         super(graph);
         this.application = application;
         previousWindow = new PreviousWindow(graph, this);
-        visibility = new VisibilityState(graph, this);
-        visibility.setInitValue(Visibility.NotCreated);
-        createEvent = new TransitionEvent<>(visibility, Visibility.NotCreated, Visibility.Foreground);
-        closeEvent = new NegationEvent<>(visibility, Equals.of(Visibility.NotCreated).not());
-        resumeEvent = new TransitionEvent<>(visibility, Visibility.Background, Visibility.Foreground);
-        pauseEvent = new TransitionEvent<>(visibility, Visibility.Foreground, Visibility.Background);
+        windowState = new WindowState(graph, this);
+        windowState.setInitValue(WindowState.NOT_CREATED);
+        createEvent = new TransitionEvent<>(windowState, WindowState.NOT_CREATED, WindowState.FOREGROUND);
+        closeEvent = new NegationEvent<>(windowState, Equals.of(WindowState.NOT_CREATED).not());
+        resumeEvent = new TransitionEvent<>(windowState, WindowState.BACKGROUND, WindowState.FOREGROUND);
+        pauseEvent = new TransitionEvent<>(windowState, WindowState.FOREGROUND, WindowState.BACKGROUND);
         ReflectionUtil.initStaticStringFields(getClass());
-        // visibility->Foreground
+        // windowState->FOREGROUND
         graph.createPath(new NegationEvent<>(application, Equals.of(this).not()),
-                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.Foreground));
-        // 退出进程时visibility->NotCreated
+                windowState.getStaticExpectation(Timing.IMMEDIATELY, false, WindowState.FOREGROUND));
+        // 退出进程时visibility->NOT_CREATED
         graph.createPath(new TransitionEvent<>(application.getProcessState(), true, false),
-                visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated));
+                windowState.getStaticExpectation(Timing.IMMEDIATELY, false, WindowState.NOT_CREATED));
 
-        Equals<Visibility> foreground = Equals.of(Visibility.Foreground);
+        Equals<String> foreground = Equals.of(WindowState.FOREGROUND);
         // 进入前台时visible->true
-        getGraph().createPath(new NegationEvent<>(visibility, foreground.not()),
+        getGraph().createPath(new NegationEvent<>(windowState, foreground.not()),
                 getStaticExpectation(Timing.IMMEDIATELY, false, true));
         // 退出前台时visible->false
-        getGraph().createPath(new NegationEvent<>(visibility, foreground),
+        getGraph().createPath(new NegationEvent<>(windowState, foreground),
                 getStaticExpectation(Timing.IMMEDIATELY, false, false));
         // cleanCache
         getGraph().createPath(closeEvent, new ActionExpectation() {
@@ -84,15 +84,15 @@ public abstract class Window extends ViewContainer {
                 // TODO 处理相同页面多个实例的情况
                 .addFollowingExpectation(newWindow.previousWindow.getDynamicExpectation(Timing.IMMEDIATELY, false,
                         () -> closeCurrent ? previousWindow.getCurrentValue() : Window.this))
-                // visibility->Background
-                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? Visibility.NotCreated : Visibility.Background)))
+                // windowState->BACKGROUND
+                .addFollowingExpectation(windowState.getStaticExpectation(Timing.IMMEDIATELY, false, closeCurrent ? WindowState.NOT_CREATED : WindowState.BACKGROUND)))
                 .addContextValue(this, true);
     }
 
     public Path close(Event inputEvent, Timing timing) {
         return getGraph().createPath(inputEvent, application.getDynamicExpectation(timing, true, () -> previousWindow.getCurrentValue())
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, null))
-                .addFollowingExpectation(visibility.getStaticExpectation(Timing.IMMEDIATELY, false, Visibility.NotCreated)));
+                .addFollowingExpectation(windowState.getStaticExpectation(Timing.IMMEDIATELY, false, WindowState.NOT_CREATED)));
     }
 
     public Path closeOnPressBack() {
@@ -111,27 +111,27 @@ public abstract class Window extends ViewContainer {
         return application;
     }
 
-    public VisibilityState getVisibility() {
-        return visibility;
+    public WindowState getWindowState() {
+        return windowState;
     }
 
     public PreviousWindow getPreviousWindow() {
         return previousWindow;
     }
 
-    public TransitionEvent<Visibility> getCreateEvent() {
+    public TransitionEvent<String> getCreateEvent() {
         return createEvent;
     }
 
-    public TransitionEvent<Visibility> getCloseEvent() {
+    public TransitionEvent<String> getCloseEvent() {
         return closeEvent;
     }
 
-    public TransitionEvent<Visibility> getResumeEvent() {
+    public TransitionEvent<String> getResumeEvent() {
         return resumeEvent;
     }
 
-    public TransitionEvent<Visibility> getPauseEvent() {
+    public TransitionEvent<String> getPauseEvent() {
         return pauseEvent;
     }
 
@@ -139,7 +139,7 @@ public abstract class Window extends ViewContainer {
 
     @Override
     protected Boolean checkValue() {
-        return visibility.getCurrentValue() == Visibility.Foreground;
+        return windowState.getCurrentValue() == WindowState.FOREGROUND;
     }
 
     @Override

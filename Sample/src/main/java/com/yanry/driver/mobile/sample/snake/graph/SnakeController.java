@@ -9,10 +9,10 @@ import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.event.StateChangeEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.extension.CombinedProperty;
-import com.yanry.driver.core.model.extension.StateSnapShoot;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.predicate.Within;
+import com.yanry.driver.core.model.property.CombinedProperty;
+import com.yanry.driver.core.model.property.StateSnapShoot;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.mobile.sample.snake.GameConfigure;
 import com.yanry.driver.mobile.sample.snake.SnakeModel;
@@ -32,7 +32,7 @@ public class SnakeController extends Graph implements Communicator {
         SnakeHeadY snakeHeadY = new SnakeHeadY(this);
         CombinedProperty snakeHead = new CombinedProperty(this, "snakeHead", snakeHeadX, snakeHeadY);
         // start
-        createPath(SnakeEvent.PressStart.get(), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameStateValue.Move)
+        createPath(SnakeEvent.PressStart.get(), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameState.MOVE)
                 .addFollowingExpectation(new ActionExpectation() {
                     @Override
                     protected void run() {
@@ -43,13 +43,13 @@ public class SnakeController extends Graph implements Communicator {
                         snakeModel.push(new Point(snakeHeadX.getCurrentValue(), snakeHeadY.getCurrentValue()));
                         snakeModel.spawnFruit();
                     }
-                })).addContextPredicate(gameState, new Within<>(GameStateValue.New, GameStateValue.GameOver));
+                })).addContextPredicate(gameState, new Within<>(GameState.NEW, GameState.GAME_OVER));
         // Move -> Pause
-        createPath(SnakeEvent.PressPause.get(), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameStateValue.Pause))
-                .addContextValue(gameState, GameStateValue.Move);
+        createPath(SnakeEvent.PressPause.get(), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameState.PAUSE))
+                .addContextValue(gameState, GameState.MOVE);
         // Pause -> Move
-        createPath(SnakeEvent.PressPause.get(), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameStateValue.Move))
-                .addContextValue(gameState, GameStateValue.Pause);
+        createPath(SnakeEvent.PressPause.get(), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameState.MOVE))
+                .addContextValue(gameState, GameState.PAUSE);
         // Move -> GameOver
         createPath(new NegationEvent<>(snakeHead, new ValuePredicate<>() {
             @Override
@@ -66,40 +66,40 @@ public class SnakeController extends Graph implements Communicator {
                         headPoint.y >= 0 && headPoint.y < GameConfigure.ROW_COUNT;
                 return insideBorder && !snakeModel.isBody(headPoint);
             }
-        }), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameStateValue.GameOver))
-                .addContextValue(gameState, GameStateValue.Move);
+        }), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameState.GAME_OVER))
+                .addContextValue(gameState, GameState.MOVE);
         // right
         createPath(SnakeEvent.MoveAhead.get(), snakeHeadX.getShiftExpectation(Timing.IMMEDIATELY, false, true, 1))
-                .addContextValue(direction, DirectionValue.Right)
-                .addContextValue(gameState, GameStateValue.Move);
+                .addContextValue(direction, Direction.RIGHT)
+                .addContextValue(gameState, GameState.MOVE);
         // left
         createPath(SnakeEvent.MoveAhead.get(), snakeHeadX.getShiftExpectation(Timing.IMMEDIATELY, false, false, 1))
-                .addContextValue(direction, DirectionValue.Left)
-                .addContextValue(gameState, GameStateValue.Move);
+                .addContextValue(direction, Direction.LEFT)
+                .addContextValue(gameState, GameState.MOVE);
         // up
         createPath(SnakeEvent.MoveAhead.get(), snakeHeadY.getShiftExpectation(Timing.IMMEDIATELY, false, false, 1))
-                .addContextValue(direction, DirectionValue.Up)
-                .addContextValue(gameState, GameStateValue.Move);
+                .addContextValue(direction, Direction.UP)
+                .addContextValue(gameState, GameState.MOVE);
         // down
         createPath(SnakeEvent.MoveAhead.get(), snakeHeadY.getShiftExpectation(Timing.IMMEDIATELY, false, true, 1))
-                .addContextValue(direction, DirectionValue.Down)
-                .addContextValue(gameState, GameStateValue.Move);
+                .addContextValue(direction, Direction.DOWN)
+                .addContextValue(gameState, GameState.MOVE);
         // -> right
-        createPath(SnakeEvent.TuneRight.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, DirectionValue.Right))
-                .addContextValue(gameState, GameStateValue.Move)
-                .addContextPredicate(direction, Equals.of(DirectionValue.Left).not());
+        createPath(SnakeEvent.TuneRight.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.RIGHT))
+                .addContextValue(gameState, GameState.MOVE)
+                .addContextPredicate(direction, Equals.of(Direction.LEFT).not());
         // -> left
-        createPath(SnakeEvent.TuneLeft.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, DirectionValue.Left))
-                .addContextValue(gameState, GameStateValue.Move)
-                .addContextPredicate(direction, Equals.of(DirectionValue.Right).not());
+        createPath(SnakeEvent.TuneLeft.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.LEFT))
+                .addContextValue(gameState, GameState.MOVE)
+                .addContextPredicate(direction, Equals.of(Direction.RIGHT).not());
         // -> up
-        createPath(SnakeEvent.TurnUp.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, DirectionValue.Up))
-                .addContextValue(gameState, GameStateValue.Move)
-                .addContextPredicate(direction, Equals.of(DirectionValue.Down).not());
+        createPath(SnakeEvent.TurnUp.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.UP))
+                .addContextValue(gameState, GameState.MOVE)
+                .addContextPredicate(direction, Equals.of(Direction.DOWN).not());
         // -> down
-        createPath(SnakeEvent.TuneDown.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, DirectionValue.Down))
-                .addContextValue(gameState, GameStateValue.Move)
-                .addContextPredicate(direction, Equals.of(DirectionValue.Up).not());
+        createPath(SnakeEvent.TuneDown.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.DOWN))
+                .addContextValue(gameState, GameState.MOVE)
+                .addContextPredicate(direction, Equals.of(Direction.UP).not());
         // on move
         ActionExpectation expectation = new ActionExpectation() {
             @Override
@@ -113,11 +113,11 @@ public class SnakeController extends Graph implements Communicator {
                 snakeModel.push(new Point(snakeHeadX.getCurrentValue(), snakeHeadY.getCurrentValue()));
             }
         };
-        createPath(new StateChangeEvent<>(snakeHeadX), expectation).addContextValue(gameState, GameStateValue.Move);
-        createPath(new StateChangeEvent<>(snakeHeadY), expectation).addContextValue(gameState, GameStateValue.Move);
+        createPath(new StateChangeEvent<>(snakeHeadX), expectation).addContextValue(gameState, GameState.MOVE);
+        createPath(new StateChangeEvent<>(snakeHeadY), expectation).addContextValue(gameState, GameState.MOVE);
     }
 
-    public GameStateValue getCurrentState() {
+    public String getCurrentState() {
         return gameState.getCurrentValue();
     }
 
