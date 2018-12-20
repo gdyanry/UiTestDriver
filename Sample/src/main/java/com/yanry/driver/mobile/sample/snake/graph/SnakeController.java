@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class SnakeController extends Graph implements Communicator {
     private GameState gameState;
 
-    public SnakeController(SnakeModel snakeModel) {
+    public SnakeController(SnakeModel snakeModel, boolean autoEat) {
         setCommunicator(this);
         gameState = new GameState(this);
         Direction direction = new Direction(this);
@@ -111,10 +111,12 @@ public class SnakeController extends Graph implements Communicator {
                     snakeModel.removeLast();
                 }
                 snakeModel.push(new Point(snakeHeadX.getCurrentValue(), snakeHeadY.getCurrentValue()));
-                Point pos = snakeModel.getFruitPos();
-                ExternalEvent event = snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, pos.x).append(snakeHeadY, pos.y).build()));
-                if (!SnakeEvent.MoveAhead.get().equals(event)) {
-                    fire(event);
+                if (autoEat) {
+                    Point pos = snakeModel.getFruitPos();
+                    ExternalEvent event = snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, pos.x).append(snakeHeadY, pos.y).build()));
+                    if (!SnakeEvent.MoveAhead.get().equals(event)) {
+                        fire(event);
+                    }
                 }
             }
         };

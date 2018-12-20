@@ -14,11 +14,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class Main {
+    private static final boolean AUTO = true;
 
     public static void main(String[] args) {
         Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().sequenceNumber().method(), LogLevel.Verbose));
         final SnakeModel gameModel = new SnakeModel();
-        SnakeController controller = new SnakeController(gameModel);
+        SnakeController controller = new SnakeController(gameModel, AUTO);
         final SnakeGame game = new SnakeGame(controller, gameModel);
         controller.setWatcher(new GraphWatcher() {
             @Override

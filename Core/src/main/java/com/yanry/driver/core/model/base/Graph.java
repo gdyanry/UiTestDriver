@@ -381,8 +381,7 @@ public class Graph {
                         unsatisfiedDegree--;
                     }
                     return unsatisfiedDegree;
-                }))
-                .collect(Collectors.toList());
+                })).collect(Collectors.toList());
         for (Path path : sorted) {
             ExternalEvent externalEvent = roll(path);
             if (externalEvent != null) {
