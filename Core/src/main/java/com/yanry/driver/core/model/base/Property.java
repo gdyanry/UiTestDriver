@@ -87,17 +87,14 @@ public abstract class Property<V> extends HandyObject {
         }
         stateSpace.enterMethod(String.format("%s > %s", this, toState));
         stateSpace.addStateTrace(getState(toState));
-        V cacheValue = (V) stateSpace.propertyCache.get(this);
-        if (cacheValue == null) {
-            if (!stateSpace.nullCache.contains(this)) {
-                // 属性值未知,认为dependentStates未满足
-                if (dependentStates != null) {
-                    for (State dependentState : dependentStates) {
-                        if (!dependentState.isSatisfied()) {
-                            ExternalEvent externalEvent = dependentState.trySatisfy();
-                            stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
-                            return externalEvent;
-                        }
+        if (!stateSpace.getCache().hasCache(this)) {
+            // 属性值未知,认为dependentStates未满足
+            if (dependentStates != null) {
+                for (State dependentState : dependentStates) {
+                    if (!dependentState.isSatisfied()) {
+                        ExternalEvent externalEvent = dependentState.trySatisfy();
+                        stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
+                        return externalEvent;
                     }
                 }
             }
@@ -168,29 +165,17 @@ public abstract class Property<V> extends HandyObject {
     }
 
     private void updateCache(V value) {
-        if (value == null) {
-            if (stateSpace.nullCache.contains(this)) {
-                return;
-            }
-            stateSpace.nullCache.add(this);
-            stateSpace.propertyCache.remove(this);
-        } else {
-            if (Objects.equals(stateSpace.propertyCache.get(this), value)) {
-                return;
-            }
-            stateSpace.nullCache.remove(this);
-            stateSpace.propertyCache.put(this, value);
-        }
-        if (onValueUpdateListeners != null) {
-            for (Consumer<V> listener : onValueUpdateListeners) {
-                listener.accept(value);
+        if (stateSpace.getCache().updateCache(this, value)) {
+            if (onValueUpdateListeners != null) {
+                for (Consumer<V> listener : onValueUpdateListeners) {
+                    listener.accept(value);
+                }
             }
         }
     }
 
     public void refresh() {
-        boolean hasCache = stateSpace.nullCache.contains(this) || stateSpace.propertyCache.containsKey(this);
-        if (hasCache) {
+        if (stateSpace.getCache().hasCache(this)) {
             V oldValue = getCurrentValue();
             V newValue = doCheckValue();
             handleChange(oldValue, newValue);
@@ -200,24 +185,20 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public void cleanCache() {
-        stateSpace.nullCache.remove(this);
-        stateSpace.propertyCache.remove(this);
-        if (onCleanListeners != null) {
-            for (Runnable listener : onCleanListeners) {
-                listener.run();
+        if (stateSpace.getCache().clean(this)) {
+            if (onCleanListeners != null) {
+                for (Runnable listener : onCleanListeners) {
+                    listener.run();
+                }
             }
         }
     }
 
     public final V getCurrentValue() {
-        if (stateSpace.nullCache.contains(this)) {
-            return null;
+        if (stateSpace.getCache().hasCache(this)) {
+            return stateSpace.getCache().getCache(this);
         }
-        V cacheValue = (V) getStateSpace().propertyCache.get(this);
-        if (cacheValue == null) {
-            cacheValue = doCheckValue();
-        }
-        return cacheValue;
+        return doCheckValue();
     }
 
     private V doCheckValue() {

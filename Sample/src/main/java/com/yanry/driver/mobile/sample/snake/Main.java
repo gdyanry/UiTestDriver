@@ -1,6 +1,5 @@
 package com.yanry.driver.mobile.sample.snake;
 
-import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.mobile.sample.snake.graph.SnakeController;
@@ -10,8 +9,6 @@ import lib.common.model.log.Logger;
 import lib.common.model.log.SimpleFormatter;
 
 import javax.swing.*;
-import java.util.Map;
-import java.util.Set;
 
 public class Main {
     private static final boolean AUTO = true;
@@ -23,7 +20,7 @@ public class Main {
         final SnakeGame game = new SnakeGame(controller, gameModel);
         controller.setWatcher(new Watcher() {
             @Override
-            public void onTransitionComplete(Map<Property, Object> propertyCache, Set<Property> nullCache, Set<Path> verifiedPaths) {
+            public void onTransitionComplete() {
                 SwingUtilities.invokeLater(() -> {
                     game.repaint();
                     game.setTitle("Greedy Snake(" + gameModel.length() + ")");

@@ -1,15 +1,11 @@
 package com.yanry.driver.mobile.sample.model;
 
-import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Watcher;
 
-import java.util.Map;
-import java.util.Set;
-
 public class ConsoleWatcher implements Watcher {
     @Override
-    public void onTransitionComplete(Map<Property, Object> propertyCache, Set<Property> nullCache, Set<Path> verifiedPaths) {
+    public void onTransitionComplete() {
         System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     }
 

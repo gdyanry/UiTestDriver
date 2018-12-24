@@ -6,16 +6,19 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.runtime.PropertyCache;
 import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.core.model.runtime.communicator.Communicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.runtime.record.ActionRecord;
 import com.yanry.driver.core.model.runtime.record.CommunicateRecord;
 import com.yanry.driver.core.model.runtime.record.VerificationRecord;
+import com.yanry.driver.core.model.runtime.revert.RevertCopy;
+import com.yanry.driver.core.model.runtime.revert.RevertLinkedList;
+import com.yanry.driver.core.model.runtime.revert.RevertManager;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
 import lib.common.util.CollectionUtil;
-import lib.common.util.object.ObjectUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +31,8 @@ import java.util.stream.Collectors;
  * Jan 5, 2017
  */
 public class StateSpace {
-    private List<Path> allPaths;
+    private RevertManager rehearsal;
+    private LinkedList<Path> allPaths;
     private List<Path> concernedPaths;
     private Communicator communicator;
     private Watcher watcher;
@@ -36,18 +40,18 @@ public class StateSpace {
     private boolean isTraversing;
     private AtomicInteger methodStack;
 
-    Map<Property, Object> propertyCache;
-    private List<CommunicateRecord> records;
-    HashSet<Property> nullCache;
+    private PropertyCache cache;
+    private LinkedList<CommunicateRecord> records;
     long frameMark;
     private boolean hasChanged;
     private Set<Path> verifiedPaths;
     private Set<Expectation> pendingExpectations;
     private HashSet<ExternalEvent> invalidActions;
     private LinkedList<State> stateTrace;
-    private List<Path> unprocessedPaths;
+    private LinkedList<Path> unprocessedPaths;
 
     public StateSpace() {
+        rehearsal = new RevertManager();
         allPaths = new LinkedList<>();
         unprocessedPaths = new LinkedList<>();
         records = new LinkedList<>();
@@ -56,14 +60,13 @@ public class StateSpace {
         pendingExpectations = new HashSet<>();
         invalidActions = new HashSet<>();
         stateTrace = new LinkedList<>();
-        propertyCache = new HashMap<>();
-        nullCache = new HashSet<>();
+        cache = new PropertyCache(rehearsal);
     }
 
     public void reset() {
-        propertyCache.clear();
+        rehearsal.clean();
+        cache.clearAll();
         records.clear();
-        nullCache.clear();
         frameMark = 0;
         verifiedPaths.clear();
         pendingExpectations.clear();
@@ -91,11 +94,15 @@ public class StateSpace {
     }
 
     void addStateTrace(State state) {
-        stateTrace.add(state);
+        rehearsal.proceed(new RevertLinkedList<>(stateTrace, state, RevertLinkedList.ADD_LAST));
+    }
+
+    PropertyCache getCache() {
+        return cache;
     }
 
     private boolean needCheck(Expectation expectation) {
-        return expectation.isNeedCheck() || expectation.getFollowingExpectations().parallelStream().anyMatch(exp -> needCheck(exp));
+        return expectation.isNeedCheck() || expectation.getFollowingExpectations().parallelStream().anyMatch(this::needCheck);
     }
 
     /**
@@ -110,6 +117,7 @@ public class StateSpace {
             return false;
         }
         isTraversing = true;
+        rehearsal.clean();
         records.clear();
         verifiedPaths.clear();
         stateTrace.clear();
@@ -197,6 +205,17 @@ public class StateSpace {
     }
 
     private ExternalEvent getNextAction(Path pathToTraverse) {
+        rehearsal.proceed(new RevertCopy<>(stateTrace) {
+            @Override
+            protected LinkedList<State> getCopy(LinkedList<State> origin) {
+                return new LinkedList<>(origin);
+            }
+
+            @Override
+            protected void setReference(LinkedList<State> object) {
+                stateTrace = object;
+            }
+        });
         State selectedState = null;
         Iterator<State> iterator = stateTrace.iterator();
         boolean found = false;
@@ -263,20 +282,20 @@ public class StateSpace {
                 VerifyResult result = expectation.verify(this);
                 if (result != VerifyResult.Pending) {
                     if (expectation.isNeedCheck()) {
-                        records.add(new VerificationRecord(expectation, result));
+                        addRecord(new VerificationRecord(expectation, result));
                     }
                     pendingExpectations.remove(expectation);
                 }
             }
         }
         if (watcher != null && hasChanged) {
-            watcher.onTransitionComplete(propertyCache, nullCache, verifiedPaths);
+            watcher.onTransitionComplete();
             hasChanged = false;
         }
     }
 
     private boolean postAction(ExternalEvent event) {
-        String snapShoot = getGraphSnapShoot();
+        String snapShoot = cache.getSnapShootMD5();
         if (communicator != null) {
             LinkedList<Runnable> preActions = event.getPreActions();
             if (preActions != null) {
@@ -285,24 +304,19 @@ public class StateSpace {
                 }
             }
             if (communicator.performAction(event)) {
-                records.add(new ActionRecord(event, true, snapShoot));
+                addRecord(new ActionRecord(event, true, snapShoot));
                 fire(event);
                 return true;
             }
         }
-        records.add(new ActionRecord(event, false, snapShoot));
+        addRecord(new ActionRecord(event, false, snapShoot));
         Logger.getDefault().ee("cannot perform action: ", event);
         invalidActions.add(event);
         return false;
     }
 
-    private String getGraphSnapShoot() {
-        try {
-            return ObjectUtil.getSnapShootMd5(propertyCache) + ObjectUtil.getSnapShootMd5(nullCache);
-        } catch (Exception e) {
-            Logger.getDefault().catches(e);
-        }
-        return null;
+    private void addRecord(CommunicateRecord record) {
+        rehearsal.proceed(new RevertLinkedList<>(records, record, RevertLinkedList.ADD_LAST));
     }
 
     private ExternalEvent roll(Path path) {
@@ -349,7 +363,7 @@ public class StateSpace {
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
-                records.add(new VerificationRecord(expectation, result));
+                addRecord(new VerificationRecord(expectation, result));
             }
         }
         return result;
@@ -403,7 +417,7 @@ public class StateSpace {
             Logger.getDefault().ii("action is invalid: ", externalEvent);
             return false;
         }
-        if (CollectionUtil.checkLoop(records, new ActionRecord(externalEvent, false, getGraphSnapShoot()))) {
+        if (CollectionUtil.checkLoop(records, new ActionRecord(externalEvent, false, cache.getSnapShootMD5()))) {
             Logger.getDefault().ii("skip action to avoid loop: ", externalEvent);
             return false;
         }
