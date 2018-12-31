@@ -208,11 +208,10 @@ public class StateSpace extends RevertManager {
         Iterator<State> iterator = stateTrace.iterator();
         boolean found = false;
         while (iterator.hasNext()) {
+            State state = iterator.next();
             if (found) {
-                iterator.next();
                 iterator.remove();
             } else {
-                State state = iterator.next();
                 if (state.isSatisfied()) {
                     found = true;
                     iterator.remove();
@@ -375,6 +374,7 @@ public class StateSpace extends RevertManager {
                 .sorted(Comparator.comparingInt(p -> {
                     int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark.get(), true);
                     if (unprocessedPaths.contains(p)) {
+                        // 优先处理未处理过的path
                         unsatisfiedDegree--;
                     }
                     return unsatisfiedDegree;
