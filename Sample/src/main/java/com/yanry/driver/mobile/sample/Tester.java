@@ -40,13 +40,12 @@ public class Tester {
         }
 
         // 打印测试记录
-        List<Object> records = stateSpace.traverse(pathIndexes);
         int passCount = 0;
         int failCount = 0;
         int missCount = 0;
         System.out.println("-------------------------------------RECORD----------------------------------");
         int n = 0;
-        for (Object record : records) {
+        for (Object record : stateSpace.traverse(pathIndexes)) {
             boolean fail = false;
             if (record instanceof Assertion) {
                 Assertion assertion = (Assertion) record;

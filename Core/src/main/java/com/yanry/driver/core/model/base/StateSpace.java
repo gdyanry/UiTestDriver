@@ -6,16 +6,13 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.runtime.PropertyCache;
 import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.core.model.runtime.communicator.Communicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.runtime.record.ActionRecord;
 import com.yanry.driver.core.model.runtime.record.CommunicateRecord;
 import com.yanry.driver.core.model.runtime.record.VerificationRecord;
-import com.yanry.driver.core.model.runtime.revert.RevertCopy;
-import com.yanry.driver.core.model.runtime.revert.RevertLinkedList;
-import com.yanry.driver.core.model.runtime.revert.RevertManager;
+import com.yanry.driver.core.model.runtime.revert.*;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
 import lib.common.util.CollectionUtil;
@@ -30,8 +27,7 @@ import java.util.stream.Collectors;
  * <p>
  * Jan 5, 2017
  */
-public class StateSpace {
-    private RevertManager rehearsal;
+public class StateSpace extends RevertManager {
     private LinkedList<Path> allPaths;
     private List<Path> concernedPaths;
     private Communicator communicator;
@@ -40,34 +36,35 @@ public class StateSpace {
     private boolean isTraversing;
     private AtomicInteger methodStack;
 
-    private PropertyCache cache;
-    private LinkedList<CommunicateRecord> records;
-    long frameMark;
-    private boolean hasChanged;
-    private Set<Path> verifiedPaths;
-    private Set<Expectation> pendingExpectations;
-    private HashSet<ExternalEvent> invalidActions;
-    private LinkedList<State> stateTrace;
-    private LinkedList<Path> unprocessedPaths;
+    private RevertibleMap<Property, Object> cache;
+    private RevertibleLinkedList<CommunicateRecord> records;
+    private RevertibleLong frameMark;
+    private RevertibleBoolean hasChanged;
+    private RevertibleSet<Path> verifiedPaths;
+    private RevertibleSet<Expectation> pendingExpectations;
+    private RevertibleSet<ExternalEvent> invalidActions;
+    private RevertibleLinkedList<State> stateTrace;
+    private RevertibleLinkedList<Path> unprocessedPaths;
 
     public StateSpace() {
-        rehearsal = new RevertManager();
         allPaths = new LinkedList<>();
-        unprocessedPaths = new LinkedList<>();
-        records = new LinkedList<>();
-        verifiedPaths = new HashSet<>();
+        unprocessedPaths = new RevertibleLinkedList<>(this);
+        records = new RevertibleLinkedList<>(this);
+        verifiedPaths = new RevertibleSet<>(this);
         methodStack = new AtomicInteger();
-        pendingExpectations = new HashSet<>();
-        invalidActions = new HashSet<>();
-        stateTrace = new LinkedList<>();
-        cache = new PropertyCache(rehearsal);
+        pendingExpectations = new RevertibleSet<>(this);
+        invalidActions = new RevertibleSet<>(this);
+        stateTrace = new RevertibleLinkedList<>(this);
+        cache = new RevertibleMap<>(this);
+        frameMark = new RevertibleLong(this);
+        hasChanged = new RevertibleBoolean(this);
     }
 
     public void reset() {
-        rehearsal.clean();
-        cache.clearAll();
+        this.clean();
+        cache.clear();
         records.clear();
-        frameMark = 0;
+        frameMark.set(0);
         verifiedPaths.clear();
         pendingExpectations.clear();
         invalidActions.clear();
@@ -94,10 +91,14 @@ public class StateSpace {
     }
 
     void addStateTrace(State state) {
-        rehearsal.proceed(new RevertLinkedList<>(stateTrace, state, RevertLinkedList.ADD_LAST));
+        stateTrace.addLast(state);
     }
 
-    PropertyCache getCache() {
+    long getFrameMark() {
+        return frameMark.get();
+    }
+
+    RevertibleMap<Property, Object> getCache() {
         return cache;
     }
 
@@ -117,7 +118,7 @@ public class StateSpace {
             return false;
         }
         isTraversing = true;
-        rehearsal.clean();
+        this.clean();
         records.clear();
         verifiedPaths.clear();
         stateTrace.clear();
@@ -134,19 +135,19 @@ public class StateSpace {
         return concernedPaths;
     }
 
-    public synchronized List<Object> traverse(Predicate<Path> pathFilter) {
+    public synchronized ArrayList<CommunicateRecord> traverse(Predicate<Path> pathFilter) {
         if (!setup()) {
             return null;
         }
         for (Path concernedPath : concernedPaths) {
             if (pathFilter == null || pathFilter.test(concernedPath)) {
-                unprocessedPaths.add(concernedPath);
+                unprocessedPaths.addLast(concernedPath);
             }
         }
         return traverse();
     }
 
-    public synchronized List<Object> traverse(int[] selectedIndexes) {
+    public synchronized ArrayList<CommunicateRecord> traverse(int[] selectedIndexes) {
         if (!setup()) {
             return null;
         }
@@ -154,19 +155,19 @@ public class StateSpace {
             unprocessedPaths.addAll(concernedPaths);
         } else {
             for (int i : selectedIndexes) {
-                unprocessedPaths.add(concernedPaths.get(i));
+                unprocessedPaths.addLast(concernedPaths.get(i));
             }
         }
         return traverse();
     }
 
-    private List<Object> traverse() {
+    private ArrayList<CommunicateRecord> traverse() {
         int size = unprocessedPaths.size();
         while (!unprocessedPaths.isEmpty() && isTraversing) {
             Path path = null;
             int minDegree = Integer.MAX_VALUE;
-            for (Path p : unprocessedPaths) {
-                int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark, true);
+            for (Path p : unprocessedPaths.getList()) {
+                int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark.get(), true);
                 if (unsatisfiedDegree == 0) {
                     path = p;
                     break;
@@ -182,7 +183,7 @@ public class StateSpace {
                     break;
                 }
             }
-            unprocessedPaths.removeAll(verifiedPaths);
+            unprocessedPaths.removeAll(verifiedPaths.getList());
             if (unprocessedPaths.remove(path)) {
                 Logger.getDefault().ww("fail to traverse path: ", path);
             }
@@ -190,32 +191,19 @@ public class StateSpace {
             stateTrace.clear();
         }
         // handle pending expectation
-        Iterator<Expectation> iterator = pendingExpectations.iterator();
-        while (iterator.hasNext()) {
-            Expectation expectation = iterator.next();
+        for (Expectation expectation : pendingExpectations.getList()) {
             Logger.getDefault().vv("verify pending expectation: ", expectation);
             State trigger = expectation.getTrigger();
             if (!achieveStatePredicate(trigger.getProperty(), trigger.getValuePredicate())) {
                 Logger.getDefault().ww("fail to trigger pending expectation: ", expectation);
             }
         }
-        List<Object> result = new ArrayList<>(records);
+        ArrayList<CommunicateRecord> result = records.getList();
         isTraversing = false;
         return result;
     }
 
     private ExternalEvent getNextAction(Path pathToTraverse) {
-        rehearsal.proceed(new RevertCopy<>(stateTrace) {
-            @Override
-            protected LinkedList<State> getCopy(LinkedList<State> origin) {
-                return new LinkedList<>(origin);
-            }
-
-            @Override
-            protected void setReference(LinkedList<State> object) {
-                stateTrace = object;
-            }
-        });
         State selectedState = null;
         Iterator<State> iterator = stateTrace.iterator();
         boolean found = false;
@@ -259,7 +247,7 @@ public class StateSpace {
 
     public synchronized void fire(ExternalEvent event) {
         Logger.getDefault().dd(event);
-        frameMark++;
+        frameMark.increment();
         if (event instanceof SwitchStateAction) {
             SwitchStateAction stateAction = (SwitchStateAction) event;
             Property property = stateAction.getProperty();
@@ -268,7 +256,7 @@ public class StateSpace {
         // 为了避免使用相同事件来切换状态（如播放/暂停）的路径被连续触发，所以先把path放入容器中。
         LinkedList<Path> pathsToVerify = new LinkedList<>();
         for (Path path : new ArrayList<>(allPaths)) {
-            if (path.getEvent().equals(event) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
+            if (path.getEvent().equals(event) && path.getUnsatisfiedDegree(frameMark.get(), false) == 0) {
                 pathsToVerify.add(path);
             }
         }
@@ -276,21 +264,20 @@ public class StateSpace {
             verify(path);
         }
         // process pending expectation
-        if (pendingExpectations.size() > 0) {
-            ArrayList<Expectation> pending = new ArrayList<>(pendingExpectations);
-            for (Expectation expectation : pending) {
+        if (!pendingExpectations.isEmpty()) {
+            for (Expectation expectation : pendingExpectations.getList()) {
                 VerifyResult result = expectation.verify(this);
                 if (result != VerifyResult.Pending) {
                     if (expectation.isNeedCheck()) {
-                        addRecord(new VerificationRecord(expectation, result));
+                        records.addLast(new VerificationRecord(expectation, result));
                     }
                     pendingExpectations.remove(expectation);
                 }
             }
         }
-        if (watcher != null && hasChanged) {
+        if (watcher != null && hasChanged.get()) {
             watcher.onTransitionComplete();
-            hasChanged = false;
+            hasChanged.set(false);
         }
     }
 
@@ -304,19 +291,15 @@ public class StateSpace {
                 }
             }
             if (communicator.performAction(event)) {
-                addRecord(new ActionRecord(event, true, snapShoot));
+                records.addLast(new ActionRecord(event, true, snapShoot));
                 fire(event);
                 return true;
             }
         }
-        addRecord(new ActionRecord(event, false, snapShoot));
+        records.addLast(new ActionRecord(event, false, snapShoot));
         Logger.getDefault().ee("cannot perform action: ", event);
         invalidActions.add(event);
         return false;
-    }
-
-    private void addRecord(CommunicateRecord record) {
-        rehearsal.proceed(new RevertLinkedList<>(records, record, RevertLinkedList.ADD_LAST));
     }
 
     private ExternalEvent roll(Path path) {
@@ -363,7 +346,7 @@ public class StateSpace {
         VerifyResult result = expectation.verify(this);
         if (result != VerifyResult.Pending) {
             if (expectation.isNeedCheck()) {
-                addRecord(new VerificationRecord(expectation, result));
+                records.addLast(new VerificationRecord(expectation, result));
             }
         }
         return result;
@@ -372,14 +355,14 @@ public class StateSpace {
     <V> void verifySuperPaths(Property<V> property, V from, V to) {
         if (!Objects.equals(from, to)) {
             if (watcher != null) {
-                hasChanged = true;
+                hasChanged.set(true);
                 watcher.onStateChange(property, from, to);
             }
             for (Path path : new ArrayList<>(allPaths)) {
                 Event event = path.getEvent();
                 if (event instanceof InternalEvent) {
                     // 父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-                    if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
+                    if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(frameMark.get(), false) == 0) {
                         verify(path);
                     }
                 }
@@ -390,7 +373,7 @@ public class StateSpace {
     ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
         List<Path> sorted = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
-                    int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark, true);
+                    int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark.get(), true);
                     if (unprocessedPaths.contains(p)) {
                         unsatisfiedDegree--;
                     }
@@ -417,7 +400,7 @@ public class StateSpace {
             Logger.getDefault().ii("action is invalid: ", externalEvent);
             return false;
         }
-        if (CollectionUtil.checkLoop(records, new ActionRecord(externalEvent, false, cache.getSnapShootMD5()))) {
+        if (CollectionUtil.checkLoop(records.getList(), new ActionRecord(externalEvent, false, cache.getSnapShootMD5()))) {
             Logger.getDefault().ii("skip action to avoid loop: ", externalEvent);
             return false;
         }
@@ -431,7 +414,7 @@ public class StateSpace {
         }
         if (communicator != null) {
             V value = communicator.fetchState(obtainable);
-            property.graphFrameMark = frameMark;
+            property.setStateSpaceFrameMark(frameMark.get());
             return value;
         }
         Logger.getDefault().ww("unable to check state: ", obtainable);

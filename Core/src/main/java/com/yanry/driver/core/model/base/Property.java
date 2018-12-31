@@ -6,6 +6,7 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
+import com.yanry.driver.core.model.runtime.revert.RevertibleLong;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
@@ -25,7 +26,7 @@ public abstract class Property<V> extends HandyObject {
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
-    long graphFrameMark;
+    private RevertibleLong stateSpaceFrameMark;
     private HashSet<V> collectedValues;
     private State[] dependentStates;
     private LinkedList<Consumer<V>> onValueUpdateListeners;
@@ -34,6 +35,7 @@ public abstract class Property<V> extends HandyObject {
     public Property(StateSpace stateSpace) {
         this.stateSpace = stateSpace;
         collectedValues = new HashSet<>();
+        stateSpaceFrameMark = new RevertibleLong(stateSpace);
     }
 
     public void setDependentStates(State... dependentStates) {
@@ -71,6 +73,10 @@ public abstract class Property<V> extends HandyObject {
         }
     }
 
+    void setStateSpaceFrameMark(long frameMark) {
+        stateSpaceFrameMark.set(frameMark);
+    }
+
     @EqualsPart
     public StateSpace getStateSpace() {
         return stateSpace;
@@ -87,7 +93,7 @@ public abstract class Property<V> extends HandyObject {
         }
         stateSpace.enterMethod(String.format("%s > %s", this, toState));
         stateSpace.addStateTrace(getState(toState));
-        if (!stateSpace.getCache().hasCache(this)) {
+        if (!stateSpace.getCache().containsKey(this)) {
             // 属性值未知,认为dependentStates未满足
             if (dependentStates != null) {
                 for (State dependentState : dependentStates) {
@@ -161,11 +167,11 @@ public abstract class Property<V> extends HandyObject {
     }
 
     boolean isValueFresh() {
-        return stateSpace.frameMark > 0 && graphFrameMark == stateSpace.frameMark;
+        return stateSpace.getFrameMark() > 0 && stateSpaceFrameMark.get() == stateSpace.getFrameMark();
     }
 
     private void updateCache(V value) {
-        if (stateSpace.getCache().updateCache(this, value)) {
+        if (stateSpace.getCache().put(this, value)) {
             if (onValueUpdateListeners != null) {
                 for (Consumer<V> listener : onValueUpdateListeners) {
                     listener.accept(value);
@@ -175,7 +181,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public void refresh() {
-        if (stateSpace.getCache().hasCache(this)) {
+        if (stateSpace.getCache().containsKey(this)) {
             V oldValue = getCurrentValue();
             V newValue = doCheckValue();
             handleChange(oldValue, newValue);
@@ -185,7 +191,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public void cleanCache() {
-        if (stateSpace.getCache().clean(this)) {
+        if (stateSpace.getCache().remove(this)) {
             if (onCleanListeners != null) {
                 for (Runnable listener : onCleanListeners) {
                     listener.run();
@@ -195,8 +201,8 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final V getCurrentValue() {
-        if (stateSpace.getCache().hasCache(this)) {
-            return stateSpace.getCache().getCache(this);
+        if (stateSpace.getCache().containsKey(this)) {
+            return (V) stateSpace.getCache().get(this);
         }
         return doCheckValue();
     }

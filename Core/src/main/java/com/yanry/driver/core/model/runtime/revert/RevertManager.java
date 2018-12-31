@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class RevertManager {
-    private LinkedList<RevertStep> stack;
+    private LinkedList<Revertible> stack;
     private HashMap<Object, TagStep> tags;
 
     public RevertManager() {
@@ -12,7 +12,7 @@ public class RevertManager {
         tags = new HashMap<>();
     }
 
-    public void proceed(RevertStep step) {
+    public void proceed(Revertible step) {
         if (!stack.isEmpty()) {
             stack.push(step);
         }
@@ -20,7 +20,7 @@ public class RevertManager {
     }
 
     public void revert() {
-        RevertStep step;
+        Revertible step;
         while ((step = stack.pop()) != null) {
             if (!(step instanceof TagStep)) {
                 step.recover();
@@ -42,7 +42,7 @@ public class RevertManager {
     }
 
     public void revertTo(Object tag) {
-        RevertStep step;
+        Revertible step;
         while ((step = stack.pop()) != null) {
             if (step instanceof TagStep) {
                 TagStep tagStep = (TagStep) step;
@@ -57,7 +57,7 @@ public class RevertManager {
 
     public int getTagCount() {
         int count = 0;
-        for (RevertStep step : stack) {
+        for (Revertible step : stack) {
             if (step instanceof TagStep) {
                 count++;
             }
@@ -69,7 +69,7 @@ public class RevertManager {
         stack.clear();
     }
 
-    private static class TagStep implements RevertStep {
+    private static class TagStep implements Revertible {
         private Object tag;
 
         private TagStep(Object tag) {

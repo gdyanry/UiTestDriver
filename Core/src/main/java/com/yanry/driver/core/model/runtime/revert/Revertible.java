@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.runtime.revert;
 
-public interface RevertStep {
+public interface Revertible {
     void proceed();
 
     void recover();

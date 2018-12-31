@@ -6,10 +6,12 @@ import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.runtime.communicator.SerializedCommunicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
+import com.yanry.driver.core.model.runtime.record.CommunicateRecord;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
 import lib.common.util.object.ObjectUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
@@ -59,7 +61,7 @@ public class ServerReception extends SerializedCommunicator {
         }
         int[] finalIndexes = indexes;
         executor.execute(() -> {
-            List<Object> result = stateSpace.traverse(finalIndexes);
+            ArrayList<CommunicateRecord> result = stateSpace.traverse(finalIndexes);
             JSONArray ja = new JSONArray();
             for (Object o : result) {
                 ja.put(ObjectUtil.getPresentation(o));
