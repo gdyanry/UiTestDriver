@@ -1,12 +1,13 @@
 package com.yanry.driver.core.model.property;
 
+import com.yanry.driver.core.model.base.ActionCollector;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.StateSpace;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.Visible;
 
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class CombinedProperty extends Property<StateSnapShoot> {
@@ -45,11 +46,24 @@ public class CombinedProperty extends Property<StateSnapShoot> {
 
     @Override
     protected ExternalEvent doSelfSwitch(StateSnapShoot to) {
+        LinkedHashMap<ExternalEvent, Integer> counter = new LinkedHashMap<>();
         for (Property property : properties) {
-            ExternalEvent event = property.switchToValue(to.getValue(property));
-            if (event != null) {
-                return event;
+            Object toValue = to.getValue(property);
+            if (!Objects.equals(toValue, property.getCurrentValue())) {
+                ActionCollector actionCollector = new ActionCollector();
+                property.switchToValue(toValue, actionCollector);
+                Iterator<ExternalEvent> iterator = actionCollector.iterator();
+                while (iterator.hasNext()) {
+                    ExternalEvent externalEvent = iterator.next();
+                    counter.put(externalEvent, counter.getOrDefault(externalEvent, 0) + 1);
+                }
             }
+        }
+        Iterator<Map.Entry<ExternalEvent, Integer>> iterator = counter.entrySet().stream()
+                .sorted(Comparator.comparingInt(entry -> -entry.getValue()))
+                .iterator();
+        if (iterator.hasNext()) {
+            return iterator.next().getKey();
         }
         return null;
     }

@@ -5,13 +5,16 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
+import com.yanry.driver.core.model.libtemp.revert.RevertibleLong;
 import com.yanry.driver.core.model.predicate.Equals;
-import com.yanry.driver.core.model.runtime.revert.RevertibleLong;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
 import lib.common.util.object.HandyObject;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -28,7 +31,7 @@ public abstract class Property<V> extends HandyObject {
      */
     private RevertibleLong stateSpaceFrameMark;
     private HashSet<V> collectedValues;
-    private State[] dependentStates;
+    private Context dependentStates;
     private LinkedList<Consumer<V>> onValueUpdateListeners;
     private LinkedList<Runnable> onCleanListeners;
 
@@ -38,8 +41,11 @@ public abstract class Property<V> extends HandyObject {
         stateSpaceFrameMark = new RevertibleLong(stateSpace);
     }
 
-    public void setDependentStates(State... dependentStates) {
-        this.dependentStates = dependentStates;
+    public <T> void addDependentState(Property<T> property, ValuePredicate<T> predicate) {
+        if (dependentStates == null) {
+            dependentStates = new Context();
+        }
+        dependentStates.add(property, predicate);
     }
 
     public void addValue(V... value) {
@@ -82,51 +88,46 @@ public abstract class Property<V> extends HandyObject {
         return stateSpace;
     }
 
-    public final ExternalEvent switchToValue(V toState) {
-        return switchTo(Equals.of(toState));
+    public final void switchToValue(V toState, ActionCollector actionCollector) {
+        switchTo(Equals.of(toState), actionCollector);
     }
 
-    public final ExternalEvent switchTo(ValuePredicate<V> toState) {
-        findValueToAdd(toState);
-        if (toState.test(getCurrentValue())) {
-            return null;
-        }
-        stateSpace.enterMethod(String.format("%s > %s", this, toState));
-        stateSpace.addStateTrace(getState(toState));
-        if (!stateSpace.getCache().containsKey(this)) {
-            // 属性值未知,认为dependentStates未满足
-            if (dependentStates != null) {
-                for (State dependentState : dependentStates) {
-                    if (!dependentState.isSatisfied()) {
-                        ExternalEvent externalEvent = dependentState.trySatisfy();
-                        stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
-                        return externalEvent;
-                    }
+    public final void switchTo(ValuePredicate<V> toState, ActionCollector actionCollector) {
+        stateSpace.getExecutor().execute(() -> {
+            findValueToAdd(toState);
+            if (toState.test(getCurrentValue())) {
+                return;
+            }
+            stateSpace.enterMethod(String.format("%s > %s", this, toState));
+            stateSpace.addStateTrace(getState(toState));
+            if (!stateSpace.getCache().containsKey(this)) {
+                // 属性值未知,认为dependentStates未满足
+                if (dependentStates != null && !dependentStates.isSatisfied()) {
+                    dependentStates.trySatisfy(actionCollector, stateSpace);
+                    stateSpace.exitMethod(LogLevel.Verbose, actionCollector);
+                    return;
                 }
             }
-        }
-        Stream<V> stream = getValueStream(collectedValues);
-        if (stream == null) {
-            stream = collectedValues.stream();
-        }
-        Optional<ExternalEvent> any = stream.filter(v -> toState.test(v))
-                .map(v -> doSelfSwitch(v))
-                .filter(a -> a != null && stateSpace.isValidAction(a))
-                .findAny();
-        if (any.isPresent()) {
-            ExternalEvent externalEvent = any.get();
-            stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
-            return externalEvent;
-        }
-        ExternalEvent externalEvent = stateSpace.findPathToRoll(e -> {
-            if (e instanceof PropertyExpectation) {
-                PropertyExpectation<V> exp = (PropertyExpectation) e;
-                return equals(exp.getProperty()) && toState.test(exp.getExpectedValue());
+            Stream<V> stream = getValueStream(collectedValues);
+            if (stream == null) {
+                stream = collectedValues.stream();
             }
-            return false;
+            actionCollector.add(stream.filter(v -> toState.test(v))
+                    .map(v -> doSelfSwitch(v))
+                    .filter(a -> a != null && stateSpace.isValidAction(a))
+                    .limit(actionCollector.getLimit())
+                    .iterator(), stateSpace);
+            if (!actionCollector.isFull()) {
+                stateSpace.findPathToRoll(e -> {
+                    if (e instanceof PropertyExpectation) {
+                        PropertyExpectation<V> exp = (PropertyExpectation) e;
+                        return equals(exp.getProperty()) && toState.test(exp.getExpectedValue());
+                    }
+                    return false;
+                }, actionCollector);
+            }
+            stateSpace.exitMethod(LogLevel.Verbose, actionCollector);
         });
-        stateSpace.exitMethod(LogLevel.Verbose, externalEvent);
-        return externalEvent;
     }
 
     public State<V> getState(ValuePredicate<V> predicate) {
@@ -146,18 +147,20 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final void handleExpectation(V expectedValue, boolean needCheck) {
-        V oldValue = getCurrentValue();
-        if (needCheck) {
-            if (!isValueFresh()) {
-                // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
-                cleanCache();
+        stateSpace.getExecutor().execute(() -> {
+            V oldValue = getCurrentValue();
+            if (needCheck) {
+                if (!isValueFresh()) {
+                    // 清空缓存，使得接下来调用getCurrentValue时触发向客户端查询并更新该属性最新的状态值
+                    cleanCache();
+                }
+            } else {
+                // 不查询客户端，直接通过验证并更新状态值
+                updateCache(expectedValue);
             }
-        } else {
-            // 不查询客户端，直接通过验证并更新状态值
-            updateCache(expectedValue);
-        }
-        V newValue = getCurrentValue();
-        handleChange(oldValue, newValue);
+            V newValue = getCurrentValue();
+            handleChange(oldValue, newValue);
+        });
     }
 
     private void handleChange(V oldValue, V newValue) {
@@ -181,13 +184,15 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public void refresh() {
-        if (stateSpace.getCache().containsKey(this)) {
-            V oldValue = getCurrentValue();
-            V newValue = doCheckValue();
-            handleChange(oldValue, newValue);
-        } else {
-            doCheckValue();
-        }
+        stateSpace.getExecutor().execute(() -> {
+            if (stateSpace.getCache().containsKey(this)) {
+                V oldValue = getCurrentValue();
+                V newValue = doCheckValue();
+                handleChange(oldValue, newValue);
+            } else {
+                doCheckValue();
+            }
+        });
     }
 
     public void cleanCache() {
@@ -201,19 +206,17 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final V getCurrentValue() {
-        if (stateSpace.getCache().containsKey(this)) {
-            return (V) stateSpace.getCache().get(this);
-        }
-        return doCheckValue();
+        return stateSpace.getExecutor().execute(() -> {
+            if (stateSpace.getCache().containsKey(this)) {
+                return (V) stateSpace.getCache().get(this);
+            }
+            return doCheckValue();
+        });
     }
 
     private V doCheckValue() {
-        if (dependentStates != null) {
-            for (State dependentState : dependentStates) {
-                if (!dependentState.isSatisfied()) {
-                    return null;
-                }
-            }
+        if (dependentStates != null && !dependentStates.isSatisfied()) {
+            return null;
         }
         V value = checkValue();
         updateCache(value);

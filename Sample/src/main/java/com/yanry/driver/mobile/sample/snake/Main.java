@@ -14,16 +14,21 @@ public class Main {
     private static final boolean AUTO = true;
 
     public static void main(String[] args) {
-        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().sequenceNumber().method(), LogLevel.Verbose));
+        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().sequenceNumber().time().thread().method(3), LogLevel.Verbose));
         final SnakeModel gameModel = new SnakeModel();
-        SnakeController controller = new SnakeController(gameModel, AUTO);
+        SnakeController controller = new SnakeController(gameModel);
         final SnakeGame game = new SnakeGame(controller, gameModel);
         controller.setWatcher(new Watcher() {
             @Override
             public void onTransitionComplete() {
                 SwingUtilities.invokeLater(() -> {
-                    game.repaint();
-                    game.setTitle("Greedy Snake(" + gameModel.length() + ")");
+                    if (controller.getTagCount() == 0) {
+                        game.repaint();
+                        game.setTitle("Greedy Snake(" + gameModel.length() + ")");
+                        if (AUTO) {
+                            controller.makeAction(gameModel.getFruitPos());
+                        }
+                    }
                 });
             }
 

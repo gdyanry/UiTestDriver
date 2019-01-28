@@ -68,5 +68,6 @@ public class Tester {
             }
         }
         Logger.getDefault().d("pass/fail/miss: %s/%s/%s", passCount, failCount, missCount);
+        stateSpace.release();
     }
 }

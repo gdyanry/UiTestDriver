@@ -1,6 +1,7 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
+import lib.common.model.log.Logger;
 
 import java.util.Objects;
 
@@ -23,6 +24,12 @@ public abstract class PropertyExpectation<V> extends Expectation {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
         property.handleExpectation(expectedValue, isNeedCheck());
-        return Objects.equals(expectedValue, property.getCurrentValue());
+        V actualValue = property.getCurrentValue();
+        if (Objects.equals(expectedValue, actualValue)) {
+            return true;
+        } else {
+            Logger.getDefault().ww("expected ", expectedValue, " and actually get ", actualValue);
+            return false;
+        }
     }
 }

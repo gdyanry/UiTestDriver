@@ -56,6 +56,7 @@ public abstract class Window extends ViewContainer {
     public Path showOnLaunch(Timing timing) {
         return getStateSpace().createPath(GlobalActions.clickLauncher(), application.getStaticExpectation(timing, true, this)
                 .addFollowingExpectation(previousWindow.getStaticExpectation(Timing.IMMEDIATELY, false, null)))
+                .addContextValue(application, null)
                 .setBaseUnsatisfiedDegree(10000);
     }
 

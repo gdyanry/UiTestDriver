@@ -41,11 +41,12 @@ public class TransitionEvent<V> extends InternalEvent<V> {
     }
 
     @Override
-    protected ExternalEvent traverse() {
+    protected void traverse(ActionCollector actionCollector) {
         Property<V> property = getProperty();
         if (!from.test(property.getCurrentValue())) {
-            return property.switchTo(from);
+            property.switchTo(from, actionCollector);
+        } else {
+            property.switchTo(to, actionCollector);
         }
-        return property.switchTo(to);
     }
 }

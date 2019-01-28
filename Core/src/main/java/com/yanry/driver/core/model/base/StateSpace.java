@@ -5,6 +5,8 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.base.Expectation.VerifyResult;
 import com.yanry.driver.core.model.event.SwitchStateAction;
+import com.yanry.driver.core.model.libtemp.ThreadSafeExecutor;
+import com.yanry.driver.core.model.libtemp.revert.*;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.core.model.runtime.communicator.Communicator;
@@ -12,10 +14,10 @@ import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.runtime.record.ActionRecord;
 import com.yanry.driver.core.model.runtime.record.CommunicateRecord;
 import com.yanry.driver.core.model.runtime.record.VerificationRecord;
-import com.yanry.driver.core.model.runtime.revert.*;
 import lib.common.model.log.LogLevel;
 import lib.common.model.log.Logger;
 import lib.common.util.CollectionUtil;
+import lib.common.util.object.ObjectUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
  * Jan 5, 2017
  */
 public class StateSpace extends RevertManager {
+    private static AtomicInteger sequenceGenerator = new AtomicInteger();
+    private ThreadSafeExecutor executor;
+
     private LinkedList<Path> allPaths;
     private List<Path> concernedPaths;
     private Communicator communicator;
@@ -58,9 +63,13 @@ public class StateSpace extends RevertManager {
         cache = new RevertibleMap<>(this);
         frameMark = new RevertibleLong(this);
         hasChanged = new RevertibleBoolean(this);
+        executor = new ThreadSafeExecutor();
+        Thread workThread = new Thread(executor);
+        workThread.setName(String.format("%s-%s", StateSpace.class.getSimpleName(), sequenceGenerator.getAndIncrement()));
+        workThread.start();
     }
 
-    public void reset() {
+    public void resetStates() {
         this.clean();
         cache.clear();
         records.clear();
@@ -102,15 +111,24 @@ public class StateSpace extends RevertManager {
         return cache;
     }
 
+    ThreadSafeExecutor getExecutor() {
+        return executor;
+    }
+
+    void post(Runnable runnable) {
+        executor.post(runnable);
+    }
+
     private boolean needCheck(Expectation expectation) {
         return expectation.isNeedCheck() || expectation.getFollowingExpectations().parallelStream().anyMatch(this::needCheck);
     }
 
-    /**
-     * This should be called from a different thread.
-     */
     public void abort() {
         isTraversing = false;
+    }
+
+    public void release() {
+        executor.stop();
     }
 
     private boolean setup() {
@@ -135,30 +153,34 @@ public class StateSpace extends RevertManager {
         return concernedPaths;
     }
 
-    public synchronized ArrayList<CommunicateRecord> traverse(Predicate<Path> pathFilter) {
-        if (!setup()) {
-            return null;
-        }
-        for (Path concernedPath : concernedPaths) {
-            if (pathFilter == null || pathFilter.test(concernedPath)) {
-                unprocessedPaths.addLast(concernedPath);
+    public ArrayList<CommunicateRecord> traverse(Predicate<Path> pathFilter) {
+        return executor.execute(() -> {
+            if (!setup()) {
+                return null;
             }
-        }
-        return traverse();
+            for (Path concernedPath : concernedPaths) {
+                if (pathFilter == null || pathFilter.test(concernedPath)) {
+                    unprocessedPaths.addLast(concernedPath);
+                }
+            }
+            return traverse();
+        });
     }
 
-    public synchronized ArrayList<CommunicateRecord> traverse(int[] selectedIndexes) {
-        if (!setup()) {
-            return null;
-        }
-        if (selectedIndexes == null) {
-            unprocessedPaths.addAll(concernedPaths);
-        } else {
-            for (int i : selectedIndexes) {
-                unprocessedPaths.addLast(concernedPaths.get(i));
+    public ArrayList<CommunicateRecord> traverse(int[] selectedIndexes) {
+        return executor.execute(() -> {
+            if (!setup()) {
+                return null;
             }
-        }
-        return traverse();
+            if (selectedIndexes == null) {
+                unprocessedPaths.addAll(concernedPaths);
+            } else {
+                for (int i : selectedIndexes) {
+                    unprocessedPaths.addLast(concernedPaths.get(i));
+                }
+            }
+            return traverse();
+        });
     }
 
     private ArrayList<CommunicateRecord> traverse() {
@@ -220,31 +242,45 @@ public class StateSpace extends RevertManager {
                 }
             }
         }
+        ActionCollector actionCollector = new ActionCollector(1);
         if (selectedState == null) {
-            return roll(pathToTraverse);
+            roll(pathToTraverse, actionCollector);
+        } else {
+            selectedState.getProperty().switchTo(selectedState.getValuePredicate(), actionCollector);
         }
-        return selectedState.getProperty().switchTo(selectedState.getValuePredicate());
+        return actionCollector.pop();
     }
 
     private <V> boolean achieveStatePredicate(Property<V> property, ValuePredicate<V> valuePredicate) {
         while (isTraversing && !valuePredicate.test(property.getCurrentValue())) {
-            ExternalEvent externalEvent = property.switchTo(valuePredicate);
-            if (externalEvent == null) {
+            ActionCollector actionCollector = new ActionCollector(1);
+            property.switchTo(valuePredicate, actionCollector);
+            if (actionCollector.isEmpty()) {
                 break;
             } else {
-                postAction(externalEvent);
+                postAction(actionCollector.pop());
             }
         }
         return valuePredicate.test(property.getCurrentValue());
     }
 
-    public synchronized <V> boolean achieveState(Property<V> property, V value) {
-        boolean success = setup() && achieveStatePredicate(property, Equals.of(value));
-        isTraversing = false;
-        return success;
+    public <V> boolean achieveState(Property<V> property, V value) {
+        return executor.execute(() -> {
+            boolean success = setup() && achieveStatePredicate(property, Equals.of(value));
+            isTraversing = false;
+            return success;
+        });
     }
 
-    public synchronized void fire(ExternalEvent event) {
+    public void fire(ExternalEvent event) {
+        executor.execute(() -> doFire(event));
+    }
+
+    public void fireLater(ExternalEvent event) {
+        executor.post(() -> doFire(event));
+    }
+
+    private void doFire(ExternalEvent event) {
         Logger.getDefault().dd(event);
         frameMark.increment();
         if (event instanceof SwitchStateAction) {
@@ -301,39 +337,37 @@ public class StateSpace extends RevertManager {
         return false;
     }
 
-    private ExternalEvent roll(Path path) {
+    private void roll(Path path, ActionCollector actionCollector) {
         enterMethod(path);
         // make sure context states are satisfied.
         Context context = path.getContext();
-        ExternalEvent e = context.trySatisfy();
-        if (e != null || !context.isSatisfied()) {
-            exitMethod(LogLevel.Verbose, e);
-            return e;
+        if (!context.isSatisfied()) {
+            context.trySatisfy(actionCollector, this);
+            exitMethod(LogLevel.Verbose, actionCollector);
+            return;
         }
         // all context states are satisfied by now.
         // trigger event
         Event inputEvent = path.getEvent();
         if (inputEvent instanceof InternalEvent) {
-            ExternalEvent externalEvent = ((InternalEvent) inputEvent).traverse();
-            exitMethod(LogLevel.Verbose, externalEvent);
-            return externalEvent;
+            ((InternalEvent) inputEvent).traverse(actionCollector);
+            exitMethod(LogLevel.Verbose, actionCollector);
+            return;
         } else if (inputEvent instanceof ExternalEvent) {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
             Context precondition = externalEvent.getPrecondition();
-            if (precondition != null) {
-                ExternalEvent event = precondition.trySatisfy();
-                if (event != null || !precondition.isSatisfied()) {
-                    exitMethod(LogLevel.Verbose, event);
-                    return event;
-                }
+            if (precondition != null && !precondition.isSatisfied()) {
+                precondition.trySatisfy(actionCollector, this);
+                exitMethod(LogLevel.Verbose, actionCollector);
+                return;
             }
             if (isValidAction(externalEvent)) {
-                exitMethod(LogLevel.Verbose, externalEvent);
-                return externalEvent;
+                actionCollector.add(externalEvent, this);
+                exitMethod(LogLevel.Verbose, actionCollector);
+                return;
             }
         }
         exitMethod(LogLevel.Warn, "no available action.");
-        return null;
     }
 
     private void verify(Path path) {
@@ -369,7 +403,7 @@ public class StateSpace extends RevertManager {
         }
     }
 
-    ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter) {
+    void findPathToRoll(Predicate<Expectation> expectationFilter, ActionCollector actionCollector) {
         List<Path> sorted = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
                     int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark.get(), true);
@@ -380,12 +414,11 @@ public class StateSpace extends RevertManager {
                     return unsatisfiedDegree;
                 })).collect(Collectors.toList());
         for (Path path : sorted) {
-            ExternalEvent externalEvent = roll(path);
-            if (externalEvent != null) {
-                return externalEvent;
+            if (actionCollector.isFull()) {
+                return;
             }
+            roll(path, actionCollector);
         }
-        return null;
     }
 
     private boolean isSatisfied(Expectation expectation, Predicate<Expectation> expectationFilter) {
@@ -408,17 +441,19 @@ public class StateSpace extends RevertManager {
     }
 
     public <V> V obtainValue(Obtainable<V> obtainable) {
-        Property<V> property = obtainable.getProperty();
-        if (property.isValueFresh()) {
-            return property.getCurrentValue();
-        }
-        if (communicator != null) {
-            V value = communicator.fetchState(obtainable);
-            property.setStateSpaceFrameMark(frameMark.get());
-            return value;
-        }
-        Logger.getDefault().ww("unable to check state: ", obtainable);
-        return null;
+        return executor.execute(() -> {
+            Property<V> property = obtainable.getProperty();
+            if (property.isValueFresh()) {
+                return property.getCurrentValue();
+            }
+            if (communicator != null) {
+                V value = communicator.fetchState(obtainable);
+                property.setStateSpaceFrameMark(frameMark.get());
+                return value;
+            }
+            Logger.getDefault().ww("unable to check state: ", obtainable);
+            return null;
+        });
     }
 
     Boolean verifyExpectation(NonPropertyExpectation expectation) {
@@ -437,6 +472,6 @@ public class StateSpace extends RevertManager {
 
     void exitMethod(LogLevel logLevel, Object msg) {
         int depth = methodStack.getAndDecrement();
-        Logger.getDefault().concat(1, logLevel, '-', depth, ':', msg);
+        Logger.getDefault().concat(1, logLevel, '-', depth, ':', ObjectUtil.getPresentation(msg));
     }
 }

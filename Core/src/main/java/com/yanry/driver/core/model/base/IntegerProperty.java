@@ -21,7 +21,8 @@ public abstract class IntegerProperty extends Property<Integer> {
         if (currentValue == null || to == null) {
             return null;
         }
-        return getStateSpace().findPathToRoll(exp -> {
+        ActionCollector actionCollector = new ActionCollector(1);
+        getStateSpace().findPathToRoll(exp -> {
             if (exp instanceof ShiftExpectation) {
                 ShiftExpectation expectation = (ShiftExpectation) exp;
                 if (expectation.getProperty() == this) {
@@ -29,7 +30,8 @@ public abstract class IntegerProperty extends Property<Integer> {
                 }
             }
             return false;
-        });
+        }, actionCollector);
+        return actionCollector.pop();
     }
 
     public class ShiftExpectation extends SDPropertyExpectation<Integer> {

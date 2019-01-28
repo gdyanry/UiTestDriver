@@ -1,9 +1,6 @@
 package com.yanry.driver.mobile.sample.snake.graph;
 
-import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.NonPropertyExpectation;
-import com.yanry.driver.core.model.base.StateSpace;
-import com.yanry.driver.core.model.base.ValuePredicate;
+import com.yanry.driver.core.model.base.*;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.event.StateChangeEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
@@ -23,14 +20,17 @@ import java.util.stream.Stream;
 
 public class SnakeController extends StateSpace implements Communicator {
     private GameState gameState;
+    private SnakeHeadX snakeHeadX;
+    private SnakeHeadY snakeHeadY;
+    private CombinedProperty snakeHead;
 
-    public SnakeController(SnakeModel snakeModel, boolean automated) {
+    public SnakeController(SnakeModel snakeModel) {
         setCommunicator(this);
         gameState = new GameState(this);
         Direction direction = new Direction(this);
-        SnakeHeadX snakeHeadX = new SnakeHeadX(this);
-        SnakeHeadY snakeHeadY = new SnakeHeadY(this);
-        CombinedProperty snakeHead = new CombinedProperty(this, "snakeHead", snakeHeadX, snakeHeadY);
+        snakeHeadX = new SnakeHeadX(this);
+        snakeHeadY = new SnakeHeadY(this);
+        snakeHead = new CombinedProperty(this, "snakeHead", snakeHeadX, snakeHeadY);
         // start
         createPath(SnakeEvent.PressStart.get(), gameState.getStaticExpectation(Timing.IMMEDIATELY, false, GameState.MOVE)
                 .addFollowingExpectation(new ActionExpectation() {
@@ -104,6 +104,7 @@ public class SnakeController extends StateSpace implements Communicator {
         ActionExpectation expectation = new ActionExpectation() {
             @Override
             protected void run() {
+                // 更新snake model
                 Point fruitPos = snakeModel.getFruitPos();
                 if (fruitPos.x == snakeHeadX.getCurrentValue() && fruitPos.y == snakeHeadY.getCurrentValue()) {
                     snakeModel.spawnFruit();
@@ -111,16 +112,21 @@ public class SnakeController extends StateSpace implements Communicator {
                     snakeModel.removeLast();
                 }
                 snakeModel.push(new Point(snakeHeadX.getCurrentValue(), snakeHeadY.getCurrentValue()));
-                if (automated) {
-                    Point pos = snakeModel.getFruitPos();
-                    ExternalEvent event = snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, pos.x).append(snakeHeadY, pos.y).build()));
-                    if (!SnakeEvent.MoveAhead.get().equals(event)) {
-                        fire(event);
-                    }
-                }
             }
         };
         createPath(new StateChangeEvent<>(snakeHead), expectation).addContextValue(gameState, GameState.MOVE);
+    }
+
+    public void makeAction(Point fruitPos) {
+        if (gameState.getCurrentValue() == GameState.MOVE) {
+            ActionCollector actionCollector = new ActionCollector(1);
+//            actionCollector.addPromise(gameState, Equals.of(GameState.GAME_OVER).not());
+            snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, fruitPos.x).append(snakeHeadY, fruitPos.y).build()), actionCollector);
+            ExternalEvent event = actionCollector.pop();
+            if (event != null && !SnakeEvent.MoveAhead.get().equals(event)) {
+                fireLater(event);
+            }
+        }
     }
 
     public String getCurrentState() {

@@ -12,7 +12,7 @@ public abstract class ViewProperty<V> extends Property<V> {
     public ViewProperty(View view) {
         super(view.getStateSpace());
         this.view = view;
-        setDependentStates(view.getState(Equals.of(true)));
+        addDependentState(view, Equals.of(true));
         view.addOnCleanListener(() -> cleanCache());
     }
 

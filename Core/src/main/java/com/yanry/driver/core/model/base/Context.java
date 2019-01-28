@@ -3,8 +3,7 @@ package com.yanry.driver.core.model.base;
 import lib.common.util.object.Visible;
 import lib.common.util.object.VisibleObject;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Context extends VisibleObject {
     private HashMap<Property, ValuePredicate> states;
@@ -15,7 +14,7 @@ public class Context extends VisibleObject {
         states = new HashMap<>();
     }
 
-    public void add(Property property, ValuePredicate valuePredicate) {
+    public <V> void add(Property<V> property, ValuePredicate<V> valuePredicate) {
         property.findValueToAdd(valuePredicate);
         ValuePredicate existPredicate = states.get(property);
         if (existPredicate != null) {
@@ -34,15 +33,29 @@ public class Context extends VisibleObject {
         return true;
     }
 
-    public ExternalEvent trySatisfy() {
+    public void trySatisfy(ActionCollector actionCollector, StateSpace stateSpace) {
+        LinkedHashMap<ExternalEvent, Integer> counter = new LinkedHashMap<>();
         for (Map.Entry<Property, ValuePredicate> entry : states.entrySet()) {
             Property property = entry.getKey();
             ValuePredicate predicate = entry.getValue();
             if (!predicate.test(property.getCurrentValue())) {
-                return property.switchTo(predicate);
+                ActionCollector collector = new ActionCollector(1);
+                property.switchTo(predicate, collector);
+                if (collector.isEmpty()) {
+                    return;
+                } else {
+                    Iterator<ExternalEvent> iterator = collector.iterator();
+                    while (iterator.hasNext()) {
+                        ExternalEvent externalEvent = iterator.next();
+                        counter.put(externalEvent, counter.getOrDefault(externalEvent, 0) + 1);
+                    }
+                }
             }
         }
-        return null;
+        actionCollector.add(counter.entrySet().stream()
+                .sorted(Comparator.comparingInt(entry -> -entry.getValue()))
+                .map(entry -> entry.getKey())
+                .iterator(), stateSpace);
     }
 
     public int getUnsatisfiedDegree(long currentFrameMark, Property excludeProperty, int stepLength) {
