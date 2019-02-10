@@ -14,6 +14,38 @@ public class RevertibleLinkedList<E> {
         list = new LinkedList<>();
     }
 
+    public void push(E e) {
+        manager.proceed(new Revertible() {
+            @Override
+            public void proceed() {
+                list.addFirst(e);
+            }
+
+            @Override
+            public void recover() {
+                list.removeFirst();
+            }
+        });
+    }
+
+    public E pop() {
+        if (list.size() > 0) {
+            E removed = list.removeFirst();
+            manager.proceed(new Revertible() {
+                @Override
+                public void proceed() {
+                }
+
+                @Override
+                public void recover() {
+                    list.addFirst(removed);
+                }
+            });
+            return removed;
+        }
+        return null;
+    }
+
     public void addLast(E e) {
         manager.proceed(new Revertible() {
             @Override
@@ -26,6 +58,24 @@ public class RevertibleLinkedList<E> {
                 list.removeLast();
             }
         });
+    }
+
+    public E removeLast() {
+        if (list.size() > 0) {
+            E removed = list.removeLast();
+            manager.proceed(new Revertible() {
+                @Override
+                public void proceed() {
+                }
+
+                @Override
+                public void recover() {
+                    list.addLast(removed);
+                }
+            });
+            return removed;
+        }
+        return null;
     }
 
     public void addAll(Collection<E> collection) {
@@ -123,10 +173,18 @@ public class RevertibleLinkedList<E> {
     }
 
     public boolean isEmpty() {
-        return list.isEmpty();
+        return list.size() == 0;
     }
 
     public boolean contains(E element) {
         return list.contains(element);
+    }
+
+    public E peekFirst() {
+        return list.peekFirst();
+    }
+
+    public E peekLast() {
+        return list.peekLast();
     }
 }

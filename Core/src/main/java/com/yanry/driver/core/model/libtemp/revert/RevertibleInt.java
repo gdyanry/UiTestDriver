@@ -1,19 +1,21 @@
 package com.yanry.driver.core.model.libtemp.revert;
 
-public class RevertibleLong {
+public class RevertibleInt {
     private RevertManager manager;
-    private long value;
+    private int value;
 
-    public RevertibleLong(RevertManager manager) {
+    public RevertibleInt(RevertManager manager) {
         this.manager = manager;
     }
 
-    public long get() {
+    public int get() {
         return value;
     }
 
-    public void set(long value) {
-        manager.proceed(new SetLong(value));
+    public void set(int value) {
+        if (this.value != value) {
+            manager.proceed(new SetLong(value));
+        }
     }
 
     public void increment() {
@@ -21,10 +23,10 @@ public class RevertibleLong {
     }
 
     private class SetLong implements Revertible {
-        private long copy;
-        private long valueToSet;
+        private int copy;
+        private int valueToSet;
 
-        public SetLong(long valueToSet) {
+        public SetLong(int valueToSet) {
             this.valueToSet = valueToSet;
             copy = value;
         }

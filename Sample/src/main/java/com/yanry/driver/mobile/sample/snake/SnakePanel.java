@@ -14,11 +14,8 @@ public class SnakePanel extends JPanel {
 
     private SnakeController controller;
 
-    private SnakeModel model;
-
-    public SnakePanel(SnakeController controller, SnakeModel model) {
+    public SnakePanel(SnakeController controller) {
         this.controller = controller;
-        this.model = model;
         setPreferredSize(new Dimension(GameConfigure.COL_COUNT * GameConfigure.CELL_SIZE,
                 GameConfigure.ROW_COUNT * GameConfigure.CELL_SIZE));
         setBackground(Color.BLACK);
@@ -30,6 +27,7 @@ public class SnakePanel extends JPanel {
 
         // draw snake body
         g.setColor(Color.GREEN);
+        SnakeModel model = controller.getSnakeModel();
         for (Point snakePoint : model.getSnakePoints()) {
             g.fillRect(snakePoint.x * GameConfigure.CELL_SIZE,
                     snakePoint.y * GameConfigure.CELL_SIZE,

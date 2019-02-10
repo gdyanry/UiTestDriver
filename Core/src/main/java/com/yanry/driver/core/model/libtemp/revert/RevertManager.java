@@ -1,5 +1,6 @@
 package com.yanry.driver.core.model.libtemp.revert;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -13,7 +14,7 @@ public class RevertManager {
     }
 
     public void proceed(Revertible step) {
-        if (!stack.isEmpty()) {
+        if (stack.size() > 0) {
             stack.push(step);
         }
         step.proceed();
@@ -57,7 +58,7 @@ public class RevertManager {
 
     public int getTagCount() {
         int count = 0;
-        for (Revertible step : stack) {
+        for (Revertible step : new ArrayList<>(stack)) {
             if (step instanceof TagStep) {
                 count++;
             }

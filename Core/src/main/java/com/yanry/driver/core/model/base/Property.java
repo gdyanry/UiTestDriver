@@ -5,7 +5,7 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.libtemp.revert.RevertibleLong;
+import com.yanry.driver.core.model.libtemp.revert.RevertibleInt;
 import com.yanry.driver.core.model.predicate.Equals;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
@@ -29,7 +29,7 @@ public abstract class Property<V> extends HandyObject {
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
-    private RevertibleLong stateSpaceFrameMark;
+    private RevertibleInt stateSpaceFrameMark;
     private HashSet<V> collectedValues;
     private Context dependentStates;
     private LinkedList<Consumer<V>> onValueUpdateListeners;
@@ -38,7 +38,7 @@ public abstract class Property<V> extends HandyObject {
     public Property(StateSpace stateSpace) {
         this.stateSpace = stateSpace;
         collectedValues = new HashSet<>();
-        stateSpaceFrameMark = new RevertibleLong(stateSpace);
+        stateSpaceFrameMark = new RevertibleInt(stateSpace);
     }
 
     public <T> void addDependentState(Property<T> property, ValuePredicate<T> predicate) {
@@ -79,7 +79,7 @@ public abstract class Property<V> extends HandyObject {
         }
     }
 
-    void setStateSpaceFrameMark(long frameMark) {
+    void setStateSpaceFrameMark(int frameMark) {
         stateSpaceFrameMark.set(frameMark);
     }
 
@@ -103,7 +103,7 @@ public abstract class Property<V> extends HandyObject {
             if (!stateSpace.getCache().containsKey(this)) {
                 // 属性值未知,认为dependentStates未满足
                 if (dependentStates != null && !dependentStates.isSatisfied()) {
-                    dependentStates.trySatisfy(actionCollector, stateSpace);
+                    dependentStates.trySatisfy(actionCollector);
                     stateSpace.exitMethod(LogLevel.Verbose, actionCollector);
                     return;
                 }
@@ -114,9 +114,9 @@ public abstract class Property<V> extends HandyObject {
             }
             actionCollector.add(stream.filter(v -> toState.test(v))
                     .map(v -> doSelfSwitch(v))
-                    .filter(a -> a != null && stateSpace.isValidAction(a))
+                    .filter(a -> a != null && stateSpace.isValidAction(a) && actionCollector.isExcluded(a))
                     .limit(actionCollector.getLimit())
-                    .iterator(), stateSpace);
+                    .iterator());
             if (!actionCollector.isFull()) {
                 stateSpace.findPathToRoll(e -> {
                     if (e instanceof PropertyExpectation) {

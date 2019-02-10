@@ -3,13 +3,14 @@ package com.yanry.driver.core.model.base;
 import lib.common.util.object.Visible;
 import lib.common.util.object.VisibleObject;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 public class ActionCollector extends VisibleObject {
     private LinkedList<ExternalEvent> list;
     private int limit;
-    private Context promises;
+    private HashSet<ExternalEvent> excluded;
 
     public ActionCollector() {
         this(128);
@@ -21,13 +22,6 @@ public class ActionCollector extends VisibleObject {
         }
         this.limit = limit;
         list = new LinkedList<>();
-    }
-
-    public <V> void addPromise(Property<V> property, ValuePredicate<V> predicate) {
-        if (promises == null) {
-            promises = new Context();
-        }
-        promises.add(property, predicate);
     }
 
     public ExternalEvent pop() {
@@ -42,35 +36,24 @@ public class ActionCollector extends VisibleObject {
         return list.iterator();
     }
 
-    public boolean add(ExternalEvent event, StateSpace stateSpace) {
-        if (!list.contains(event) && list.size() < limit && testPromises(event, stateSpace)) {
+    public boolean add(ExternalEvent event) {
+        if (!list.contains(event) && list.size() < limit) {
             list.add(event);
             return true;
         }
         return false;
     }
 
-    private boolean testPromises(ExternalEvent event, StateSpace stateSpace) {
-        if (promises != null) {
-            stateSpace.tag(this);
-            stateSpace.fire(event);
-            if (!promises.isSatisfied()) {
-                stateSpace.revertTo(this);
-                return false;
-            }
-            stateSpace.revertTo(this);
-        }
-        return true;
-    }
-
-    public void add(Iterator<ExternalEvent> iterator, StateSpace stateSpace) {
+    public void add(Iterator<ExternalEvent> iterator) {
         LinkedList<ExternalEvent> temp = new LinkedList<>();
         while (iterator.hasNext()) {
-            if (list.size() < limit) {
+            if (list.size() + temp.size() < limit) {
                 ExternalEvent next = iterator.next();
-                if (!list.contains(next) && testPromises(next, stateSpace)) {
+                if (!list.contains(next)) {
                     temp.add(next);
                 }
+            } else {
+                break;
             }
         }
         list.addAll(temp);
@@ -84,6 +67,23 @@ public class ActionCollector extends VisibleObject {
         return list.isEmpty();
     }
 
+    public void exclude(ExternalEvent event) {
+        if (excluded == null) {
+            excluded = new HashSet<>();
+        }
+        excluded.add(event);
+    }
+
+    public boolean isExcluded(ExternalEvent event) {
+        return excluded == null || !excluded.contains(event);
+    }
+
+    public ActionCollector getSubCollector(int limit) {
+        ActionCollector collector = new ActionCollector(limit);
+        collector.excluded = this.excluded;
+        return collector;
+    }
+
     @Visible
     public LinkedList<ExternalEvent> getList() {
         return list;
@@ -92,10 +92,5 @@ public class ActionCollector extends VisibleObject {
     @Visible
     public int getLimit() {
         return limit;
-    }
-
-    @Visible
-    public Context getPromises() {
-        return promises;
     }
 }

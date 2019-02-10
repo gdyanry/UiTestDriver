@@ -20,14 +20,14 @@ public class SnakeGame extends JFrame {
 
     private final SnakeController gameController;
 
-    public SnakeGame(final SnakeController controller, final SnakeModel gameModel) {
+    public SnakeGame(final SnakeController controller) {
         super("Greedy Snake");
         setLayout(new BorderLayout());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
 
         this.gameController = controller;
-        this.panel = new SnakePanel(gameController, gameModel);
+        this.panel = new SnakePanel(gameController);
         add(panel, BorderLayout.CENTER);
 
         addKeyListener(new KeyAdapter() {
@@ -38,30 +38,30 @@ public class SnakeGame extends JFrame {
 
                     case KeyEvent.VK_W:
                     case KeyEvent.VK_UP:
-                        gameController.fire(SnakeEvent.TurnUp.get());
+                        gameController.asyncFire(SnakeEvent.TurnUp.get());
                         break;
 
                     case KeyEvent.VK_S:
                     case KeyEvent.VK_DOWN:
-                        gameController.fire(SnakeEvent.TuneDown.get());
+                        gameController.asyncFire(SnakeEvent.TuneDown.get());
                         break;
 
                     case KeyEvent.VK_A:
                     case KeyEvent.VK_LEFT:
-                        gameController.fire(SnakeEvent.TuneLeft.get());
+                        gameController.asyncFire(SnakeEvent.TuneLeft.get());
                         break;
 
                     case KeyEvent.VK_D:
                     case KeyEvent.VK_RIGHT:
-                        gameController.fire(SnakeEvent.TuneRight.get());
+                        gameController.asyncFire(SnakeEvent.TuneRight.get());
                         break;
 
                     case KeyEvent.VK_P:
-                        gameController.fire(SnakeEvent.PressPause.get());
+                        gameController.asyncFire(SnakeEvent.PressPause.get());
                         break;
 
                     case KeyEvent.VK_ENTER:
-                        gameController.fire(SnakeEvent.PressStart.get());
+                        gameController.asyncFire(SnakeEvent.PressStart.get());
                         break;
                 }
             }
@@ -81,7 +81,7 @@ public class SnakeGame extends JFrame {
             @Override
             public void run() {
                 if (gameController.getCurrentState() == GameState.MOVE) {
-                    gameController.fire(SnakeEvent.MoveAhead.get());
+                    gameController.makeAction();
                 }
             }
         }, 0, GameConfigure.FRAME_TIME);

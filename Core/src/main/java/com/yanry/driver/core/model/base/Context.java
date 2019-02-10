@@ -33,13 +33,13 @@ public class Context extends VisibleObject {
         return true;
     }
 
-    public void trySatisfy(ActionCollector actionCollector, StateSpace stateSpace) {
+    public void trySatisfy(ActionCollector actionCollector) {
         LinkedHashMap<ExternalEvent, Integer> counter = new LinkedHashMap<>();
         for (Map.Entry<Property, ValuePredicate> entry : states.entrySet()) {
             Property property = entry.getKey();
             ValuePredicate predicate = entry.getValue();
             if (!predicate.test(property.getCurrentValue())) {
-                ActionCollector collector = new ActionCollector(1);
+                ActionCollector collector = actionCollector.getSubCollector(1);
                 property.switchTo(predicate, collector);
                 if (collector.isEmpty()) {
                     return;
@@ -54,8 +54,9 @@ public class Context extends VisibleObject {
         }
         actionCollector.add(counter.entrySet().stream()
                 .sorted(Comparator.comparingInt(entry -> -entry.getValue()))
+                .limit(actionCollector.getLimit())
                 .map(entry -> entry.getKey())
-                .iterator(), stateSpace);
+                .iterator());
     }
 
     public int getUnsatisfiedDegree(long currentFrameMark, Property excludeProperty, int stepLength) {

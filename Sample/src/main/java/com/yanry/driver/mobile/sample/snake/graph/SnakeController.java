@@ -23,8 +23,10 @@ public class SnakeController extends StateSpace implements Communicator {
     private SnakeHeadX snakeHeadX;
     private SnakeHeadY snakeHeadY;
     private CombinedProperty snakeHead;
+    private SnakeModel snakeModel;
 
-    public SnakeController(SnakeModel snakeModel) {
+    public SnakeController() {
+        snakeModel = new SnakeModel(this);
         setCommunicator(this);
         gameState = new GameState(this);
         Direction direction = new Direction(this);
@@ -117,14 +119,33 @@ public class SnakeController extends StateSpace implements Communicator {
         createPath(new StateChangeEvent<>(snakeHead), expectation).addContextValue(gameState, GameState.MOVE);
     }
 
-    public void makeAction(Point fruitPos) {
+    public SnakeModel getSnakeModel() {
+        return snakeModel;
+    }
+
+    public void makeAction() {
+        Point fruitPos = snakeModel.getFruitPos();
         if (gameState.getCurrentValue() == GameState.MOVE) {
-            ActionCollector actionCollector = new ActionCollector(1);
-//            actionCollector.addPromise(gameState, Equals.of(GameState.GAME_OVER).not());
-            snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, fruitPos.x).append(snakeHeadY, fruitPos.y).build()), actionCollector);
-            ExternalEvent event = actionCollector.pop();
-            if (event != null && !SnakeEvent.MoveAhead.get().equals(event)) {
-                fireLater(event);
+            ActionCollector actionCollector = new ActionCollector(3);
+            while (true) {
+                snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, fruitPos.x).append(snakeHeadY, fruitPos.y).build()), actionCollector);
+                if (actionCollector.isEmpty()) {
+                    return;
+                }
+                while (true) {
+                    ExternalEvent event = actionCollector.pop();
+                    if (event == null) {
+                        break;
+                    } else {
+                        Context promise = new Context();
+                        promise.add(gameState, Equals.of(GameState.MOVE));
+                        if (syncFire(event, promise)) {
+                            return;
+                        } else {
+                            actionCollector.exclude(event);
+                        }
+                    }
+                }
             }
         }
     }

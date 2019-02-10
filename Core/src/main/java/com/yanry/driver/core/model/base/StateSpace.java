@@ -43,7 +43,7 @@ public class StateSpace extends RevertManager {
 
     private RevertibleMap<Property, Object> cache;
     private RevertibleLinkedList<CommunicateRecord> records;
-    private RevertibleLong frameMark;
+    private RevertibleInt frameMark;
     private RevertibleBoolean hasChanged;
     private RevertibleSet<Path> verifiedPaths;
     private RevertibleSet<Expectation> pendingExpectations;
@@ -61,7 +61,7 @@ public class StateSpace extends RevertManager {
         invalidActions = new RevertibleSet<>(this);
         stateTrace = new RevertibleLinkedList<>(this);
         cache = new RevertibleMap<>(this);
-        frameMark = new RevertibleLong(this);
+        frameMark = new RevertibleInt(this);
         hasChanged = new RevertibleBoolean(this);
         executor = new ThreadSafeExecutor();
         Thread workThread = new Thread(executor);
@@ -272,16 +272,35 @@ public class StateSpace extends RevertManager {
         });
     }
 
-    public void fire(ExternalEvent event) {
-        executor.execute(() -> doFire(event));
+    public boolean syncFire(ExternalEvent event, Context promises) {
+        return executor.execute(() -> {
+            if (promises != null) {
+                int tagCount = getTagCount();
+                if (tagCount > 0) {
+                    throw new IllegalStateException("revertible tag count is " + tagCount);
+                }
+                Object tag = new Object();
+                tag(tag);
+                doFire(event);
+                if (!promises.isSatisfied()) {
+                    revertTo(tag);
+                    return false;
+                } else {
+                    clean();
+                }
+            } else {
+                doFire(event);
+            }
+            return true;
+        });
     }
 
-    public void fireLater(ExternalEvent event) {
+    public void asyncFire(ExternalEvent event) {
         executor.post(() -> doFire(event));
     }
 
     private void doFire(ExternalEvent event) {
-        Logger.getDefault().dd(event);
+        Logger.getDefault().dd(getTagCount(), ' ', event);
         frameMark.increment();
         if (event instanceof SwitchStateAction) {
             SwitchStateAction stateAction = (SwitchStateAction) event;
@@ -327,7 +346,7 @@ public class StateSpace extends RevertManager {
             }
             if (communicator.performAction(event)) {
                 records.addLast(new ActionRecord(event, true, snapShoot));
-                fire(event);
+                doFire(event);
                 return true;
             }
         }
@@ -342,7 +361,7 @@ public class StateSpace extends RevertManager {
         // make sure context states are satisfied.
         Context context = path.getContext();
         if (!context.isSatisfied()) {
-            context.trySatisfy(actionCollector, this);
+            context.trySatisfy(actionCollector);
             exitMethod(LogLevel.Verbose, actionCollector);
             return;
         }
@@ -357,12 +376,12 @@ public class StateSpace extends RevertManager {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
             Context precondition = externalEvent.getPrecondition();
             if (precondition != null && !precondition.isSatisfied()) {
-                precondition.trySatisfy(actionCollector, this);
+                precondition.trySatisfy(actionCollector);
                 exitMethod(LogLevel.Verbose, actionCollector);
                 return;
             }
-            if (isValidAction(externalEvent)) {
-                actionCollector.add(externalEvent, this);
+            if (isValidAction(externalEvent) && actionCollector.isExcluded(externalEvent)) {
+                actionCollector.add(externalEvent);
                 exitMethod(LogLevel.Verbose, actionCollector);
                 return;
             }

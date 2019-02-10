@@ -61,6 +61,7 @@ public class CombinedProperty extends Property<StateSnapShoot> {
         }
         Iterator<Map.Entry<ExternalEvent, Integer>> iterator = counter.entrySet().stream()
                 .sorted(Comparator.comparingInt(entry -> -entry.getValue()))
+                .limit(1)
                 .iterator();
         if (iterator.hasNext()) {
             return iterator.next().getKey();
