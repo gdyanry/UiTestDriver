@@ -3,7 +3,8 @@ package com.yanry.driver.core.model.base;
 import lib.common.util.object.Visible;
 import lib.common.util.object.VisibleObject;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Context extends VisibleObject {
     private HashMap<Property, ValuePredicate> states;
@@ -33,30 +34,15 @@ public class Context extends VisibleObject {
         return true;
     }
 
-    public void trySatisfy(ActionCollector actionCollector) {
-        LinkedHashMap<ExternalEvent, Integer> counter = new LinkedHashMap<>();
+    public ExternalEvent trySatisfy(ActionFilter actionFilter) {
         for (Map.Entry<Property, ValuePredicate> entry : states.entrySet()) {
             Property property = entry.getKey();
             ValuePredicate predicate = entry.getValue();
             if (!predicate.test(property.getCurrentValue())) {
-                ActionCollector collector = actionCollector.getSubCollector(1);
-                property.switchTo(predicate, collector);
-                if (collector.isEmpty()) {
-                    return;
-                } else {
-                    Iterator<ExternalEvent> iterator = collector.iterator();
-                    while (iterator.hasNext()) {
-                        ExternalEvent externalEvent = iterator.next();
-                        counter.put(externalEvent, counter.getOrDefault(externalEvent, 0) + 1);
-                    }
-                }
+                return property.switchTo(predicate, actionFilter);
             }
         }
-        actionCollector.add(counter.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> -entry.getValue()))
-                .limit(actionCollector.getLimit())
-                .map(entry -> entry.getKey())
-                .iterator());
+        return null;
     }
 
     public int getUnsatisfiedDegree(long currentFrameMark, Property excludeProperty, int stepLength) {

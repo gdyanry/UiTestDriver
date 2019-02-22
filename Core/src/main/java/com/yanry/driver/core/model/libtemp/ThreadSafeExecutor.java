@@ -18,7 +18,7 @@ public class ThreadSafeExecutor implements Runnable {
         queue = new LinkedBlockingQueue<>();
     }
 
-    public <T> T execute(Callable<T> callable) {
+    public <T> T sync(Callable<T> callable) {
         if (state == STATE_ABORTING) {
             throw new IllegalStateException("current state is " + getState());
         } else {
@@ -49,7 +49,7 @@ public class ThreadSafeExecutor implements Runnable {
         }
     }
 
-    public void execute(Runnable runnable) {
+    public void sync(Runnable runnable) {
         if (state == STATE_ABORTING) {
             throw new IllegalStateException("current state is " + getState());
         } else {
@@ -67,7 +67,7 @@ public class ThreadSafeExecutor implements Runnable {
         }
     }
 
-    public void post(Runnable runnable) {
+    public void async(Runnable runnable) {
         if (state == STATE_ABORTING) {
             throw new IllegalStateException("current state is " + getState());
         } else {

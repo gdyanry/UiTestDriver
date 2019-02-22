@@ -5,6 +5,7 @@ import com.yanry.driver.core.model.libtemp.revert.RevertibleLinkedList;
 import com.yanry.driver.core.model.libtemp.revert.RevertibleObject;
 
 import java.awt.*;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -43,6 +44,19 @@ public class SnakeModel {
 
     public Point getFruitPos() {
         return fruitPoint.get();
+    }
+
+    public Point getMidPos() {
+        int i = 0;
+        Iterator<Point> iterator = snakePoints.iterator();
+        int midPos = snakePoints.size() / 2;
+        while (iterator.hasNext()) {
+            if (i++ == midPos) {
+                return iterator.next();
+            }
+            iterator.next();
+        }
+        return null;
     }
 
     public boolean contains(int x, int y) {

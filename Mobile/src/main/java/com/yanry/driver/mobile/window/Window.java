@@ -144,7 +144,7 @@ public abstract class Window extends ViewContainer {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Boolean to) {
+    protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
         return null;
     }
 }

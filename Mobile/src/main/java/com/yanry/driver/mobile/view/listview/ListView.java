@@ -1,9 +1,6 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.core.model.base.Event;
-import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.StateSpace;
-import com.yanry.driver.core.model.base.TransitionEvent;
+import com.yanry.driver.core.model.base.*;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.GreaterThan;
 import com.yanry.driver.core.model.property.BooleanProperty;
@@ -136,7 +133,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         }
 
         @Override
-        protected ExternalEvent doSelfSwitch(Boolean to) {
+        protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
             return null;
         }
     }

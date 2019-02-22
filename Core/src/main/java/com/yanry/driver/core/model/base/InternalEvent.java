@@ -24,5 +24,5 @@ public abstract class InternalEvent<V> extends Event {
 
     protected abstract boolean matches(V fromValue, V toValue);
 
-    protected abstract void traverse(ActionCollector actionCollector);
+    protected abstract ExternalEvent traverse(ActionFilter actionFilter);
 }

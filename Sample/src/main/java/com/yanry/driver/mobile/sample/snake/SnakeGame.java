@@ -43,17 +43,17 @@ public class SnakeGame extends JFrame {
 
                     case KeyEvent.VK_S:
                     case KeyEvent.VK_DOWN:
-                        gameController.asyncFire(SnakeEvent.TuneDown.get());
+                        gameController.asyncFire(SnakeEvent.TurnDown.get());
                         break;
 
                     case KeyEvent.VK_A:
                     case KeyEvent.VK_LEFT:
-                        gameController.asyncFire(SnakeEvent.TuneLeft.get());
+                        gameController.asyncFire(SnakeEvent.TurnLeft.get());
                         break;
 
                     case KeyEvent.VK_D:
                     case KeyEvent.VK_RIGHT:
-                        gameController.asyncFire(SnakeEvent.TuneRight.get());
+                        gameController.asyncFire(SnakeEvent.TurnRight.get());
                         break;
 
                     case KeyEvent.VK_P:

@@ -5,6 +5,7 @@ import com.yanry.driver.mobile.sample.snake.graph.SnakeController;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class SnakePanel extends JPanel {
 
@@ -26,9 +27,15 @@ public class SnakePanel extends JPanel {
         super.paintComponent(g);
 
         // draw snake body
-        g.setColor(Color.GREEN);
         SnakeModel model = controller.getSnakeModel();
-        for (Point snakePoint : model.getSnakePoints()) {
+        List<Point> snakePoints = model.getSnakePoints();
+        for (int i = 0; i < snakePoints.size(); i++) {
+            if (i == 0) {
+                g.setColor(Color.ORANGE);
+            } else if (i == 1) {
+                g.setColor(Color.GREEN);
+            }
+            Point snakePoint = snakePoints.get(i);
             g.fillRect(snakePoint.x * GameConfigure.CELL_SIZE,
                     snakePoint.y * GameConfigure.CELL_SIZE,
                     GameConfigure.CELL_SIZE,

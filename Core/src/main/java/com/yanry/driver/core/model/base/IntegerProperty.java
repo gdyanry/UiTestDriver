@@ -16,13 +16,12 @@ public abstract class IntegerProperty extends Property<Integer> {
     }
 
     @Override
-    protected final ExternalEvent doSelfSwitch(Integer to) {
+    protected final ExternalEvent doSelfSwitch(Integer to, ActionFilter actionFilter) {
         Integer currentValue = getCurrentValue();
         if (currentValue == null || to == null) {
             return null;
         }
-        ActionCollector actionCollector = new ActionCollector(1);
-        getStateSpace().findPathToRoll(exp -> {
+        return getStateSpace().findPathToRoll(exp -> {
             if (exp instanceof ShiftExpectation) {
                 ShiftExpectation expectation = (ShiftExpectation) exp;
                 if (expectation.getProperty() == this) {
@@ -30,8 +29,7 @@ public abstract class IntegerProperty extends Property<Integer> {
                 }
             }
             return false;
-        }, actionCollector);
-        return actionCollector.pop();
+        }, actionFilter);
     }
 
     public class ShiftExpectation extends SDPropertyExpectation<Integer> {

@@ -109,4 +109,9 @@ public class RevertibleMap<K, V> {
     public V get(K key) {
         return map.get(key);
     }
+
+    @Override
+    public String toString() {
+        return map.toString();
+    }
 }

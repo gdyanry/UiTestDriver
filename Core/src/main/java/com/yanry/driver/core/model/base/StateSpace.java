@@ -21,6 +21,7 @@ import lib.common.util.object.ObjectUtil;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -40,10 +41,11 @@ public class StateSpace extends RevertManager {
 
     private boolean isTraversing;
     private AtomicInteger methodStack;
+    private LinkedList<State> traversingStateStack;
+    private long frameMark;
 
     private RevertibleMap<Property, Object> cache;
     private RevertibleLinkedList<CommunicateRecord> records;
-    private RevertibleInt frameMark;
     private RevertibleBoolean hasChanged;
     private RevertibleSet<Path> verifiedPaths;
     private RevertibleSet<Expectation> pendingExpectations;
@@ -61,9 +63,9 @@ public class StateSpace extends RevertManager {
         invalidActions = new RevertibleSet<>(this);
         stateTrace = new RevertibleLinkedList<>(this);
         cache = new RevertibleMap<>(this);
-        frameMark = new RevertibleInt(this);
         hasChanged = new RevertibleBoolean(this);
         executor = new ThreadSafeExecutor();
+        traversingStateStack = new LinkedList<>();
         Thread workThread = new Thread(executor);
         workThread.setName(String.format("%s-%s", StateSpace.class.getSimpleName(), sequenceGenerator.getAndIncrement()));
         workThread.start();
@@ -73,7 +75,6 @@ public class StateSpace extends RevertManager {
         this.clean();
         cache.clear();
         records.clear();
-        frameMark.set(0);
         verifiedPaths.clear();
         pendingExpectations.clear();
         invalidActions.clear();
@@ -95,6 +96,12 @@ public class StateSpace extends RevertManager {
         return path;
     }
 
+    public void printCache(Consumer<String> printer) {
+        if (printer != null) {
+            printer.accept(cache.toString());
+        }
+    }
+
     void addPendingExpectation(Expectation expectation) {
         pendingExpectations.add(expectation);
     }
@@ -103,8 +110,20 @@ public class StateSpace extends RevertManager {
         stateTrace.addLast(state);
     }
 
+    <V> boolean pushTraversingState(State<V> state) {
+        if (!traversingStateStack.contains(state)) {
+            traversingStateStack.push(state);
+            return true;
+        }
+        return false;
+    }
+
+    void popTraversingState() {
+        traversingStateStack.pop();
+    }
+
     long getFrameMark() {
-        return frameMark.get();
+        return frameMark;
     }
 
     RevertibleMap<Property, Object> getCache() {
@@ -116,7 +135,7 @@ public class StateSpace extends RevertManager {
     }
 
     void post(Runnable runnable) {
-        executor.post(runnable);
+        executor.async(runnable);
     }
 
     private boolean needCheck(Expectation expectation) {
@@ -154,7 +173,7 @@ public class StateSpace extends RevertManager {
     }
 
     public ArrayList<CommunicateRecord> traverse(Predicate<Path> pathFilter) {
-        return executor.execute(() -> {
+        return executor.sync(() -> {
             if (!setup()) {
                 return null;
             }
@@ -168,7 +187,7 @@ public class StateSpace extends RevertManager {
     }
 
     public ArrayList<CommunicateRecord> traverse(int[] selectedIndexes) {
-        return executor.execute(() -> {
+        return executor.sync(() -> {
             if (!setup()) {
                 return null;
             }
@@ -189,7 +208,7 @@ public class StateSpace extends RevertManager {
             Path path = null;
             int minDegree = Integer.MAX_VALUE;
             for (Path p : unprocessedPaths.getList()) {
-                int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark.get(), true);
+                int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark, true);
                 if (unsatisfiedDegree == 0) {
                     path = p;
                     break;
@@ -242,30 +261,27 @@ public class StateSpace extends RevertManager {
                 }
             }
         }
-        ActionCollector actionCollector = new ActionCollector(1);
         if (selectedState == null) {
-            roll(pathToTraverse, actionCollector);
+            return roll(pathToTraverse, null);
         } else {
-            selectedState.getProperty().switchTo(selectedState.getValuePredicate(), actionCollector);
+            return selectedState.getProperty().switchTo(selectedState.getValuePredicate(), null);
         }
-        return actionCollector.pop();
     }
 
     private <V> boolean achieveStatePredicate(Property<V> property, ValuePredicate<V> valuePredicate) {
         while (isTraversing && !valuePredicate.test(property.getCurrentValue())) {
-            ActionCollector actionCollector = new ActionCollector(1);
-            property.switchTo(valuePredicate, actionCollector);
-            if (actionCollector.isEmpty()) {
-                break;
+            ExternalEvent externalEvent = property.switchTo(valuePredicate, null);
+            if (externalEvent == null) {
+                return false;
             } else {
-                postAction(actionCollector.pop());
+                postAction(externalEvent);
             }
         }
         return valuePredicate.test(property.getCurrentValue());
     }
 
     public <V> boolean achieveState(Property<V> property, V value) {
-        return executor.execute(() -> {
+        return executor.sync(() -> {
             boolean success = setup() && achieveStatePredicate(property, Equals.of(value));
             isTraversing = false;
             return success;
@@ -273,8 +289,10 @@ public class StateSpace extends RevertManager {
     }
 
     public boolean syncFire(ExternalEvent event, Context promises) {
-        return executor.execute(() -> {
-            if (promises != null) {
+        return executor.sync(() -> {
+            if (promises == null) {
+                doFire(event);
+            } else {
                 int tagCount = getTagCount();
                 if (tagCount > 0) {
                     throw new IllegalStateException("revertible tag count is " + tagCount);
@@ -288,20 +306,18 @@ public class StateSpace extends RevertManager {
                 } else {
                     clean();
                 }
-            } else {
-                doFire(event);
             }
             return true;
         });
     }
 
     public void asyncFire(ExternalEvent event) {
-        executor.post(() -> doFire(event));
+        executor.async(() -> doFire(event));
     }
 
     private void doFire(ExternalEvent event) {
         Logger.getDefault().dd(getTagCount(), ' ', event);
-        frameMark.increment();
+        frameMark++;
         if (event instanceof SwitchStateAction) {
             SwitchStateAction stateAction = (SwitchStateAction) event;
             Property property = stateAction.getProperty();
@@ -310,7 +326,7 @@ public class StateSpace extends RevertManager {
         // 为了避免使用相同事件来切换状态（如播放/暂停）的路径被连续触发，所以先把path放入容器中。
         LinkedList<Path> pathsToVerify = new LinkedList<>();
         for (Path path : new ArrayList<>(allPaths)) {
-            if (path.getEvent().equals(event) && path.getUnsatisfiedDegree(frameMark.get(), false) == 0) {
+            if (path.getEvent().equals(event) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
                 pathsToVerify.add(path);
             }
         }
@@ -356,37 +372,37 @@ public class StateSpace extends RevertManager {
         return false;
     }
 
-    private void roll(Path path, ActionCollector actionCollector) {
+    private ExternalEvent roll(Path path, ActionFilter actionFilter) {
         enterMethod(path);
         // make sure context states are satisfied.
         Context context = path.getContext();
         if (!context.isSatisfied()) {
-            context.trySatisfy(actionCollector);
-            exitMethod(LogLevel.Verbose, actionCollector);
-            return;
+            ExternalEvent event = context.trySatisfy(actionFilter);
+            exitMethod(LogLevel.Verbose, event);
+            return event;
         }
         // all context states are satisfied by now.
         // trigger event
         Event inputEvent = path.getEvent();
         if (inputEvent instanceof InternalEvent) {
-            ((InternalEvent) inputEvent).traverse(actionCollector);
-            exitMethod(LogLevel.Verbose, actionCollector);
-            return;
+            ExternalEvent event = ((InternalEvent) inputEvent).traverse(actionFilter);
+            exitMethod(LogLevel.Verbose, event);
+            return event;
         } else if (inputEvent instanceof ExternalEvent) {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
             Context precondition = externalEvent.getPrecondition();
             if (precondition != null && !precondition.isSatisfied()) {
-                precondition.trySatisfy(actionCollector);
-                exitMethod(LogLevel.Verbose, actionCollector);
-                return;
+                ExternalEvent event = precondition.trySatisfy(actionFilter);
+                exitMethod(LogLevel.Verbose, event);
+                return event;
             }
-            if (isValidAction(externalEvent) && actionCollector.isExcluded(externalEvent)) {
-                actionCollector.add(externalEvent);
-                exitMethod(LogLevel.Verbose, actionCollector);
-                return;
+            if (isValidAction(externalEvent, actionFilter)) {
+                exitMethod(LogLevel.Verbose, externalEvent);
+                return externalEvent;
             }
         }
         exitMethod(LogLevel.Warn, "no available action.");
+        return null;
     }
 
     private void verify(Path path) {
@@ -414,7 +430,7 @@ public class StateSpace extends RevertManager {
                 Event event = path.getEvent();
                 if (event instanceof InternalEvent) {
                     // 父路径是指由状态变迁形成的路径触发时本身形成状态变迁事件，由此导致触发的其他路径。
-                    if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(frameMark.get(), false) == 0) {
+                    if (((InternalEvent) event).matches(property, from, to) && path.getUnsatisfiedDegree(frameMark, false) == 0) {
                         verify(path);
                     }
                 }
@@ -422,10 +438,10 @@ public class StateSpace extends RevertManager {
         }
     }
 
-    void findPathToRoll(Predicate<Expectation> expectationFilter, ActionCollector actionCollector) {
+    ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter, ActionFilter actionFilter) {
         List<Path> sorted = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
-                    int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark.get(), true);
+                    int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark, true);
                     if (unprocessedPaths.contains(p)) {
                         // 优先处理未处理过的path
                         unsatisfiedDegree--;
@@ -433,11 +449,12 @@ public class StateSpace extends RevertManager {
                     return unsatisfiedDegree;
                 })).collect(Collectors.toList());
         for (Path path : sorted) {
-            if (actionCollector.isFull()) {
-                return;
+            ExternalEvent externalEvent = roll(path, actionFilter);
+            if (externalEvent != null) {
+                return externalEvent;
             }
-            roll(path, actionCollector);
         }
+        return null;
     }
 
     private boolean isSatisfied(Expectation expectation, Predicate<Expectation> expectationFilter) {
@@ -447,7 +464,7 @@ public class StateSpace extends RevertManager {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, expectationFilter));
     }
 
-    boolean isValidAction(ExternalEvent externalEvent) {
+    boolean isValidAction(ExternalEvent externalEvent, ActionFilter actionFilter) {
         if (invalidActions.contains(externalEvent)) {
             Logger.getDefault().ii("action is invalid: ", externalEvent);
             return false;
@@ -456,18 +473,18 @@ public class StateSpace extends RevertManager {
             Logger.getDefault().ii("skip action to avoid loop: ", externalEvent);
             return false;
         }
-        return true;
+        return actionFilter == null || actionFilter.test(externalEvent);
     }
 
     public <V> V obtainValue(Obtainable<V> obtainable) {
-        return executor.execute(() -> {
+        return executor.sync(() -> {
             Property<V> property = obtainable.getProperty();
             if (property.isValueFresh()) {
                 return property.getCurrentValue();
             }
             if (communicator != null) {
                 V value = communicator.fetchState(obtainable);
-                property.setStateSpaceFrameMark(frameMark.get());
+                property.setStateSpaceFrameMark(frameMark);
                 return value;
             }
             Logger.getDefault().ww("unable to check state: ", obtainable);

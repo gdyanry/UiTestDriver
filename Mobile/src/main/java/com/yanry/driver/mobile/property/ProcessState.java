@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.property;
 
+import com.yanry.driver.core.model.base.ActionFilter;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.property.BooleanProperty;
@@ -19,7 +20,7 @@ public class ProcessState extends BooleanProperty {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Boolean to) {
+    protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
         return null;
     }
 }

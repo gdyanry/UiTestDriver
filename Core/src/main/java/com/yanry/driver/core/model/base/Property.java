@@ -5,7 +5,6 @@ package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
-import com.yanry.driver.core.model.libtemp.revert.RevertibleInt;
 import com.yanry.driver.core.model.predicate.Equals;
 import lib.common.model.log.LogLevel;
 import lib.common.util.object.EqualsPart;
@@ -29,7 +28,7 @@ public abstract class Property<V> extends HandyObject {
     /**
      * 缓存向客户端查询属性值时的graph的actionTimeFrame，用于防止非必要的重复查询。
      */
-    private RevertibleInt stateSpaceFrameMark;
+    private long stateSpaceFrameMark;
     private HashSet<V> collectedValues;
     private Context dependentStates;
     private LinkedList<Consumer<V>> onValueUpdateListeners;
@@ -38,7 +37,6 @@ public abstract class Property<V> extends HandyObject {
     public Property(StateSpace stateSpace) {
         this.stateSpace = stateSpace;
         collectedValues = new HashSet<>();
-        stateSpaceFrameMark = new RevertibleInt(stateSpace);
     }
 
     public <T> void addDependentState(Property<T> property, ValuePredicate<T> predicate) {
@@ -79,8 +77,8 @@ public abstract class Property<V> extends HandyObject {
         }
     }
 
-    void setStateSpaceFrameMark(int frameMark) {
-        stateSpaceFrameMark.set(frameMark);
+    void setStateSpaceFrameMark(long frameMark) {
+        stateSpaceFrameMark = frameMark;
     }
 
     @EqualsPart
@@ -88,45 +86,50 @@ public abstract class Property<V> extends HandyObject {
         return stateSpace;
     }
 
-    public final void switchToValue(V toState, ActionCollector actionCollector) {
-        switchTo(Equals.of(toState), actionCollector);
+    public final ExternalEvent switchToValue(V toState, ActionFilter actionFilter) {
+        return switchTo(Equals.of(toState), actionFilter);
     }
 
-    public final void switchTo(ValuePredicate<V> toState, ActionCollector actionCollector) {
-        stateSpace.getExecutor().execute(() -> {
+    public final ExternalEvent switchTo(ValuePredicate<V> toState, ActionFilter actionFilter) {
+        return stateSpace.getExecutor().sync(() -> {
             findValueToAdd(toState);
             if (toState.test(getCurrentValue())) {
-                return;
+                return null;
             }
-            stateSpace.enterMethod(String.format("%s > %s", this, toState));
-            stateSpace.addStateTrace(getState(toState));
+            State<V> state = getState(toState);
+            if (!stateSpace.pushTraversingState(state)) {
+                // 防止StackOverFlow
+                return null;
+            }
+            stateSpace.enterMethod(String.format("%s -> %s", this, toState));
+            stateSpace.addStateTrace(state);
             if (!stateSpace.getCache().containsKey(this)) {
                 // 属性值未知,认为dependentStates未满足
                 if (dependentStates != null && !dependentStates.isSatisfied()) {
-                    dependentStates.trySatisfy(actionCollector);
-                    stateSpace.exitMethod(LogLevel.Verbose, actionCollector);
-                    return;
+                    ExternalEvent event = dependentStates.trySatisfy(actionFilter);
+                    stateSpace.popTraversingState();
+                    stateSpace.exitMethod(LogLevel.Verbose, event);
+                    return event;
                 }
             }
             Stream<V> stream = getValueStream(collectedValues);
             if (stream == null) {
                 stream = collectedValues.stream();
             }
-            actionCollector.add(stream.filter(v -> toState.test(v))
-                    .map(v -> doSelfSwitch(v))
-                    .filter(a -> a != null && stateSpace.isValidAction(a) && actionCollector.isExcluded(a))
-                    .limit(actionCollector.getLimit())
-                    .iterator());
-            if (!actionCollector.isFull()) {
-                stateSpace.findPathToRoll(e -> {
-                    if (e instanceof PropertyExpectation) {
-                        PropertyExpectation<V> exp = (PropertyExpectation) e;
-                        return equals(exp.getProperty()) && toState.test(exp.getExpectedValue());
-                    }
-                    return false;
-                }, actionCollector);
-            }
-            stateSpace.exitMethod(LogLevel.Verbose, actionCollector);
+            ExternalEvent event = stream.filter(v -> toState.test(v))
+                    .map(v -> doSelfSwitch(v, actionFilter))
+                    .filter(a -> a != null && stateSpace.isValidAction(a, null))
+                    .findAny()
+                    .orElse(stateSpace.findPathToRoll(e -> {
+                        if (e instanceof PropertyExpectation) {
+                            PropertyExpectation<V> exp = (PropertyExpectation) e;
+                            return equals(exp.getProperty()) && toState.test(exp.getExpectedValue());
+                        }
+                        return false;
+                    }, actionFilter));
+            stateSpace.popTraversingState();
+            stateSpace.exitMethod(LogLevel.Verbose, event);
+            return event;
         });
     }
 
@@ -147,7 +150,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final void handleExpectation(V expectedValue, boolean needCheck) {
-        stateSpace.getExecutor().execute(() -> {
+        stateSpace.getExecutor().sync(() -> {
             V oldValue = getCurrentValue();
             if (needCheck) {
                 if (!isValueFresh()) {
@@ -170,7 +173,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     boolean isValueFresh() {
-        return stateSpace.getFrameMark() > 0 && stateSpaceFrameMark.get() == stateSpace.getFrameMark();
+        return stateSpace.getFrameMark() > 0 && stateSpaceFrameMark == stateSpace.getFrameMark();
     }
 
     private void updateCache(V value) {
@@ -184,7 +187,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public void refresh() {
-        stateSpace.getExecutor().execute(() -> {
+        stateSpace.getExecutor().sync(() -> {
             if (stateSpace.getCache().containsKey(this)) {
                 V oldValue = getCurrentValue();
                 V newValue = doCheckValue();
@@ -206,7 +209,7 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final V getCurrentValue() {
-        return stateSpace.getExecutor().execute(() -> {
+        return stateSpace.getExecutor().sync(() -> {
             if (stateSpace.getCache().containsKey(this)) {
                 return (V) stateSpace.getCache().get(this);
             }
@@ -232,7 +235,7 @@ public abstract class Property<V> extends HandyObject {
 
     protected abstract V checkValue();
 
-    protected abstract ExternalEvent doSelfSwitch(V to);
+    protected abstract ExternalEvent doSelfSwitch(V to, ActionFilter actionFilter);
 
     protected abstract Stream<V> getValueStream(Set<V> collectedValues);
 }

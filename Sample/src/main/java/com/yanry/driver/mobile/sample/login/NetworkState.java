@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.sample.login;
 
+import com.yanry.driver.core.model.base.ActionFilter;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.StateSpace;
@@ -32,7 +33,7 @@ public class NetworkState extends Property<String> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(String to) {
+    protected ExternalEvent doSelfSwitch(String to, ActionFilter actionFilter) {
         return new SwitchStateAction<>(this, to);
     }
 

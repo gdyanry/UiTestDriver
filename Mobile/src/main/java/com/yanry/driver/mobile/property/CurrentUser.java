@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.property;
 
+import com.yanry.driver.core.model.base.ActionFilter;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.StateSpace;
@@ -43,7 +44,7 @@ public class CurrentUser extends Property<String> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(String to) {
+    protected ExternalEvent doSelfSwitch(String to, ActionFilter actionFilter) {
         return null;
     }
 

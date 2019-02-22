@@ -1,9 +1,6 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.Property;
-import com.yanry.driver.core.model.base.StateSpace;
-import com.yanry.driver.core.model.base.TransitionEvent;
+import com.yanry.driver.core.model.base.*;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.runtime.fetch.Select;
@@ -68,7 +65,7 @@ public class Application extends Property<Window> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Window to) {
+    protected ExternalEvent doSelfSwitch(Window to, ActionFilter actionFilter) {
         return null;
     }
 

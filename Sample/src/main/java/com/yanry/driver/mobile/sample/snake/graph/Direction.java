@@ -1,5 +1,6 @@
 package com.yanry.driver.mobile.sample.snake.graph;
 
+import com.yanry.driver.core.model.base.ActionFilter;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.StateSpace;
@@ -28,7 +29,7 @@ public class Direction extends Property<String> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(String to) {
+    protected ExternalEvent doSelfSwitch(String to, ActionFilter actionFilter) {
         return null;
     }
 

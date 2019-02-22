@@ -3,10 +3,7 @@
  */
 package com.yanry.driver.mobile.view;
 
-import com.yanry.driver.core.model.base.ExternalEvent;
-import com.yanry.driver.core.model.base.SSPropertyExpectation;
-import com.yanry.driver.core.model.base.StateSpace;
-import com.yanry.driver.core.model.base.TransitionEvent;
+import com.yanry.driver.core.model.base.*;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.property.BooleanProperty;
 import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
@@ -79,7 +76,7 @@ public class View extends ViewContainer {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Boolean to) {
+    protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
         return null;
     }
 
@@ -101,7 +98,7 @@ public class View extends ViewContainer {
         }
 
         @Override
-        protected ExternalEvent doSelfSwitch(Boolean to) {
+        protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
             return null;
         }
     }

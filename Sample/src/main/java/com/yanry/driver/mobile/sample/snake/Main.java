@@ -24,7 +24,8 @@ public class Main {
                     if (controller.getTagCount() == 0) {
                         game.repaint();
                         SnakeModel gameModel = controller.getSnakeModel();
-                        game.setTitle("Greedy Snake(" + gameModel.length() + ")");
+                        Property[] properties = controller.getSnakeHead().getProperties();
+                        game.setTitle(String.format("Greedy Snake(%s, %s-%s)", gameModel.length(), properties[0].getCurrentValue(), properties[1].getCurrentValue()));
                     }
                 });
             }

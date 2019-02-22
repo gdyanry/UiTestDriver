@@ -1,6 +1,7 @@
 package com.yanry.driver.mobile.sample.snake.graph;
 
 import com.yanry.driver.core.model.base.*;
+import com.yanry.driver.core.model.event.GlobalExternalEvent;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.event.StateChangeEvent;
 import com.yanry.driver.core.model.expectation.ActionExpectation;
@@ -16,7 +17,11 @@ import com.yanry.driver.mobile.sample.snake.SnakeModel;
 import lib.common.model.log.Logger;
 
 import java.awt.*;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.stream.Stream;
+
+import static com.yanry.driver.mobile.sample.snake.graph.SnakeEvent.*;
 
 public class SnakeController extends StateSpace implements Communicator {
     private GameState gameState;
@@ -87,19 +92,19 @@ public class SnakeController extends StateSpace implements Communicator {
                 .addContextValue(direction, Direction.DOWN)
                 .addContextValue(gameState, GameState.MOVE);
         // -> right
-        createPath(SnakeEvent.TuneRight.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.RIGHT))
+        createPath(TurnRight.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.RIGHT))
                 .addContextValue(gameState, GameState.MOVE)
                 .addContextPredicate(direction, Equals.of(Direction.LEFT).not());
         // -> left
-        createPath(SnakeEvent.TuneLeft.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.LEFT))
+        createPath(TurnLeft.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.LEFT))
                 .addContextValue(gameState, GameState.MOVE)
                 .addContextPredicate(direction, Equals.of(Direction.RIGHT).not());
         // -> up
-        createPath(SnakeEvent.TurnUp.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.UP))
+        createPath(TurnUp.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.UP))
                 .addContextValue(gameState, GameState.MOVE)
                 .addContextPredicate(direction, Equals.of(Direction.DOWN).not());
         // -> down
-        createPath(SnakeEvent.TuneDown.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.DOWN))
+        createPath(TurnDown.get(), direction.getStaticExpectation(Timing.IMMEDIATELY, false, Direction.DOWN))
                 .addContextValue(gameState, GameState.MOVE)
                 .addContextPredicate(direction, Equals.of(Direction.UP).not());
         // on move
@@ -123,31 +128,69 @@ public class SnakeController extends StateSpace implements Communicator {
         return snakeModel;
     }
 
+    public CombinedProperty getSnakeHead() {
+        return snakeHead;
+    }
+
     public void makeAction() {
         Point fruitPos = snakeModel.getFruitPos();
         if (gameState.getCurrentValue() == GameState.MOVE) {
-            ActionCollector actionCollector = new ActionCollector(3);
+            HashSet<ExternalEvent> invalidEvents = new HashSet<>();
+            ActionFilter actionFilter = event -> !invalidEvents.contains(event);
             while (true) {
-                snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, fruitPos.x).append(snakeHeadY, fruitPos.y).build()), actionCollector);
-                if (actionCollector.isEmpty()) {
-                    return;
-                }
-                while (true) {
-                    ExternalEvent event = actionCollector.pop();
-                    if (event == null) {
-                        break;
-                    } else {
-                        Context promise = new Context();
-                        promise.add(gameState, Equals.of(GameState.MOVE));
-                        if (syncFire(event, promise)) {
+                ExternalEvent event = snakeHead.switchTo(Equals.of(StateSnapShoot.builder().append(snakeHeadX, fruitPos.x).append(snakeHeadY, fruitPos.y).build()), actionFilter);
+                if (event != null) {
+                    if (!tryFire(invalidEvents, event)) continue;
+                } else {
+                    Logger.getDefault().ww("no valid action, try the rests.");
+                    // 优先选择远离中点的方向
+                    Point midPos = snakeModel.getMidPos();
+                    GlobalExternalEvent recommendedAction = midPos.x > snakeHeadX.getCurrentValue() ? TurnLeft.get() : TurnRight.get();
+                    Logger.getDefault().i("middle point is %s, recommend action: %s", midPos, recommendedAction);
+                    if (tryFire(invalidEvents, recommendedAction)) {
+                        return;
+                    }
+                    recommendedAction = midPos.y > snakeHeadY.getCurrentValue() ? TurnUp.get() : TurnDown.get();
+                    Logger.getDefault().ii("recommend action: ", recommendedAction);
+                    if (tryFire(invalidEvents, recommendedAction)) {
+                        return;
+                    }
+                    for (SnakeEvent snakeEvent : EnumSet.of(TurnUp, TurnDown, TurnLeft, TurnRight)) {
+                        if (tryFire(invalidEvents, snakeEvent.get())) {
                             return;
-                        } else {
-                            actionCollector.exclude(event);
                         }
                     }
+                    Logger.getDefault().ee("game over!");
+                    printCache(s -> Logger.getDefault().dd(s));
+                    asyncFire(SnakeEvent.MoveAhead.get());
                 }
+                break;
             }
         }
+    }
+
+    private boolean tryFire(HashSet<ExternalEvent> invalidEvents, ExternalEvent event) {
+        if (invalidEvents.contains(event)) {
+            return false;
+        }
+        Object tag = new Object();
+        tag(tag);
+        if (event != SnakeEvent.MoveAhead.get()) {
+            syncFire(event, null);
+        }
+        syncFire(SnakeEvent.MoveAhead.get(), null);
+        String newValue = gameState.getCurrentValue();
+        revertTo(tag);
+        if (newValue != GameState.MOVE) {
+            invalidEvents.add(event);
+            Logger.getDefault().ii("invalid action: ", event);
+            return false;
+        }
+        asyncFire(event);
+        if (event != SnakeEvent.MoveAhead.get()) {
+            asyncFire(SnakeEvent.MoveAhead.get());
+        }
+        return true;
     }
 
     public String getCurrentState() {
