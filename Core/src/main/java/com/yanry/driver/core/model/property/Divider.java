@@ -51,7 +51,7 @@ public class Divider extends BooleanProperty {
     }
 
     @Override
-    protected Boolean checkValue() {
+    protected Boolean checkValue(Boolean expected) {
         for (State state : states) {
             if (!state.isSatisfied()) {
                 return false;

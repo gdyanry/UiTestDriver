@@ -13,7 +13,7 @@ public class SnakeHeadX extends IntegerProperty {
     }
 
     @Override
-    protected Integer checkValue() {
+    protected Integer checkValue(Integer expected) {
         return GameConfigure.COL_COUNT / 2;
     }
 

@@ -60,8 +60,8 @@ public class Application extends Property<Window> {
     }
 
     @Override
-    protected Window checkValue() {
-        return getStateSpace().obtainValue(new Select<>(this));
+    protected Window checkValue(Window expected) {
+        return getStateSpace().obtainValue(new Select<>(this), expected);
     }
 
     @Override

@@ -34,7 +34,7 @@ public class WindowState extends Property<String> {
     }
 
     @Override
-    protected String checkValue() {
+    protected String checkValue(String expected) {
         Window current = window.getApplication().getCurrentValue();
         if (current == null) {
             return NOT_CREATED;

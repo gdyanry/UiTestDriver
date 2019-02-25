@@ -190,10 +190,10 @@ public abstract class Property<V> extends HandyObject {
         stateSpace.getExecutor().sync(() -> {
             if (stateSpace.getCache().containsKey(this)) {
                 V oldValue = getCurrentValue();
-                V newValue = doCheckValue();
+                V newValue = doCheckValue(null);
                 handleChange(oldValue, newValue);
             } else {
-                doCheckValue();
+                doCheckValue(null);
             }
         });
     }
@@ -209,19 +209,23 @@ public abstract class Property<V> extends HandyObject {
     }
 
     public final V getCurrentValue() {
+        return getCurrentValue(null);
+    }
+
+    V getCurrentValue(V expected) {
         return stateSpace.getExecutor().sync(() -> {
             if (stateSpace.getCache().containsKey(this)) {
                 return (V) stateSpace.getCache().get(this);
             }
-            return doCheckValue();
+            return doCheckValue(expected);
         });
     }
 
-    private V doCheckValue() {
+    private V doCheckValue(V expected) {
         if (dependentStates != null && !dependentStates.isSatisfied()) {
             return null;
         }
-        V value = checkValue();
+        V value = checkValue(expected);
         updateCache(value);
         if (value != null) {
             collectedValues.add(value);
@@ -233,7 +237,7 @@ public abstract class Property<V> extends HandyObject {
         return getValueStream(collectedValues).toArray();
     }
 
-    protected abstract V checkValue();
+    protected abstract V checkValue(V expected);
 
     protected abstract ExternalEvent doSelfSwitch(V to, ActionFilter actionFilter);
 

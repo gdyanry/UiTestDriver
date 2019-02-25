@@ -134,10 +134,6 @@ public class StateSpace extends RevertManager {
         return executor;
     }
 
-    void post(Runnable runnable) {
-        executor.async(runnable);
-    }
-
     private boolean needCheck(Expectation expectation) {
         return expectation.isNeedCheck() || expectation.getFollowingExpectations().parallelStream().anyMatch(this::needCheck);
     }
@@ -353,23 +349,21 @@ public class StateSpace extends RevertManager {
 
     private boolean postAction(ExternalEvent event) {
         String snapShoot = cache.getSnapShootMD5();
-        if (communicator != null) {
-            LinkedList<Runnable> preActions = event.getPreActions();
-            if (preActions != null) {
-                for (Runnable action : preActions) {
-                    action.run();
-                }
-            }
-            if (communicator.performAction(event)) {
-                records.addLast(new ActionRecord(event, true, snapShoot));
-                doFire(event);
-                return true;
+        LinkedList<Runnable> preActions = event.getPreActions();
+        if (preActions != null) {
+            for (Runnable action : preActions) {
+                action.run();
             }
         }
-        records.addLast(new ActionRecord(event, false, snapShoot));
-        Logger.getDefault().ee("cannot perform action: ", event);
-        invalidActions.add(event);
-        return false;
+        if (getTagCount() == 0 && communicator != null && !communicator.performAction(event)) {
+            records.addLast(new ActionRecord(event, false, snapShoot));
+            Logger.getDefault().ee("cannot perform action: ", event);
+            invalidActions.add(event);
+            return false;
+        }
+        records.addLast(new ActionRecord(event, true, snapShoot));
+        doFire(event);
+        return true;
     }
 
     private ExternalEvent roll(Path path, ActionFilter actionFilter) {
@@ -476,30 +470,27 @@ public class StateSpace extends RevertManager {
         return actionFilter == null || actionFilter.test(externalEvent);
     }
 
-    public <V> V obtainValue(Obtainable<V> obtainable) {
+    public <V> V obtainValue(Obtainable<V> obtainable, V expected) {
         return executor.sync(() -> {
             Property<V> property = obtainable.getProperty();
             if (property.isValueFresh()) {
                 return property.getCurrentValue();
             }
-            if (communicator != null) {
+            if (communicator != null && getTagCount() == 0) {
                 V value = communicator.fetchState(obtainable);
                 property.setStateSpaceFrameMark(frameMark);
                 return value;
             }
-            Logger.getDefault().ww("unable to check state: ", obtainable);
-            return null;
+            property.setStateSpaceFrameMark(frameMark);
+            return expected;
         });
     }
 
-    Boolean verifyExpectation(NonPropertyExpectation expectation) {
-        if (communicator != null) {
-            Boolean result = communicator.verifyExpectation(expectation);
-            if (result != null) {
-                return result;
-            }
+    boolean verifyExpectation(NonPropertyExpectation expectation) {
+        if (communicator != null && getTagCount() == 0) {
+            return communicator.verifyExpectation(expectation);
         }
-        return null;
+        return true;
     }
 
     void enterMethod(Object msg) {

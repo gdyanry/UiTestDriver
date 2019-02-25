@@ -13,7 +13,7 @@ public class SnakeHeadY extends IntegerProperty {
     }
 
     @Override
-    protected Integer checkValue() {
+    protected Integer checkValue(Integer expected) {
         return GameConfigure.ROW_COUNT / 2;
     }
 

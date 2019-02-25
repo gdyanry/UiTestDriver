@@ -39,8 +39,8 @@ public class CurrentUser extends Property<String> {
     }
 
     @Override
-    protected String checkValue() {
-        return getStateSpace().obtainValue(new Select<>(this));
+    protected String checkValue(String expected) {
+        return getStateSpace().obtainValue(new Select<>(this), expected);
     }
 
     @Override

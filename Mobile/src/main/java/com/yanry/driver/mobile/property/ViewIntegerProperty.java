@@ -24,7 +24,7 @@ public abstract class ViewIntegerProperty extends IntegerProperty {
     }
 
     @Override
-    protected final Integer checkValue() {
-        return getStateSpace().obtainValue(new IntegerQuery(this));
+    protected final Integer checkValue(Integer expected) {
+        return getStateSpace().obtainValue(new IntegerQuery(this), expected);
     }
 }

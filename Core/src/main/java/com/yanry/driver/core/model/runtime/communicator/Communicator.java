@@ -21,9 +21,5 @@ public interface Communicator {
      */
     boolean performAction(ExternalEvent externalEvent);
 
-    /**
-     * @param expectation
-     * @return 返回null表示无法校验，否则表示校验结果。
-     */
-    Boolean verifyExpectation(NonPropertyExpectation expectation);
+    boolean verifyExpectation(NonPropertyExpectation expectation);
 }

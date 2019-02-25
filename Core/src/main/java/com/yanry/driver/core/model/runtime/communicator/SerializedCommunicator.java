@@ -64,18 +64,16 @@ public abstract class SerializedCommunicator implements Communicator {
     }
 
     @Override
-    public Boolean verifyExpectation(NonPropertyExpectation expectation) {
+    public boolean verifyExpectation(NonPropertyExpectation expectation) {
         return _verifyExpectation(0, expectation);
     }
 
-    private Boolean _verifyExpectation(int repeat, Expectation req) {
+    private boolean _verifyExpectation(int repeat, Expectation req) {
         String resp = verifyExpectation(repeat, req);
         if ("0".equals(resp)) {
             return false;
         } else if ("1".equals(resp)) {
             return true;
-        } else if ("-1".equals(resp)) {
-            return null;
         }
         return _verifyExpectation(++repeat, req);
     }

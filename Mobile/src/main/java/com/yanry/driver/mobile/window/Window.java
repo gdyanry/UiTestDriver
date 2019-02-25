@@ -139,7 +139,7 @@ public abstract class Window extends ViewContainer {
     protected abstract void addCases(StateSpace stateSpace, Application manager);
 
     @Override
-    protected Boolean checkValue() {
+    protected Boolean checkValue(Boolean expected) {
         return windowState.getCurrentValue() == WindowState.FOREGROUND;
     }
 

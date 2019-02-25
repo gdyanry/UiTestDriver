@@ -1,6 +1,9 @@
 package com.yanry.driver.mobile.sample.snake.graph;
 
-import com.yanry.driver.core.model.base.*;
+import com.yanry.driver.core.model.base.ActionFilter;
+import com.yanry.driver.core.model.base.ExternalEvent;
+import com.yanry.driver.core.model.base.StateSpace;
+import com.yanry.driver.core.model.base.ValuePredicate;
 import com.yanry.driver.core.model.event.GlobalExternalEvent;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.event.StateChangeEvent;
@@ -10,8 +13,6 @@ import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.predicate.Within;
 import com.yanry.driver.core.model.property.CombinedProperty;
 import com.yanry.driver.core.model.property.StateSnapShoot;
-import com.yanry.driver.core.model.runtime.communicator.Communicator;
-import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.mobile.sample.snake.GameConfigure;
 import com.yanry.driver.mobile.sample.snake.SnakeModel;
 import lib.common.model.log.Logger;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 
 import static com.yanry.driver.mobile.sample.snake.graph.SnakeEvent.*;
 
-public class SnakeController extends StateSpace implements Communicator {
+public class SnakeController extends StateSpace {
     private GameState gameState;
     private SnakeHeadX snakeHeadX;
     private SnakeHeadY snakeHeadY;
@@ -32,7 +33,6 @@ public class SnakeController extends StateSpace implements Communicator {
 
     public SnakeController() {
         snakeModel = new SnakeModel(this);
-        setCommunicator(this);
         gameState = new GameState(this);
         Direction direction = new Direction(this);
         snakeHeadX = new SnakeHeadX(this);
@@ -161,7 +161,7 @@ public class SnakeController extends StateSpace implements Communicator {
                         }
                     }
                     Logger.getDefault().ee("game over!");
-                    printCache(s -> Logger.getDefault().dd(s));
+                    printCache(s -> Logger.getDefault().ii(s));
                     asyncFire(SnakeEvent.MoveAhead.get());
                 }
                 break;
@@ -195,20 +195,5 @@ public class SnakeController extends StateSpace implements Communicator {
 
     public String getCurrentState() {
         return gameState.getCurrentValue();
-    }
-
-    @Override
-    public <V> V fetchState(Obtainable<V> stateToCheck) {
-        Logger.getDefault().ww("we are not supposed to get here!");
-        return null;
-    }
-
-    @Override
-    public boolean performAction(ExternalEvent externalEvent) {
-        return true;
-    }
-
-    public Boolean verifyExpectation(NonPropertyExpectation expectation) {
-        return true;
     }
 }

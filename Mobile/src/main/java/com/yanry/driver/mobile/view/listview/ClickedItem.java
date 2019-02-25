@@ -14,7 +14,7 @@ public class ClickedItem<I extends ListViewItem<I>> extends ViewProperty<I> {
     }
 
     @Override
-    protected I checkValue() {
+    protected I checkValue(I expected) {
         return null;
     }
 

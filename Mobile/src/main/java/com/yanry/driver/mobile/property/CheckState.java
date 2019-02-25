@@ -27,8 +27,8 @@ public class CheckState extends ViewProperty<Boolean> {
     }
 
     @Override
-    protected Boolean checkValue() {
-        return getStateSpace().obtainValue(new BooleanQuery(this));
+    protected Boolean checkValue(Boolean expected) {
+        return getStateSpace().obtainValue(new BooleanQuery(this), expected);
     }
 
     @Override

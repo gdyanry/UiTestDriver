@@ -71,7 +71,7 @@ public class View extends ViewContainer {
     }
 
     @Override
-    protected Boolean checkValue() {
+    protected Boolean checkValue(Boolean expected) {
         return parent.getCurrentValue() && independentVisibility.getCurrentValue();
     }
 
@@ -93,8 +93,8 @@ public class View extends ViewContainer {
         }
 
         @Override
-        protected Boolean checkValue() {
-            return getStateSpace().obtainValue(new BooleanQuery(this));
+        protected Boolean checkValue(Boolean expected) {
+            return getStateSpace().obtainValue(new BooleanQuery(this), expected);
         }
 
         @Override

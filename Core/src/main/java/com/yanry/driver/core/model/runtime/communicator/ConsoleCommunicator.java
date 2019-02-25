@@ -51,7 +51,6 @@ public class ConsoleCommunicator extends SerializedCommunicator {
         return getInput(repeat, "verify", expectation, () -> {
             System.out.println("0 - false");
             System.out.println("1 - true");
-            System.out.println("-1 - unknown");
         });
     }
 }

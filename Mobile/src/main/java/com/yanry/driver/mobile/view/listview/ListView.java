@@ -128,7 +128,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         }
 
         @Override
-        protected Boolean checkValue() {
+        protected Boolean checkValue(Boolean expected) {
             return false;
         }
 

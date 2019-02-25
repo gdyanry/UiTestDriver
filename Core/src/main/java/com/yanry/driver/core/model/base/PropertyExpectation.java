@@ -24,11 +24,11 @@ public abstract class PropertyExpectation<V> extends Expectation {
         V expectedValue = getExpectedValue();
         Property<V> property = getProperty();
         property.handleExpectation(expectedValue, isNeedCheck());
-        V actualValue = property.getCurrentValue();
+        V actualValue = property.getCurrentValue(expectedValue);
         if (Objects.equals(expectedValue, actualValue)) {
             return true;
         } else {
-            Logger.getDefault().ww("expected ", expectedValue, " and actually get ", actualValue);
+            Logger.getDefault().ww("expected value: ", expectedValue, ", actual value:  ", actualValue);
             return false;
         }
     }

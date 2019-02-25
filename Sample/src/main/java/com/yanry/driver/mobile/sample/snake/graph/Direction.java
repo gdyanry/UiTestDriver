@@ -24,7 +24,7 @@ public class Direction extends Property<String> {
     }
 
     @Override
-    protected String checkValue() {
+    protected String checkValue(String expected) {
         return UP;
     }
 

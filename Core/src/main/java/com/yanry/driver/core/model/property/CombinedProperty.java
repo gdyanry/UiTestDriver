@@ -38,7 +38,7 @@ public class CombinedProperty extends Property<StateSnapShoot> {
     }
 
     @Override
-    protected StateSnapShoot checkValue() {
+    protected StateSnapShoot checkValue(StateSnapShoot expected) {
         StateSnapShoot.Builder builder = StateSnapShoot.builder();
         for (Property property : properties) {
             builder.append(property, property.getCurrentValue());
