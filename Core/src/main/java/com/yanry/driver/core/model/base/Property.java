@@ -118,7 +118,7 @@ public abstract class Property<V> extends HandyObject {
             }
             ExternalEvent event = stream.filter(v -> toState.test(v))
                     .map(v -> doSelfSwitch(v, actionFilter))
-                    .filter(a -> a != null && stateSpace.isValidAction(a, null))
+                    .filter(a -> a != null && stateSpace.isValidAction(a, actionFilter))
                     .findAny()
                     .orElse(stateSpace.findPathToRoll(e -> {
                         if (e instanceof PropertyExpectation) {

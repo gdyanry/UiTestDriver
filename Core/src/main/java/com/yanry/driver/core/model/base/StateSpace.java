@@ -284,24 +284,55 @@ public class StateSpace extends RevertManager {
         });
     }
 
+    public <V> LinkedList<Practice> getStaticEventsToAchieveState(Property<V> property, ValuePredicate<V> predicate) {
+        return executor.sync(() -> {
+            LinkedList<Practice> filterList = new LinkedList<>();
+            while (!predicate.test(property.getCurrentValue())) {
+                Practice filter = practise(property, predicate, null, filterList);
+                if (filter == null) {
+                    break;
+                }
+            }
+            revert(filterList.peekFirst());
+            return filterList;
+        });
+    }
+
+    private <V> Practice practise(Property<V> property, ValuePredicate<V> predicate, Practice actionFilter, LinkedList<Practice> filterList) {
+        ExternalEvent event = property.switchTo(predicate, actionFilter);
+        if (event == null) {
+            if (filterList.isEmpty()) {
+                return null;
+            } else {
+                Practice pop = filterList.pop();
+                pop.invalidate(pop.getSelectedEvent());
+                revert(pop);
+                return practise(property, predicate, pop, filterList);
+            }
+        } else {
+            if (actionFilter == null) {
+                actionFilter = new Practice();
+            }
+            actionFilter.setSelectedEvent(event);
+            filterList.push(actionFilter);
+            tag(actionFilter);
+            doFire(event);
+            return actionFilter;
+        }
+    }
+
     public boolean syncFire(ExternalEvent event, Context promises) {
         return executor.sync(() -> {
             if (promises == null) {
                 doFire(event);
             } else {
-                int tagCount = getTagCount();
-                if (tagCount > 0) {
-                    throw new IllegalStateException("revertible tag count is " + tagCount);
-                }
                 Object tag = new Object();
                 tag(tag);
                 doFire(event);
-                if (!promises.isSatisfied()) {
-                    revertTo(tag);
-                    return false;
-                } else {
-                    clean();
-                }
+                boolean satisfied = promises.isSatisfied();
+                revert(tag);
+                doFire(event);
+                return satisfied;
             }
             return true;
         });
@@ -467,7 +498,7 @@ public class StateSpace extends RevertManager {
             Logger.getDefault().ii("skip action to avoid loop: ", externalEvent);
             return false;
         }
-        return actionFilter == null || actionFilter.test(externalEvent);
+        return actionFilter == null || actionFilter.isValid(externalEvent);
     }
 
     public <V> V obtainValue(Obtainable<V> obtainable, V expected) {

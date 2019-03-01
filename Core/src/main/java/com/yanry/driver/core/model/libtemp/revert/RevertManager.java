@@ -1,12 +1,13 @@
 package com.yanry.driver.core.model.libtemp.revert;
 
-import java.util.ArrayList;
+import lib.common.model.log.Logger;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 
 public class RevertManager {
     private LinkedList<Revertible> stack;
-    private HashMap<Object, TagStep> tags;
+    private HashMap<Object, Tag> tags;
 
     public RevertManager() {
         stack = new LinkedList<>();
@@ -20,60 +21,68 @@ public class RevertManager {
         step.proceed();
     }
 
-    public void revert() {
-        Revertible step;
-        while ((step = stack.pop()) != null) {
-            if (!(step instanceof TagStep)) {
-                step.recover();
+    public void revertLastTag() {
+        while (stack.size() > 0) {
+            Revertible step = stack.pop();
+            if (step instanceof Tag) {
+                tags.remove(((Tag) step).tag);
                 return;
             }
+            step.recover();
         }
+    }
+
+    public void revertAll() {
+        while (stack.size() > 0) {
+            stack.pop().recover();
+        }
+        tags.clear();
     }
 
     public void tag(Object tag) {
         if (tag == null) {
             return;
         }
-        TagStep tagStep = tags.get(tag);
-        if (tagStep == null) {
-            tagStep = new TagStep(tag);
-            tags.put(tag, tagStep);
+        if (tags.containsKey(tag)) {
+            throw new IllegalArgumentException("tag already exist: " + tag);
         }
+        Tag tagStep = new Tag(tag);
+        tags.put(tag, tagStep);
         stack.push(tagStep);
     }
 
-    public void revertTo(Object tag) {
-        Revertible step;
-        while ((step = stack.pop()) != null) {
-            if (step instanceof TagStep) {
-                TagStep tagStep = (TagStep) step;
-                if (tagStep.tag.equals(tag)) {
-                    return;
-                }
+    public void revert(Object tag) {
+        if (tag == null) {
+            return;
+        }
+        Tag tagStep = tags.remove(tag);
+        if (tagStep == null) {
+            throw new IllegalArgumentException("tag doesn't exist: " + tag);
+        }
+        while (stack.size() > 0) {
+            Revertible step = stack.pop();
+            if (tagStep == step) {
+                return;
             } else {
                 step.recover();
             }
         }
+        Logger.getDefault().ee("we are not supposed to get here.");
     }
 
     public int getTagCount() {
-        int count = 0;
-        for (Revertible step : new ArrayList<>(stack)) {
-            if (step instanceof TagStep) {
-                count++;
-            }
-        }
-        return count;
+        return tags.size();
     }
 
     public void clean() {
         stack.clear();
+        tags.clear();
     }
 
-    private static class TagStep implements Revertible {
+    private static class Tag implements Revertible {
         private Object tag;
 
-        private TagStep(Object tag) {
+        private Tag(Object tag) {
             this.tag = tag;
         }
 

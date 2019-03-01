@@ -21,12 +21,10 @@ public class Main {
             @Override
             public void onTransitionComplete() {
                 SwingUtilities.invokeLater(() -> {
-                    if (controller.getTagCount() == 0) {
-                        game.repaint();
-                        SnakeModel gameModel = controller.getSnakeModel();
-                        Property[] properties = controller.getSnakeHead().getProperties();
-                        game.setTitle(String.format("Greedy Snake(%s, %s-%s)", gameModel.length(), properties[0].getCurrentValue(), properties[1].getCurrentValue()));
-                    }
+                    game.repaint();
+                    SnakeModel gameModel = controller.getSnakeModel();
+                    Property[] properties = controller.getSnakeHead().getProperties();
+                    game.setTitle(String.format("Greedy Snake(%s, %s-%s)", gameModel.length(), properties[0].getCurrentValue(), properties[1].getCurrentValue()));
                 });
             }
 
