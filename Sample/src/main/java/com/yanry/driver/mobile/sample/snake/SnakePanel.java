@@ -29,11 +29,13 @@ public class SnakePanel extends JPanel {
         // draw snake body
         SnakeModel model = controller.getSnakeModel();
         List<Point> snakePoints = model.getSnakePoints();
-        for (int i = 0; i < snakePoints.size(); i++) {
+        int size = snakePoints.size();
+        for (int i = 0; i < size; i++) {
             if (i == 0) {
-                g.setColor(Color.ORANGE);
-            } else if (i == 1) {
-                g.setColor(Color.GREEN);
+                g.setColor(Color.RED);
+            } else {
+                int delta = i * 0xff / (size - 1);
+                g.setColor(new Color(0xff - delta, delta, 0));
             }
             Point snakePoint = snakePoints.get(i);
             g.fillRect(snakePoint.x * GameConfigure.CELL_SIZE,
@@ -44,7 +46,7 @@ public class SnakePanel extends JPanel {
 
         // draw fruit
         if (model.getFruitPos() != null) {
-            g.setColor(Color.RED);
+            g.setColor(Color.ORANGE);
             g.fillOval(model.getFruitPos().x * GameConfigure.CELL_SIZE + 2,
                     model.getFruitPos().y * GameConfigure.CELL_SIZE + 2,
                     GameConfigure.CELL_SIZE - 4, GameConfigure.CELL_SIZE - 4);

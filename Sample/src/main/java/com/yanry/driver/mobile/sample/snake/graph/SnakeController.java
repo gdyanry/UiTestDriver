@@ -36,6 +36,7 @@ public class SnakeController extends StateSpace {
     private SnakeHeadY snakeHeadY;
     private CombinedProperty snakeHead;
     private SnakeModel snakeModel;
+    private Direction direction;
     private int state;
     private LinkedList<Practice> practices;
     private PractiseDebug debug = new PractiseDebug();
@@ -46,7 +47,7 @@ public class SnakeController extends StateSpace {
         practices = new LinkedList<>();
         snakeModel = new SnakeModel(this);
         gameState = new GameState(this);
-        Direction direction = new Direction(this);
+        direction = new Direction(this);
         snakeHeadX = new SnakeHeadX(this);
         snakeHeadY = new SnakeHeadY(this);
         snakeHead = new CombinedProperty(this, "snakeHead", snakeHeadX, snakeHeadY);
@@ -153,9 +154,17 @@ public class SnakeController extends StateSpace {
         debug.begin();
         debug.printLine(fruitPos.toString());
 
-        invalidStates.clear();
         while (!toState.test(snakeHead.getCurrentValue())) {
-            if (!nextMove(toState, new Practice())) {
+            Practice practice = new Practice();
+            String currentDirection = direction.getCurrentValue();
+            if (currentDirection == Direction.UP || currentDirection == Direction.DOWN) {
+                practice.invalidate(SnakeEvent.TurnUp.get());
+                practice.invalidate(SnakeEvent.TurnDown.get());
+            } else {
+                practice.invalidate(SnakeEvent.TurnLeft.get());
+                practice.invalidate(SnakeEvent.TurnRight.get());
+            }
+            if (!nextMove(toState, practice)) {
                 state = STATE_DYING;
                 return;
             }
@@ -163,6 +172,7 @@ public class SnakeController extends StateSpace {
 
         debug.end();
 
+        invalidStates.clear();
         revertAll();
         state = STATE_CONSUMING;
     }
@@ -238,7 +248,45 @@ public class SnakeController extends StateSpace {
             syncFire(SnakeEvent.MoveAhead.get(), null);
         }
         if (gameState.getCurrentValue() != GameState.MOVE) {
+            Integer jointX = snakeHeadX.getCurrentValue();
+            Integer jointY = snakeHeadY.getCurrentValue();
+            boolean isCircle = jointX >= 0 && jointY >= 0;
+            String directionValue = direction.getCurrentValue();
             revert(practice);
+            String currentDirection = direction.getCurrentValue();
+            // 打圈时应避免往圈里面走
+            if (isCircle && directionValue.equals(currentDirection)) {
+                // test点选在蛇头的左或上
+                int testX = snakeHeadX.getCurrentValue();
+                int testY = snakeHeadY.getCurrentValue();
+                if (currentDirection == Direction.DOWN || currentDirection == Direction.UP) {
+                    testX--;
+                } else if (currentDirection == Direction.LEFT || currentDirection == Direction.RIGHT) {
+                    testY--;
+                }
+                int jointCount = 0;
+                // 连续的交点按一个点算
+                boolean isJoint = false;
+                for (Point point : snakeModel.getSnakePoints()) {
+                    if (point.y == testY && point.x > testX) {
+                        if (!isJoint) {
+                            jointCount++;
+                        }
+                        isJoint = true;
+                    } else {
+                        isJoint = false;
+                    }
+                    if (point.x == jointX && point.y == jointY) {
+                        break;
+                    }
+                }
+                boolean isOutside = jointCount % 2 == 0;
+                if (currentDirection == Direction.UP || currentDirection == Direction.DOWN) {
+                    practice.invalidate(isOutside ? SnakeEvent.TurnRight.get() : SnakeEvent.TurnLeft.get());
+                } else if (currentDirection == Direction.LEFT || currentDirection == Direction.RIGHT) {
+                    practice.invalidate(isOutside ? SnakeEvent.TurnDown.get() : SnakeEvent.TurnUp.get());
+                }
+            }
             practice.invalidate(event);
             Logger.getDefault().ii("invalid action: ", event);
             return false;
