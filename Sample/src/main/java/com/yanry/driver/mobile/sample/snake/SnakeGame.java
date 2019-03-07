@@ -1,6 +1,5 @@
 package com.yanry.driver.mobile.sample.snake;
 
-import com.yanry.driver.mobile.sample.snake.graph.GameState;
 import com.yanry.driver.mobile.sample.snake.graph.SnakeController;
 import com.yanry.driver.mobile.sample.snake.graph.SnakeEvent;
 import lib.common.entity.DaemonTimer;
@@ -80,9 +79,7 @@ public class SnakeGame extends JFrame {
         Singletons.get(DaemonTimer.class).schedule(new TimerTask() {
             @Override
             public void run() {
-                if (gameController.getCurrentState() == GameState.MOVE) {
-                    gameController.makeAction();
-                }
+                gameController.makeAction();
             }
         }, 0, GameConfigure.FRAME_TIME);
     }

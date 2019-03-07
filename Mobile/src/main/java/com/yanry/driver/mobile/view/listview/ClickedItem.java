@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.view.listview;
 
-import com.yanry.driver.core.model.base.ActionFilter;
+import com.yanry.driver.core.model.base.ActionGuard;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.mobile.property.ViewProperty;
 
@@ -19,7 +19,7 @@ public class ClickedItem<I extends ListViewItem<I>> extends ViewProperty<I> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(I to, ActionFilter actionFilter) {
+    protected ExternalEvent doSelfSwitch(I to, ActionGuard actionGuard) {
         return null;
     }
 

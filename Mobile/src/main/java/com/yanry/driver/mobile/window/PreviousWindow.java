@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.window;
 
-import com.yanry.driver.core.model.base.ActionFilter;
+import com.yanry.driver.core.model.base.ActionGuard;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.StateSpace;
@@ -30,7 +30,7 @@ public class PreviousWindow extends Property<Window> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Window to, ActionFilter actionFilter) {
+    protected ExternalEvent doSelfSwitch(Window to, ActionGuard actionGuard) {
         return null;
     }
 

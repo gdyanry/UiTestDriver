@@ -34,12 +34,12 @@ public class Context extends VisibleObject {
         return true;
     }
 
-    public ExternalEvent trySatisfy(ActionFilter actionFilter) {
+    public ExternalEvent trySatisfy(ActionGuard actionGuard) {
         for (Map.Entry<Property, ValuePredicate> entry : states.entrySet()) {
             Property property = entry.getKey();
             ValuePredicate predicate = entry.getValue();
             if (!predicate.test(property.getCurrentValue())) {
-                return property.switchTo(predicate, actionFilter);
+                return property.switchTo(predicate, actionGuard);
             }
         }
         return null;

@@ -133,7 +133,7 @@ public class ListView<I extends ListViewItem<I>> extends View {
         }
 
         @Override
-        protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
+        protected ExternalEvent doSelfSwitch(Boolean to, ActionGuard actionGuard) {
             return null;
         }
     }

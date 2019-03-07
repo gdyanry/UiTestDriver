@@ -59,6 +59,13 @@ public class SnakeModel {
         return null;
     }
 
+    public Point getNeckPos() {
+        if (snakePoints.size() > 1) {
+            return snakePoints.get(1);
+        }
+        return null;
+    }
+
     public boolean contains(int x, int y) {
         return snakePoints.contains(new Point(x, y));
     }

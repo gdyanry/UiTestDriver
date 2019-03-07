@@ -76,7 +76,7 @@ public class View extends ViewContainer {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
+    protected ExternalEvent doSelfSwitch(Boolean to, ActionGuard actionGuard) {
         return null;
     }
 
@@ -98,7 +98,7 @@ public class View extends ViewContainer {
         }
 
         @Override
-        protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
+        protected ExternalEvent doSelfSwitch(Boolean to, ActionGuard actionGuard) {
             return null;
         }
     }

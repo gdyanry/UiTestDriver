@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.property;
 
-import com.yanry.driver.core.model.base.ActionFilter;
+import com.yanry.driver.core.model.base.ActionGuard;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.StateSpace;
@@ -47,9 +47,9 @@ public class CombinedProperty extends Property<StateSnapShoot> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(StateSnapShoot to, ActionFilter actionFilter) {
+    protected ExternalEvent doSelfSwitch(StateSnapShoot to, ActionGuard actionGuard) {
         return Arrays.stream(properties).filter(property -> !Objects.equals(to.getValue(property), property.getCurrentValue()))
-                .map(property -> property.switchToValue(to.getValue(property), actionFilter))
+                .map(property -> property.switchToValue(to.getValue(property), actionGuard))
                 .filter(event -> event != null)
                 .findAny().orElse(null);
     }

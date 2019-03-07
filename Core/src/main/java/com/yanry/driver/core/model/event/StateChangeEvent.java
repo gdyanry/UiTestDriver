@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.event;
 
-import com.yanry.driver.core.model.base.ActionFilter;
+import com.yanry.driver.core.model.base.ActionGuard;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.InternalEvent;
 import com.yanry.driver.core.model.base.Property;
@@ -19,7 +19,7 @@ public class StateChangeEvent<V> extends InternalEvent<V> {
     }
 
     @Override
-    protected ExternalEvent traverse(ActionFilter actionFilter) {
-        return getProperty().switchTo(Equals.of(getProperty().getCurrentValue()).not(), actionFilter);
+    protected ExternalEvent traverse(ActionGuard actionGuard) {
+        return getProperty().switchTo(Equals.of(getProperty().getCurrentValue()).not(), actionGuard);
     }
 }

@@ -86,11 +86,11 @@ public abstract class Property<V> extends HandyObject {
         return stateSpace;
     }
 
-    public final ExternalEvent switchToValue(V toState, ActionFilter actionFilter) {
-        return switchTo(Equals.of(toState), actionFilter);
+    public final ExternalEvent switchToValue(V toState, ActionGuard actionGuard) {
+        return switchTo(Equals.of(toState), actionGuard);
     }
 
-    public final ExternalEvent switchTo(ValuePredicate<V> toState, ActionFilter actionFilter) {
+    public final ExternalEvent switchTo(ValuePredicate<V> toState, ActionGuard actionGuard) {
         return stateSpace.getExecutor().sync(() -> {
             findValueToAdd(toState);
             if (toState.test(getCurrentValue())) {
@@ -106,7 +106,7 @@ public abstract class Property<V> extends HandyObject {
             if (!stateSpace.getCache().containsKey(this)) {
                 // 属性值未知,认为dependentStates未满足
                 if (dependentStates != null && !dependentStates.isSatisfied()) {
-                    ExternalEvent event = dependentStates.trySatisfy(actionFilter);
+                    ExternalEvent event = dependentStates.trySatisfy(actionGuard);
                     stateSpace.popTraversingState();
                     stateSpace.exitMethod(LogLevel.Verbose, event);
                     return event;
@@ -117,8 +117,8 @@ public abstract class Property<V> extends HandyObject {
                 stream = collectedValues.stream();
             }
             ExternalEvent event = stream.filter(v -> toState.test(v))
-                    .map(v -> doSelfSwitch(v, actionFilter))
-                    .filter(a -> a != null && stateSpace.isValidAction(a, actionFilter))
+                    .map(v -> doSelfSwitch(v, actionGuard))
+                    .filter(a -> a != null && stateSpace.isValidAction(a, actionGuard))
                     .findAny()
                     .orElse(stateSpace.findPathToRoll(e -> {
                         if (e instanceof PropertyExpectation) {
@@ -126,7 +126,7 @@ public abstract class Property<V> extends HandyObject {
                             return equals(exp.getProperty()) && toState.test(exp.getExpectedValue());
                         }
                         return false;
-                    }, actionFilter));
+                    }, actionGuard));
             stateSpace.popTraversingState();
             stateSpace.exitMethod(LogLevel.Verbose, event);
             return event;
@@ -239,7 +239,7 @@ public abstract class Property<V> extends HandyObject {
 
     protected abstract V checkValue(V expected);
 
-    protected abstract ExternalEvent doSelfSwitch(V to, ActionFilter actionFilter);
+    protected abstract ExternalEvent doSelfSwitch(V to, ActionGuard actionGuard);
 
     protected abstract Stream<V> getValueStream(Set<V> collectedValues);
 }

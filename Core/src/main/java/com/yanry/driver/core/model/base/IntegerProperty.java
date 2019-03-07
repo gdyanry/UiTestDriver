@@ -16,7 +16,7 @@ public abstract class IntegerProperty extends Property<Integer> {
     }
 
     @Override
-    protected final ExternalEvent doSelfSwitch(Integer to, ActionFilter actionFilter) {
+    protected final ExternalEvent doSelfSwitch(Integer to, ActionGuard actionGuard) {
         Integer currentValue = getCurrentValue();
         if (currentValue == null || to == null) {
             return null;
@@ -29,7 +29,7 @@ public abstract class IntegerProperty extends Property<Integer> {
                 }
             }
             return false;
-        }, actionFilter);
+        }, actionGuard);
     }
 
     public class ShiftExpectation extends SDPropertyExpectation<Integer> {

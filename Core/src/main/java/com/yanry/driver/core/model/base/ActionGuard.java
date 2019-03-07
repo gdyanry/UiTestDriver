@@ -7,11 +7,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.function.Predicate;
 
-public class ActionFilter extends VisibleObject {
+public class ActionGuard extends VisibleObject {
     private HashSet<ExternalEvent> invalidActions;
     private LinkedList<Predicate<ExternalEvent>> filters;
+    private ExternalEvent selectedAction;
 
-    public ActionFilter() {
+    public ActionGuard() {
         invalidActions = new HashSet<>();
     }
 
@@ -39,6 +40,15 @@ public class ActionFilter extends VisibleObject {
             return true;
         }
         return false;
+    }
+
+    public void setSelectedAction(ExternalEvent selectedAction) {
+        this.selectedAction = selectedAction;
+    }
+
+    @Visible
+    public ExternalEvent getSelectedAction() {
+        return selectedAction;
     }
 
     @Visible

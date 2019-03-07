@@ -284,11 +284,13 @@ public class StateSpace extends RevertManager {
         });
     }
 
-    public <V> LinkedList<Practice> getStaticEventsToAchieveState(Property<V> property, ValuePredicate<V> predicate) {
-        return executor.sync(() -> {
-            LinkedList<Practice> filterList = new LinkedList<>();
+    public <V> void achieveStateRehearsal(Property<V> property, ValuePredicate<V> predicate, TransitionRehearsal rehearsal) {
+        executor.sync(() -> {
+
+
+            LinkedList<ActionGuard> filterList = new LinkedList<>();
             while (!predicate.test(property.getCurrentValue())) {
-                Practice filter = practise(property, predicate, null, filterList);
+                ActionGuard filter = practise(property, predicate, null, filterList);
                 if (filter == null) {
                     break;
                 }
@@ -298,22 +300,22 @@ public class StateSpace extends RevertManager {
         });
     }
 
-    private <V> Practice practise(Property<V> property, ValuePredicate<V> predicate, Practice actionFilter, LinkedList<Practice> filterList) {
+    private <V> ActionGuard practise(Property<V> property, ValuePredicate<V> predicate, ActionGuard actionFilter, LinkedList<ActionGuard> filterList) {
         ExternalEvent event = property.switchTo(predicate, actionFilter);
         if (event == null) {
             if (filterList.isEmpty()) {
                 return null;
             } else {
-                Practice pop = filterList.pop();
-                pop.invalidate(pop.getSelectedEvent());
+                ActionGuard pop = filterList.pop();
+                pop.invalidate(pop.getSelectedAction());
                 revert(pop);
                 return practise(property, predicate, pop, filterList);
             }
         } else {
             if (actionFilter == null) {
-                actionFilter = new Practice();
+                actionFilter = new ActionGuard();
             }
-            actionFilter.setSelectedEvent(event);
+            actionFilter.setSelectedAction(event);
             filterList.push(actionFilter);
             tag(actionFilter);
             doFire(event);
@@ -397,12 +399,12 @@ public class StateSpace extends RevertManager {
         return true;
     }
 
-    private ExternalEvent roll(Path path, ActionFilter actionFilter) {
+    private ExternalEvent roll(Path path, ActionGuard actionGuard) {
         enterMethod(path);
         // make sure context states are satisfied.
         Context context = path.getContext();
         if (!context.isSatisfied()) {
-            ExternalEvent event = context.trySatisfy(actionFilter);
+            ExternalEvent event = context.trySatisfy(actionGuard);
             exitMethod(LogLevel.Verbose, event);
             return event;
         }
@@ -410,18 +412,18 @@ public class StateSpace extends RevertManager {
         // trigger event
         Event inputEvent = path.getEvent();
         if (inputEvent instanceof InternalEvent) {
-            ExternalEvent event = ((InternalEvent) inputEvent).traverse(actionFilter);
+            ExternalEvent event = ((InternalEvent) inputEvent).traverse(actionGuard);
             exitMethod(LogLevel.Verbose, event);
             return event;
         } else if (inputEvent instanceof ExternalEvent) {
             ExternalEvent externalEvent = (ExternalEvent) inputEvent;
             Context precondition = externalEvent.getPrecondition();
             if (precondition != null && !precondition.isSatisfied()) {
-                ExternalEvent event = precondition.trySatisfy(actionFilter);
+                ExternalEvent event = precondition.trySatisfy(actionGuard);
                 exitMethod(LogLevel.Verbose, event);
                 return event;
             }
-            if (isValidAction(externalEvent, actionFilter)) {
+            if (isValidAction(externalEvent, actionGuard)) {
                 exitMethod(LogLevel.Verbose, externalEvent);
                 return externalEvent;
             }
@@ -463,7 +465,7 @@ public class StateSpace extends RevertManager {
         }
     }
 
-    ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter, ActionFilter actionFilter) {
+    ExternalEvent findPathToRoll(Predicate<Expectation> expectationFilter, ActionGuard actionGuard) {
         List<Path> sorted = allPaths.stream().filter(p -> isSatisfied(p.getExpectation(), expectationFilter))
                 .sorted(Comparator.comparingInt(p -> {
                     int unsatisfiedDegree = p.getUnsatisfiedDegree(frameMark, true);
@@ -474,7 +476,7 @@ public class StateSpace extends RevertManager {
                     return unsatisfiedDegree;
                 })).collect(Collectors.toList());
         for (Path path : sorted) {
-            ExternalEvent externalEvent = roll(path, actionFilter);
+            ExternalEvent externalEvent = roll(path, actionGuard);
             if (externalEvent != null) {
                 return externalEvent;
             }
@@ -489,7 +491,7 @@ public class StateSpace extends RevertManager {
         return expectation.getFollowingExpectations().stream().anyMatch(exp -> isSatisfied(exp, expectationFilter));
     }
 
-    boolean isValidAction(ExternalEvent externalEvent, ActionFilter actionFilter) {
+    boolean isValidAction(ExternalEvent externalEvent, ActionGuard actionGuard) {
         if (invalidActions.contains(externalEvent)) {
             Logger.getDefault().ii("action is invalid: ", externalEvent);
             return false;
@@ -498,7 +500,7 @@ public class StateSpace extends RevertManager {
             Logger.getDefault().ii("skip action to avoid loop: ", externalEvent);
             return false;
         }
-        return actionFilter == null || actionFilter.isValid(externalEvent);
+        return actionGuard == null || actionGuard.isValid(externalEvent);
     }
 
     public <V> V obtainValue(Obtainable<V> obtainable, V expected) {

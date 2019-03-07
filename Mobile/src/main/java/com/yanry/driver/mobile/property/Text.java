@@ -1,6 +1,6 @@
 package com.yanry.driver.mobile.property;
 
-import com.yanry.driver.core.model.base.ActionFilter;
+import com.yanry.driver.core.model.base.ActionGuard;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.runtime.fetch.StringQuery;
 import com.yanry.driver.mobile.view.View;
@@ -19,7 +19,7 @@ public class Text extends ViewProperty<String> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(String to, ActionFilter actionFilter) {
+    protected ExternalEvent doSelfSwitch(String to, ActionGuard actionGuard) {
         return null;
     }
 

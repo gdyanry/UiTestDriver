@@ -1,6 +1,6 @@
 package com.yanry.driver.core.model.property;
 
-import com.yanry.driver.core.model.base.ActionFilter;
+import com.yanry.driver.core.model.base.ActionGuard;
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.State;
@@ -61,7 +61,7 @@ public class Divider extends BooleanProperty {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Boolean to, ActionFilter actionFilter) {
+    protected ExternalEvent doSelfSwitch(Boolean to, ActionGuard actionGuard) {
         return null;
     }
 }

@@ -65,7 +65,7 @@ public class Application extends Property<Window> {
     }
 
     @Override
-    protected ExternalEvent doSelfSwitch(Window to, ActionFilter actionFilter) {
+    protected ExternalEvent doSelfSwitch(Window to, ActionGuard actionGuard) {
         return null;
     }
 

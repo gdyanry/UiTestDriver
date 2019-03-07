@@ -168,6 +168,10 @@ public class RevertibleLinkedList<E> {
         return new ArrayList<>(list);
     }
 
+    public E get(int index) {
+        return list.get(index);
+    }
+
     public int size() {
         return list.size();
     }
