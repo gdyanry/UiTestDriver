@@ -11,4 +11,6 @@ public class GameConfigure {
     public static final int CELL_SIZE = 16;
 
     public static final long FRAME_TIME = 150; // ms
+
+    public static final int FALLBACK_LIMIT = 32;
 }

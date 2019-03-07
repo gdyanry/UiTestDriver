@@ -11,10 +11,8 @@ import lib.common.model.log.SimpleFormatter;
 import javax.swing.*;
 
 public class Main {
-    private static final boolean AUTO = true;
-
     public static void main(String[] args) {
-        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().sequenceNumber().time().thread().method(5), LogLevel.Verbose));
+        Logger.getDefault().addHandler(new ConsoleHandler(new SimpleFormatter().sequenceNumber().time().thread().method(5), LogLevel.Info));
         SnakeController controller = new SnakeController();
         final SnakeGame game = new SnakeGame(controller);
         controller.setWatcher(new Watcher() {
@@ -30,7 +28,7 @@ public class Main {
 
             @Override
             public <V> void onStateChange(Property<V> property, V fromVal, V toVal) {
-                System.out.println(String.format(">>>>%s - %s", property, property.getCurrentValue()));
+                Logger.getDefault().v(">>>>%s - %s", property, property.getCurrentValue());
             }
         });
         game.startGame();

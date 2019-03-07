@@ -7,6 +7,7 @@ import com.yanry.driver.core.model.base.TransitionRehearsal;
 import com.yanry.driver.core.model.event.GlobalExternalEvent;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.property.StateSnapShoot;
+import com.yanry.driver.mobile.sample.snake.GameConfigure;
 import com.yanry.driver.mobile.sample.snake.SnakeModel;
 import lib.common.model.log.Logger;
 import lib.common.util.object.ObjectUtil;
@@ -24,6 +25,7 @@ public class SnakeRehearsal extends TransitionRehearsal {
     private SnakeController controller;
 
     public SnakeRehearsal(SnakeController controller) {
+        super(GameConfigure.FALLBACK_LIMIT);
         this.controller = controller;
     }
 
@@ -129,7 +131,7 @@ public class SnakeRehearsal extends TransitionRehearsal {
                 return action;
             }
         }
-        Logger.getDefault().ww("no valid action, try the rests.");
+        Logger.getDefault().dd("no valid action, try the rests.");
         if (tryFire(tag, SnakeEvent.MoveAhead.get())) {
             return SnakeEvent.MoveAhead.get();
         }
@@ -138,13 +140,13 @@ public class SnakeRehearsal extends TransitionRehearsal {
         Integer snakeHeadX = controller.getSnakeHeadX().getCurrentValue();
         if (midPos.x != snakeHeadX) {
             GlobalExternalEvent recommendedAction = midPos.x > snakeHeadX ? TurnLeft.get() : TurnRight.get();
-            Logger.getDefault().i("middle point is %s, recommend action: %s", midPos, recommendedAction);
+            Logger.getDefault().d("middle point is %s, recommend action: %s", midPos, recommendedAction);
             if (tryFire(tag, recommendedAction)) {
                 return recommendedAction;
             }
         }
         GlobalExternalEvent recommendedAction = midPos.y > controller.getSnakeHeadY().getCurrentValue() ? TurnUp.get() : TurnDown.get();
-        Logger.getDefault().ii("recommend action: ", recommendedAction);
+        Logger.getDefault().dd("recommend action: ", recommendedAction);
         if (tryFire(tag, recommendedAction)) {
             return recommendedAction;
         }
@@ -167,7 +169,7 @@ public class SnakeRehearsal extends TransitionRehearsal {
         if (controller.getCurrentState() != GameState.MOVE) {
             actionGuard.invalidate(event);
             controller.revert(actionGuard);
-            Logger.getDefault().ii("invalid action: ", event);
+            Logger.getDefault().dd("invalid action: ", event);
             controller.tag(actionGuard);
             return false;
         }

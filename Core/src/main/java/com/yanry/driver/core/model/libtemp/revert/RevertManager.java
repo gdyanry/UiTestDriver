@@ -61,8 +61,12 @@ public class RevertManager {
         }
         while (stack.size() > 0) {
             Revertible step = stack.pop();
-            if (tagStep == step) {
-                return;
+            if (step instanceof Tag) {
+                if (step == tagStep) {
+                    return;
+                } else {
+                    tags.remove(((Tag) step).tag);
+                }
             } else {
                 step.recover();
             }

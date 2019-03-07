@@ -1,13 +1,14 @@
 package com.yanry.driver.core.model.base;
 
+import lib.common.model.Singletons;
 import lib.common.model.log.Logger;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Random;
 
 public abstract class TransitionRehearsal {
     private static final int STATUS_NONE = 0;
@@ -19,11 +20,13 @@ public abstract class TransitionRehearsal {
 
     private int status;
     private LinkedList<ActionGuard> actionGuards;
-    private HashSet<Object> invalidSpots;
+    private Object startTag;
+    private int fallbackLimit;
 
-    public TransitionRehearsal() {
+    public TransitionRehearsal(int fallbackLimit) {
+        this.fallbackLimit = fallbackLimit;
         actionGuards = new LinkedList<>();
-        invalidSpots = new HashSet<>();
+        startTag = new Object();
     }
 
     public void reset() {
@@ -34,6 +37,7 @@ public abstract class TransitionRehearsal {
         return stateSpace.getExecutor().sync(() -> {
             status = STATUS_COLLECTING;
             actionGuards.clear();
+            int fallbackCounter = 0;
 
             DataOutputStream outStream = null;
             try {
@@ -49,8 +53,7 @@ public abstract class TransitionRehearsal {
                 Logger.getDefault().catches(e);
             }
 
-            Object initTag = new Object();
-            stateSpace.tag(initTag);
+            stateSpace.tag(startTag);
             while (!toState.isSatisfied()) {
                 ActionGuard guard = new ActionGuard();
                 initActionGuard(guard);
@@ -78,15 +81,24 @@ public abstract class TransitionRehearsal {
                         break;
                     } else {
                         if (actionGuards.size() == 0) {
-                            stateSpace.revert(initTag);
-                            invalidSpots.clear();
+                            stateSpace.revert(startTag);
                             status = STATUS_DYING;
                             return false;
                         } else {
-                            // 回退
-                            guard = actionGuards.pop();
-                            guard.invalidate(guard.getSelectedAction());
-                            stateSpace.revert(guard);
+                            if (fallbackCounter++ < fallbackLimit) {
+                                // 回退到上一步
+                                guard = fallback(stateSpace);
+                            } else {
+                                fallbackCounter = 0;
+                                // 随机回退
+                                int len = actionGuards.size();
+                                int n = Singletons.get(Random.class).nextInt(len);
+                                Logger.getDefault().i("fallback: %s(len=%s)", n, len);
+                                for (int i = 0; i < n; i++) {
+                                    actionGuards.pop();
+                                }
+                                guard = fallback(stateSpace);
+                            }
                         }
                     }
                 }
@@ -102,11 +114,17 @@ public abstract class TransitionRehearsal {
                 }
             }
 
-            stateSpace.revert(initTag);
-            invalidSpots.clear();
+            stateSpace.revert(startTag);
             status = STATUS_READY;
             return true;
         });
+    }
+
+    private ActionGuard fallback(StateSpace stateSpace) {
+        ActionGuard guard = actionGuards.pop();
+        guard.invalidate(guard.getSelectedAction());
+        stateSpace.revert(guard);
+        return guard;
     }
 
     private void addLogLine(DataOutputStream outStream, String content) throws IOException {
@@ -114,19 +132,12 @@ public abstract class TransitionRehearsal {
     }
 
     private <V> boolean nextMove(State<V> toState, ActionGuard guard, StateSpace stateSpace) {
-        Object currentSpot = getCurrentSnapshot();
-        if (currentSpot != null && invalidSpots.contains(currentSpot)) {
-            return false;
-        }
         stateSpace.tag(guard);
         ExternalEvent action = tryAction(stateSpace, guard, toState.trySatisfy(guard));
         if (action != null) {
             guard.setSelectedAction(action);
             return true;
         } else {
-            if (currentSpot != null) {
-                invalidSpots.add(currentSpot);
-            }
             return false;
         }
     }
