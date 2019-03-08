@@ -2,6 +2,7 @@ package com.yanry.driver.core.distribute;
 
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
+import lib.common.model.log.Logger;
 
 /**
  * Created by rongyu.yan on 3/23/2017.
@@ -69,7 +70,7 @@ public abstract class ClientReception {
                 jsonObject = new JSONObject(string);
                 isRetry = false;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.getDefault().catches(e);
                 isRetry = true;
             }
         }
