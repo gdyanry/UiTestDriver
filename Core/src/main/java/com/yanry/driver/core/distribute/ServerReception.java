@@ -9,6 +9,7 @@ import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.runtime.record.CommunicateRecord;
 import lib.common.model.json.JSONArray;
 import lib.common.model.json.JSONObject;
+import lib.common.model.log.Logger;
 import lib.common.util.object.ObjectUtil;
 
 import java.util.ArrayList;
@@ -70,13 +71,13 @@ public class ServerReception extends SerializedCommunicator {
             try {
                 instructionQueue.put(lastInstruction);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logger.getDefault().catches(e);
             }
         });
         try {
             return instructionQueue.take();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Logger.getDefault().catches(e);
             return null;
         }
     }
@@ -96,7 +97,7 @@ public class ServerReception extends SerializedCommunicator {
             feedbackQueue.put(feedback);
             return instructionQueue.take();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Logger.getDefault().catches(e);
             return null;
         }
     }
@@ -111,7 +112,7 @@ public class ServerReception extends SerializedCommunicator {
             feedbackQueue.put("1");
             return instructionQueue.take();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Logger.getDefault().catches(e);
             return null;
         }
     }
@@ -125,7 +126,7 @@ public class ServerReception extends SerializedCommunicator {
             instructionQueue.put(lastInstruction);
             return feedbackQueue.take();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Logger.getDefault().catches(e);
             return null;
         }
     }

@@ -81,8 +81,7 @@ public abstract class TransitionRehearsal {
                         break;
                     } else {
                         if (actionGuards.size() == 0) {
-                            stateSpace.revert(startTag);
-                            status = STATUS_DYING;
+                            finish(stateSpace, false, outStream);
                             return false;
                         } else {
                             if (fallbackCounter++ < fallbackLimit) {
@@ -93,7 +92,11 @@ public abstract class TransitionRehearsal {
                                 // 随机回退
                                 int len = actionGuards.size();
                                 int n = Singletons.get(Random.class).nextInt(len);
-                                Logger.getDefault().i("fallback: %s(len=%s)", n, len);
+                                String fallback = String.format("%s/%s", n + 1, len);
+                                if (outStream != null) {
+                                    addLogLine(outStream, fallback);
+                                }
+                                Logger.getDefault().ii("fallback: ", fallback);
                                 for (int i = 0; i < n; i++) {
                                     actionGuards.pop();
                                 }
@@ -104,20 +107,23 @@ public abstract class TransitionRehearsal {
                 }
             }
 
-            if (outStream != null) {
-                try {
-                    addLogLine(outStream, "=====END=====");
-                    outStream.flush();
-                    outStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            stateSpace.revert(startTag);
-            status = STATUS_READY;
+            finish(stateSpace, true, outStream);
             return true;
         });
+    }
+
+    private void finish(StateSpace stateSpace, boolean success, DataOutputStream outStream) {
+        if (outStream != null) {
+            try {
+                addLogLine(outStream, success ? "=====SUCCESS=====" : "=====FAIL=====");
+                outStream.flush();
+                outStream.close();
+            } catch (IOException e) {
+                Logger.getDefault().catches(e);
+            }
+        }
+        stateSpace.revert(startTag);
+        status = success ? STATUS_READY : STATUS_DYING;
     }
 
     private ActionGuard fallback(StateSpace stateSpace) {
@@ -168,8 +174,6 @@ public abstract class TransitionRehearsal {
     protected abstract char getActionLogChar(ExternalEvent action);
 
     protected abstract void initActionGuard(ActionGuard guard);
-
-    protected abstract Object getCurrentSnapshot();
 
     protected abstract ExternalEvent tryAction(StateSpace stateSpace, ActionGuard tag, ExternalEvent action);
 }

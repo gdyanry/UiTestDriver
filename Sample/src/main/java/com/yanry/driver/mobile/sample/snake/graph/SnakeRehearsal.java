@@ -10,7 +10,6 @@ import com.yanry.driver.core.model.property.StateSnapShoot;
 import com.yanry.driver.mobile.sample.snake.GameConfigure;
 import com.yanry.driver.mobile.sample.snake.SnakeModel;
 import lib.common.model.log.Logger;
-import lib.common.util.object.ObjectUtil;
 
 import java.awt.*;
 import java.io.FileOutputStream;
@@ -112,15 +111,6 @@ public class SnakeRehearsal extends TransitionRehearsal {
                 guard.invalidate(isOutside ? SnakeEvent.TurnDown.get() : SnakeEvent.TurnUp.get());
             }
 
-        }
-    }
-
-    @Override
-    protected Object getCurrentSnapshot() {
-        try {
-            return ObjectUtil.getSnapShootMd5(controller.getSnakeModel().getSnakePoints());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
