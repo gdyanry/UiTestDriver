@@ -4,8 +4,8 @@ import com.yanry.driver.core.model.base.IntegerProperty;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.runtime.fetch.IntegerQuery;
 import com.yanry.driver.mobile.view.View;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 public abstract class ViewIntegerProperty extends IntegerProperty {
     private View view;

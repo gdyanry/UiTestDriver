@@ -4,8 +4,8 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.predicate.Equals;
-import lib.common.util.object.Visible;
-import lib.common.util.object.VisibleObject;
+import yanry.lib.java.util.object.Visible;
+import yanry.lib.java.util.object.VisibleObject;
 
 /**
  * @author yanry

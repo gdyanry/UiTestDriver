@@ -5,12 +5,12 @@ import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.expectation.Toast;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.MobileElement;
-import lib.common.model.json.JSONArray;
-import lib.common.model.json.JSONObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import yanry.lib.java.model.json.JSONArray;
+import yanry.lib.java.model.json.JSONObject;
 
 /**
  * Created by rongyu.yan on 4/13/2017.

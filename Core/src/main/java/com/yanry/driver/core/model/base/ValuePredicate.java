@@ -3,7 +3,7 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.predicate.And;
 import com.yanry.driver.core.model.predicate.CompoundPredicate;
 import com.yanry.driver.core.model.predicate.Or;
-import lib.common.util.object.HandyObject;
+import yanry.lib.java.util.object.HandyObject;
 
 import java.util.stream.Stream;
 

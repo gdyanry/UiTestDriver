@@ -1,8 +1,8 @@
 package com.yanry.driver.core.distribute;
 
-import lib.common.model.json.JSONArray;
-import lib.common.model.json.JSONObject;
-import lib.common.model.log.Logger;
+import yanry.lib.java.model.json.JSONArray;
+import yanry.lib.java.model.json.JSONObject;
+import yanry.lib.java.model.log.Logger;
 
 /**
  * Created by rongyu.yan on 3/23/2017.

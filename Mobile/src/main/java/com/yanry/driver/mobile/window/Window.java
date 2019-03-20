@@ -8,7 +8,7 @@ import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.mobile.action.ClickOutside;
 import com.yanry.driver.mobile.action.GlobalActions;
 import com.yanry.driver.mobile.view.ViewContainer;
-import lib.common.util.ReflectionUtil;
+import yanry.lib.java.util.ReflectionUtil;
 
 public abstract class Window extends ViewContainer {
     private WindowState windowState;

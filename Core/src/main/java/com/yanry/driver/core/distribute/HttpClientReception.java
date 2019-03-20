@@ -1,7 +1,7 @@
 package com.yanry.driver.core.distribute;
 
-import lib.common.model.http.HttpGet;
-import lib.common.model.json.JSONArray;
+import yanry.lib.java.model.http.HttpGet;
+import yanry.lib.java.model.json.JSONArray;
 
 /**
  * Created by rongyu.yan on 4/13/2017.

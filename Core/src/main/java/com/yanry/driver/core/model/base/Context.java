@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.base;
 
-import lib.common.util.object.Visible;
-import lib.common.util.object.VisibleObject;
+import yanry.lib.java.util.object.Visible;
+import yanry.lib.java.util.object.VisibleObject;
 
 import java.util.HashMap;
 import java.util.Map;

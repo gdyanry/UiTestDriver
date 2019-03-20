@@ -9,8 +9,8 @@ import com.yanry.driver.core.model.property.BooleanProperty;
 import com.yanry.driver.core.model.runtime.fetch.BooleanQuery;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
 import com.yanry.driver.mobile.window.Window;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 /**
  * @author yanry

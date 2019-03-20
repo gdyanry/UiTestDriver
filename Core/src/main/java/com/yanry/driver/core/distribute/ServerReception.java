@@ -7,10 +7,10 @@ import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.runtime.communicator.SerializedCommunicator;
 import com.yanry.driver.core.model.runtime.fetch.Obtainable;
 import com.yanry.driver.core.model.runtime.record.CommunicateRecord;
-import lib.common.model.json.JSONArray;
-import lib.common.model.json.JSONObject;
-import lib.common.model.log.Logger;
-import lib.common.util.object.ObjectUtil;
+import yanry.lib.java.model.json.JSONArray;
+import yanry.lib.java.model.json.JSONObject;
+import yanry.lib.java.model.log.Logger;
+import yanry.lib.java.util.object.ObjectUtil;
 
 import java.util.ArrayList;
 import java.util.List;

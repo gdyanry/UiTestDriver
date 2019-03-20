@@ -8,9 +8,9 @@ import com.yanry.driver.mobile.action.Click;
 import com.yanry.driver.mobile.view.View;
 import com.yanry.driver.mobile.view.ViewContainer;
 import com.yanry.driver.mobile.view.selector.ViewSelector;
-import lib.common.model.Singletons;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.model.Singletons;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 import java.util.HashMap;
 import java.util.Random;

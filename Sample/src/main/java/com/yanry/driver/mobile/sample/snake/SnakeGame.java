@@ -2,8 +2,8 @@ package com.yanry.driver.mobile.sample.snake;
 
 import com.yanry.driver.mobile.sample.snake.graph.SnakeController;
 import com.yanry.driver.mobile.sample.snake.graph.SnakeEvent;
-import lib.common.entity.DaemonTimer;
-import lib.common.model.Singletons;
+import yanry.lib.java.entity.DaemonTimer;
+import yanry.lib.java.model.Singletons;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.base;
 
-import lib.common.model.Singletons;
-import lib.common.model.log.Logger;
+import yanry.lib.java.model.Singletons;
+import yanry.lib.java.model.log.Logger;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;

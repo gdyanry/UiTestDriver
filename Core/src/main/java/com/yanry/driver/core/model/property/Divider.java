@@ -6,8 +6,8 @@ import com.yanry.driver.core.model.base.Path;
 import com.yanry.driver.core.model.base.State;
 import com.yanry.driver.core.model.event.NegationEvent;
 import com.yanry.driver.core.model.expectation.Timing;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 /**
  * @Author: yanry

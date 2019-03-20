@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.sample.login.distribuite;
 
 import com.yanry.driver.core.distribute.HttpClientReception;
-import lib.common.model.json.JSONArray;
-import lib.common.model.json.JSONObject;
+import yanry.lib.java.model.json.JSONArray;
+import yanry.lib.java.model.json.JSONObject;
 
 import java.util.Scanner;
 

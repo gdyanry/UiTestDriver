@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.view.selector;
 
 import com.yanry.driver.mobile.view.View;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 4/27/2017.

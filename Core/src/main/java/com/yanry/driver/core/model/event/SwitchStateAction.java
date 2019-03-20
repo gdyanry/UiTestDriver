@@ -2,8 +2,8 @@ package com.yanry.driver.core.model.event;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
 import com.yanry.driver.core.model.base.Property;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 5/12/2017.

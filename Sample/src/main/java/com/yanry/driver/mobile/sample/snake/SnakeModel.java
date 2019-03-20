@@ -1,8 +1,8 @@
 package com.yanry.driver.mobile.sample.snake;
 
-import com.yanry.driver.core.model.libtemp.revert.RevertManager;
-import com.yanry.driver.core.model.libtemp.revert.RevertibleLinkedList;
-import com.yanry.driver.core.model.libtemp.revert.RevertibleObject;
+import yanry.lib.java.model.revert.RevertManager;
+import yanry.lib.java.model.revert.RevertibleLinkedList;
+import yanry.lib.java.model.revert.RevertibleObject;
 
 import java.awt.*;
 import java.util.Iterator;

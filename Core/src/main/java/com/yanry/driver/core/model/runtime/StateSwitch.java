@@ -2,9 +2,9 @@ package com.yanry.driver.core.model.runtime;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.ValuePredicate;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.HandyObject;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.HandyObject;
+import yanry.lib.java.util.object.Visible;
 
 public class StateSwitch<V> extends HandyObject {
     private Property<V> property;

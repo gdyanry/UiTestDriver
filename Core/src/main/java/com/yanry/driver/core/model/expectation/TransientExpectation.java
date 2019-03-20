@@ -2,7 +2,7 @@ package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.NonPropertyExpectation;
 import com.yanry.driver.core.model.base.StateSpace;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 4/24/2017.

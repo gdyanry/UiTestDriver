@@ -1,7 +1,7 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.expectation.Timing;
-import lib.common.model.log.Logger;
+import yanry.lib.java.model.log.Logger;
 
 import java.util.Objects;
 

@@ -1,8 +1,8 @@
 package com.yanry.driver.core.model.base;
 
 import com.yanry.driver.core.model.predicate.Equals;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 /**
  * Created by rongyu.yan on 5/17/2017.

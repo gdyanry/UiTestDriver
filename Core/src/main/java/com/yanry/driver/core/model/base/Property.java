@@ -6,9 +6,9 @@ package com.yanry.driver.core.model.base;
 import com.yanry.driver.core.model.expectation.SDPropertyExpectation;
 import com.yanry.driver.core.model.expectation.Timing;
 import com.yanry.driver.core.model.predicate.Equals;
-import lib.common.model.log.LogLevel;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.HandyObject;
+import yanry.lib.java.model.log.LogLevel;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.HandyObject;
 
 import java.util.HashSet;
 import java.util.LinkedList;

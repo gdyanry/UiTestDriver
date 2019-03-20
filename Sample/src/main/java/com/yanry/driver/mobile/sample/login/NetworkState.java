@@ -6,7 +6,7 @@ import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.StateSpace;
 import com.yanry.driver.core.model.event.SwitchStateAction;
 import com.yanry.driver.core.model.runtime.fetch.Select;
-import lib.common.util.ReflectionUtil;
+import yanry.lib.java.util.ReflectionUtil;
 
 import java.util.Set;
 import java.util.stream.Stream;

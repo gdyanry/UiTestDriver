@@ -2,8 +2,8 @@ package com.yanry.driver.core.model.expectation;
 
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.base.PropertyExpectation;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 /**
  * A key-value pair (aka state) expectation

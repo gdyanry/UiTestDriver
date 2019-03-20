@@ -1,8 +1,8 @@
 package com.yanry.driver.core.model.event;
 
 import com.yanry.driver.core.model.base.ExternalEvent;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 import java.util.HashMap;
 

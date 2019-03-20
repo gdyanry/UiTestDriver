@@ -3,10 +3,10 @@ package com.yanry.driver.mobile.sample.snake;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.mobile.sample.snake.graph.SnakeController;
-import lib.common.model.log.ConsoleHandler;
-import lib.common.model.log.LogLevel;
-import lib.common.model.log.Logger;
-import lib.common.model.log.SimpleFormatter;
+import yanry.lib.java.model.log.ConsoleHandler;
+import yanry.lib.java.model.log.LogLevel;
+import yanry.lib.java.model.log.Logger;
+import yanry.lib.java.model.log.SimpleFormatter;
 
 import javax.swing.*;
 

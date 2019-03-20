@@ -3,7 +3,7 @@
  */
 package com.yanry.driver.core.model.base;
 
-import lib.common.util.object.HandyObject;
+import yanry.lib.java.util.object.HandyObject;
 
 /**
  * @author yanry

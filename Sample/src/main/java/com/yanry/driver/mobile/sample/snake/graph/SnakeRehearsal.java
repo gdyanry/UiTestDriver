@@ -9,7 +9,7 @@ import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.core.model.property.StateSnapShoot;
 import com.yanry.driver.mobile.sample.snake.GameConfigure;
 import com.yanry.driver.mobile.sample.snake.SnakeModel;
-import lib.common.model.log.Logger;
+import yanry.lib.java.model.log.Logger;
 
 import java.awt.*;
 import java.io.FileOutputStream;
@@ -22,10 +22,13 @@ import static com.yanry.driver.mobile.sample.snake.graph.SnakeEvent.*;
 
 public class SnakeRehearsal extends TransitionRehearsal {
     private SnakeController controller;
+    private GlobalExternalEvent[] actionOptions = {SnakeEvent.MoveAhead.get(), SnakeEvent.TurnDown.get(), SnakeEvent.TurnLeft.get(),
+            SnakeEvent.TurnRight.get(), SnakeEvent.TurnUp.get()};
 
     public SnakeRehearsal(SnakeController controller) {
         super(GameConfigure.FALLBACK_LIMIT);
         this.controller = controller;
+
     }
 
     @Override
@@ -110,7 +113,6 @@ public class SnakeRehearsal extends TransitionRehearsal {
             } else if (currentDirection == Direction.LEFT || currentDirection == Direction.RIGHT) {
                 guard.invalidate(isOutside ? SnakeEvent.TurnDown.get() : SnakeEvent.TurnUp.get());
             }
-
         }
     }
 
@@ -121,6 +123,35 @@ public class SnakeRehearsal extends TransitionRehearsal {
                 return action;
             }
         }
+//        return Stream.of(actionOptions).filter(a -> tag.isValid(a)).sorted(Comparator.comparingInt(a -> {
+//            // 按曼哈顿距离排序
+//            ExternalEvent actionToGetPos = a;
+//            if (actionToGetPos == SnakeEvent.MoveAhead.get()) {
+//                String direction = controller.getDirection().getCurrentValue();
+//                if (direction == Direction.DOWN) {
+//                    actionToGetPos = SnakeEvent.TurnDown.get();
+//                } else if (direction == Direction.LEFT) {
+//                    actionToGetPos = SnakeEvent.TurnLeft.get();
+//                } else if (direction == Direction.RIGHT) {
+//                    actionToGetPos = SnakeEvent.TurnRight.get();
+//                } else if (direction == Direction.UP) {
+//                    actionToGetPos = SnakeEvent.TurnUp.get();
+//                }
+//            }
+//            int headX = controller.getSnakeHeadX().getCurrentValue();
+//            int headY = controller.getSnakeHeadY().getCurrentValue();
+//            Point fruitPos = controller.getSnakeModel().getFruitPos();
+//            if (actionToGetPos == SnakeEvent.TurnDown.get()) {
+//                return Math.abs(headX - fruitPos.x) + Math.abs(headY + 1 - fruitPos.y);
+//            } else if (actionToGetPos == SnakeEvent.TurnLeft.get()) {
+//                return Math.abs(headX - 1 - fruitPos.x) + Math.abs(headY - fruitPos.y);
+//            } else if (actionToGetPos == SnakeEvent.TurnRight.get()) {
+//                return Math.abs(headX + 1 - fruitPos.x) + Math.abs(headY - fruitPos.y);
+//            } else {
+//                return Math.abs(headX - fruitPos.x) + Math.abs(headY - 1 - fruitPos.y);
+//            }
+//        })).filter(a -> tryFire(tag, a)).findFirst().orElse(null);
+
         Logger.getDefault().dd("no valid action, try the rests.");
         if (tryFire(tag, SnakeEvent.MoveAhead.get())) {
             return SnakeEvent.MoveAhead.get();

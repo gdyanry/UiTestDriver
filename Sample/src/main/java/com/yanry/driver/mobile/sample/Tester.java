@@ -7,10 +7,10 @@ import com.yanry.driver.core.model.runtime.MissedPath;
 import com.yanry.driver.core.model.runtime.Watcher;
 import com.yanry.driver.core.model.runtime.communicator.ConsoleCommunicator;
 import com.yanry.driver.mobile.sample.model.ConsoleWatcher;
-import lib.common.model.log.ConsoleHandler;
-import lib.common.model.log.LogLevel;
-import lib.common.model.log.Logger;
-import lib.common.model.log.SimpleFormatter;
+import yanry.lib.java.model.log.ConsoleHandler;
+import yanry.lib.java.model.log.LogLevel;
+import yanry.lib.java.model.log.Logger;
+import yanry.lib.java.model.log.SimpleFormatter;
 
 import java.util.List;
 import java.util.function.Consumer;

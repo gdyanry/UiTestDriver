@@ -3,8 +3,8 @@ package com.yanry.driver.mobile.property;
 import com.yanry.driver.core.model.base.Property;
 import com.yanry.driver.core.model.predicate.Equals;
 import com.yanry.driver.mobile.view.View;
-import lib.common.util.object.EqualsPart;
-import lib.common.util.object.Visible;
+import yanry.lib.java.util.object.EqualsPart;
+import yanry.lib.java.util.object.Visible;
 
 public abstract class ViewProperty<V> extends Property<V> {
     private View view;
